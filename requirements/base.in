@@ -1,1 +1,4 @@
 django
+email-validator
+psycopg2-binary
+python-decouple
