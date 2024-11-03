@@ -18,10 +18,12 @@ requirements:	## Create requirements.txt from requirements.in
 	uv pip compile requirements/locale.in -o requirements/locale.txt
 
 	source .venv/bin/activate && uv pip install -r requirements/locale.txt
-	# source .venv/bin/activate && cp -r .cat-package/cat .venv/lib/python3.12/site-packages
 
-	# git add requirements/*
-	# @git commit -m "automatic upgrade requirements"
-	# @git push
+	git add requirements/*.txt
+	@git commit -m "automatic upgrade requirements"
+	@git push
 
 	# docker rmi -f django_cat-app:local
+
+requirements-load-cat:
+	source .venv/bin/activate && cp -r .cat-package/cat .venv/lib/python3.12/site-packages
