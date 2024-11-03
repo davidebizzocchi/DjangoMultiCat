@@ -1,0 +1,3 @@
+# requirements/locale.in
+
+-r base.in
