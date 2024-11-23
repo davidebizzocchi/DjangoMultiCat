@@ -6,6 +6,10 @@ asgiref==3.8.1
     # via django
 asttokens==2.4.1
     # via icecream
+certifi==2024.8.30
+    # via requests
+charset-normalizer==3.4.0
+    # via requests
 cheshire-cat-api==1.4.8
     # via -r requirements/base.in
 colorama==0.4.6
@@ -21,7 +25,9 @@ executing==2.1.0
 icecream==2.1.3
     # via -r requirements/base.in
 idna==3.10
-    # via email-validator
+    # via
+    #   email-validator
+    #   requests
 psycopg2-binary==2.9.10
     # via -r requirements/base.in
 pydantic==2.10.1
@@ -34,6 +40,8 @@ python-dateutil==2.9.0.post0
     # via cheshire-cat-api
 python-decouple==3.8
     # via -r requirements/base.in
+requests==2.32.3
+    # via -r requirements/base.in
 six==1.16.0
     # via
     #   asttokens
@@ -45,6 +53,8 @@ typing-extensions==4.12.2
     #   pydantic
     #   pydantic-core
 urllib3==2.0.7
-    # via cheshire-cat-api
+    # via
+    #   cheshire-cat-api
+    #   requests
 websocket-client==1.8.0
     # via cheshire-cat-api
