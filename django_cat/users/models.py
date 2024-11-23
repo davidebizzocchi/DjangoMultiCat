@@ -16,6 +16,7 @@ class UserProfile(models.Model):
     def set_as_superuser(self):
         self.user.is_superuser = True
         self.user.is_staff = True
+        self.user.save()
 
     @property
     def set_id(self):
