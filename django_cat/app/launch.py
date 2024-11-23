@@ -44,9 +44,14 @@ def call_main_in_thread(module_name):
     except Exception as e:
         ic(f"Error while launching `main` from {module_name}.launch: {e}")
 
+from app.signals import server_start
+
 def main():
     """
     Itera attraverso le app specificate in `settings.YOUR_APP` e lancia la funzione `main`.
     """
-    for app_label in getattr(settings, "YOUR_APP", []):
-        call_main_in_thread(app_label)
+    # for app_label in getattr(settings, "YOUR_APP", []):
+        # call_main_in_thread(app_label)
+
+    ic(server_start)
+    server_start.send(sender=None)
