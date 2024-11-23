@@ -1,0 +1,35 @@
+{% load poll_extras %}
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            {% load static %}
+            <a class="navbar-brand" href="/"><img src="{% static 'images/logo-small-trasparent.png'  %}" alt="Superlearn logo" ></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto" style="margin-right: auto !important;">
+                    {% if request.user.is_staff %}
+                        {% include 'base/menu_admin.html' %}
+                    {% endif %}
+
+                    {% if request.user.is_authenticated %}
+                            {% include 'base/menu_chat.html' %}
+                        {% endif %}
+                        
+                        {% include 'base/menu_logout.html' %}
+                    {% else %}
+                        {% include 'base/menu_login.html' %}
+                        {% include 'base/menu_register.html' %}
+                    {% endif %}
+                </ul>
+
+                <ul class="navbar-nav">
+                    <!-- {% if request.user.is_authenticated %} -->
+                    {% include 'base/menu_user.html' %}
+                    <!-- {% endif %} -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>

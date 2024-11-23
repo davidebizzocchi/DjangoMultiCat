@@ -1,0 +1,9 @@
+<style>
+    li.userprofile {
+        cursor: pointer;
+    }
+</style>
+
+<li class="nav-item ml-auto userprofile" onclick="window.location.href = '{% url 'users:user-profile' %}'"> 
+    <div class="nav-link"><b>{{ request.user.userprofile | title }}</b></div>
+</li>
