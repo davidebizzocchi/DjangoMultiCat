@@ -9,7 +9,7 @@ activate:	## Acvtivate venv
 	@echo "source .venv/bin/activate"
 
 requirements:	## Create requirements.txt from requirements.in
-	@git pull
+	# @git pull
 
 	@rm -f requirements/base.txt
 	@rm -f requirements/locale.txt
@@ -19,9 +19,9 @@ requirements:	## Create requirements.txt from requirements.in
 
 	source .venv/bin/activate && uv pip install -r requirements/locale.txt
 
-	# git add requirements/*.txt
-	# @git commit -m "automatic upgrade requirements"
-	# @git push
+	git add requirements/*.txt
+	@git commit -m "automatic upgrade requirements"
+	@git push
 
 	docker rmi -f django_cat-app:local
 
@@ -45,4 +45,7 @@ up-local:           ## Run the LOCAL stack via Docker on http://0.0.0.0:8000/
 	}
 
 shell-sh:			## Open a sh shell in LOCAL inside app
-	@docker compose -f docker-compose.local.yml exec app-1 /bin/sh
+	@docker compose -f docker-compose.local.yml exec app /bin/sh
+
+django-log:
+	@docker logs -f django_cat-app-1
