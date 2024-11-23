@@ -54,14 +54,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.local  # Use specific Dockerfiles for development 
-    image: django_app-app:local
+    image: django_cat-app:local
     ports:
       - "8000:8000"
     env_file:
       - env/.env.local
     volumes:
-      - .:/code                     # expose local files to quickly check code
-    command: python django_cat/manage.py runserver 0.0.0.0:8000
+      - ./django_cat:/code
+    command: python manage.py runserver 0.0.0.0:8000
     depends_on:
       - db
       - cheshire-cat-core

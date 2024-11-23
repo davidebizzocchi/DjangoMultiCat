@@ -39,7 +39,7 @@ RUN useradd -m nonrootuser
 RUN chown -R nonrootuser:nonrootuser /code
 
 # copy entrypoint.sh
-COPY ./entrypoint.sh .
+COPY django_cat/entrypoint.sh .
 RUN sed -i 's/\r$//g' /code/entrypoint.sh
 RUN chmod +x /code/entrypoint.sh
 

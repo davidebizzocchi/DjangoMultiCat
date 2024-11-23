@@ -8,6 +8,8 @@ env
 prod-remote
 backup
 _logs/*
+temp
+nginx
 
 __RemoreLab-FE.code-workspace
 .env.local
@@ -33,5 +35,4 @@ __vscode.code-workspace
 .pre-commit-config.yaml
 entrypoint.preprod.sh
 entrypoint.prod.sh
-entrypoint.sh
 env-sample/
