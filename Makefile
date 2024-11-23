@@ -19,11 +19,30 @@ requirements:	## Create requirements.txt from requirements.in
 
 	source .venv/bin/activate && uv pip install -r requirements/locale.txt
 
-	git add requirements/*.txt
-	@git commit -m "automatic upgrade requirements"
-	@git push
+	# git add requirements/*.txt
+	# @git commit -m "automatic upgrade requirements"
+	# @git push
 
-	# docker rmi -f django_cat-app:local
+	docker rmi -f django_cat-app:local
 
 requirements-load-cat:
-	source .venv/bin/activate && cp -r .cat-package/cat .venv/lib/python3.12/site-packages
+	source .venv/bin/activate && cp -r .cat-package/cat .venv/lib/python3.13/site-packages
+
+up-local:           ## Run the LOCAL stack via Docker on http://0.0.0.0:8000/
+	@{ \
+		if ! docker info > /dev/null 2>&1; then \
+			echo "Docker non è in esecuzione. Avvio Docker Desktop..."; \
+			open -n /Applications/Docker.app; \
+			echo "Attendo che Docker sia pronto..."; \
+			while ! docker info > /dev/null 2>&1; do \
+				sleep 1; \
+			done; \
+		fi; \
+		(docker compose -p django_cat -f docker-compose.local.yml up || exit 1) & \
+		PID=$$!; \
+		trap 'docker compose -p django_cat -f docker-compose.local.yml down && exit 0' EXIT; \
+		wait $$PID; \
+	}
+
+shell-sh:			## Open a sh shell in LOCAL inside app
+	@docker compose -f docker-compose.local.yml exec app-1 /bin/sh
