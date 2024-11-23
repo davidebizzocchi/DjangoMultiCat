@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 from django.conf import settings
 from threading import Thread
 import importlib
@@ -6,7 +7,7 @@ import logging
 from icecream import ic
 import importlib.util
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 def call_main_in_thread(module_name):
     """
@@ -20,10 +21,12 @@ def call_main_in_thread(module_name):
             raise FileNotFoundError(f"Il file {file_path} non esiste.")
 
         # Crea uno spec dal file
-        spec = importlib.util.spec_from_file_location("dynamic_module", file_path)
+        spec = importlib.util.spec_from_file_location("launch", str(file_path))
         module = importlib.util.module_from_spec(spec)
+        sys.modules["launch"] = module
         spec.loader.exec_module(module)
 
+        # module = importlib.import_module(f"code.{module_name}.launch")
 
         # Verifica se il modulo ha una funzione `main`
         if hasattr(module, "main"):

@@ -71,11 +71,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "cheshire_cat",
+]
+
+YOUR_APP = [
     # CheshireCat app
     "cheshire_cat",
     # your app
-
 ]
+
+# INSTALLED_APPS.extend(YOUR_APP)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
