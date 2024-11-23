@@ -1,0 +1,39 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Profilo{% endblock %}
+
+{% block contenuto %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Profilo Utente</h2>
+                </div>
+                <div class="card-body">
+                    <p><strong>Username:</strong> {{ username }}</p>
+                    <p><strong>Cheshire ID:</strong> {{ cheshire_id }}</p>
+                    <button class="btn btn-danger mt-3" onclick="confirmDelete()">Cancella Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmDelete() {
+        fetch('{% url "users:delete" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.href = data.redirect_url;
+            }
+        });
+    }
+</script>
+{% endblock %}
