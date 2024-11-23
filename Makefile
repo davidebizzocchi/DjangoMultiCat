@@ -49,3 +49,19 @@ shell-sh:			## Open a sh shell in LOCAL inside app
 
 django-log:
 	@docker logs -f django_cat-app-1
+
+
+remove-migrations:	## Remove migrations
+	@echo "Cleaning migrations directory..."
+	@find . -type d -name "migrations" -exec sh -c 'cd "{}" && find . -type f ! -name "__init__.py" -delete' \;
+	@echo "Migration directory cleaned!"
+
+destroy-database: 	## Destroy local database
+	@echo "Destroying Docker volume 'django_cat_postgres_data-local'..."
+	@docker volume rm -f django_cat_postgres_data-local
+	@echo "Docker volume destroyed!"
+
+remove-all:			## Remove migrations and DB local
+	@echo "Remove migrations and DB local"
+	@make remove-migrations
+	@make destroy-database
