@@ -72,7 +72,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # CheshireCat app
-
+    "cheshire_cat",
     # your app
 
 ]
