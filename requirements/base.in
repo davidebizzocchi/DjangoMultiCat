@@ -5,3 +5,4 @@ python-decouple
 cheshire-cat-api
 icecream
 requests
+django-widget-tweaks
