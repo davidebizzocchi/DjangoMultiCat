@@ -1,7 +1,8 @@
 # Personal
 .venv
 .cat-package
-
+# django_cat/cheshire_cat/volumes
+django_cat/cheshire_cat/volumes/plugins/download_cat_docs/.hidden
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
