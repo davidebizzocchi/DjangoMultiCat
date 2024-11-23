@@ -41,6 +41,9 @@ services:
       - long_term_memory:/app/cat/data
       - cheschire_cat_models:/app/cat/models
 
+    networks:
+      - app_network
+
   cheshire-cat-vector-memory:
     image: qdrant/qdrant:latest
     container_name: cheshire_cat_vector_memory
@@ -70,18 +73,26 @@ services:
         max-size: "10m"
         max-file: "3"
 
+    networks:
+      - app_network
+
   db:
     image: postgres:17.0-alpine3.20
     volumes:
       - postgres_data-local:/var/lib/postgresql/data/
     env_file:
       - ./env/db.local
+    networks:
+      - app_network
 
   mailhog:
     image: richarvey/mailhog
     ports:
       - "1025:1025"
       - "8025:8025"
+
+    networks:
+      - app_network
 
 
 # networks:
@@ -103,3 +114,8 @@ volumes:
   long_term_memory:
   cheschire_cat_models:
     name: cheschire_cat_models
+
+
+networks:
+  app_network:
+    driver: bridge
