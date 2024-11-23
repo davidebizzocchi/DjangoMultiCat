@@ -4,6 +4,6 @@
     }
 </style>
 
-<li class="nav-item ml-auto userprofile" onclick="window.location.href = '{% url 'users:user-profile' %}'"> 
+<li class="nav-item ml-auto userprofile" onclick="window.location.href = '{% url 'users:profile' %}'"> 
     <div class="nav-link"><b>{{ request.user.userprofile | title }}</b></div>
 </li>
