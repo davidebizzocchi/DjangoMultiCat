@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -73,7 +74,7 @@ INSTALLED_APPS = [
     # CheshireCat app
 
     # your app
-    
+
 ]
 
 MIDDLEWARE = [
@@ -108,14 +109,33 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": config("SQL_ENGINE", default="django.db.backends.sqlite3"),
+        "NAME": config("SQL_DATABASE", default=os.path.join(BASE_DIR, "db.sqlite3")),
+        "USER": config("SQL_USER", default="user"),
+        "PASSWORD": config("SQL_PASSWORD", default="password"),
+        "HOST": config("SQL_HOST", default="localhost"),
+        "PORT": config("SQL_PORT", default=5432, cast=int),
     }
 }
+
+# Email configuration
+# EMAIL_BACKEND= "django.core.mail.backends.console.EmailBackend"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config("EMAIL_HOST", default="localhost")
+EMAIL_PORT = config("EMAIL_PORT", default=25, cast=int)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool)
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", cast=bool)
+# EMAIL_FILE_PATH = BASE_DIR / 'emails'
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+# Imposta il timeout di connessione per il server Django (in secondi)
+CONN_MAX_AGE = 0  # default is 0 https://docs.djangoproject.com/en/5.0/ref/databases/
 
 
 # Password validation
