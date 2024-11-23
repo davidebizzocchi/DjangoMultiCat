@@ -10,7 +10,14 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
+from app.launch import main
+import threading
+
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
 
-application = get_wsgi_application()
+def custom_wsgi_application():
+    threading.Thread(target=main).start()
+    return get_wsgi_application()
+
+application = custom_wsgi_application()
