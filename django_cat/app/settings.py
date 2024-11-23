@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'widget_tweaks',
     # CheshireCat app
     "cheshire_cat",
     # your app
@@ -138,6 +139,11 @@ AUTHENTICATION_BACKENDS = [
     'users.auth.UsernameAuthenticationBackend',
     'django.contrib.auth.backends.ModelBackend',  # mantieni anche il backend predefinito se necessario
 ]
+
+# Login/Logout redirect URLs
+LOGIN_REDIRECT_URL = 'home'
+LOGIN_URL = 'users:login'
+LOGOUT_REDIRECT_URL = 'home'
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = config("EMAIL_HOST", default="localhost")
