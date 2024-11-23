@@ -358,6 +358,7 @@
         e.preventDefault();
         
         const data = new FormData(e.target);
+        const formAction = e.target.action; // Prende l'URL dal form
         startLoadingState();
 
         let responses = $("#responses");
@@ -378,17 +379,32 @@
 
         // Modifica la creazione della connessione SSE aggiungendo i parametri alla URL
         const message = data.get('message');
-        const params = new URLSearchParams({
-            message: message
-        });
-        const evtSource = new EventSource(`/events?${params.toString()}`);
 
-        // Oppure se preferisci usare un endpoint diverso con POST
-        fetch('/events', {
+        fetch(formAction, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+            },
+            body: JSON.stringify({
+                message: message
+            }),
+        }).then(() => {
+            const evtSource = new EventSource(formAction);
+            // ...resto del codice esistente per gestire gli eventi
+        });
+
+        // Inizia la connessione SSE (Server-Sent Events)
+
+        // Gestisce i messaggi in arrivo
+        evtSource.onmessage = function(event) {
+            const payload = JSON.parse(e.data);
+            if (payload.data) {
+                assMsg.testo += payload.data;
+                assMsg.find("div.message").html(convertToHTML(assMsg.testo));
+            }
+        };
+
         // Gestione eventi personalizzati
         evtSource.addEventListener('done', function(event) {
             evtSource.close();
