@@ -13,8 +13,8 @@ wait_for_db() {
 
 # Funzione per eseguire le migrazioni
 run_migrations() {
-    python django_cat/manage.py makemigrations
-    python django_cat/manage.py migrate
+    python manage.py makemigrations
+    python manage.py migrate
 }
 
 
