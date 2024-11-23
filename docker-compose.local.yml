@@ -1,0 +1,105 @@
+# docker-compose.local.yml
+
+services:
+
+  # nginx:
+  #   build:
+  #     context: ./nginx
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   volumes:
+  #     - ./static:/staticfiles
+  #   depends_on:
+  #     - app
+  #     - cheshire-cat-core
+
+  # caddy:
+  #   image: caddy:latest
+  #   depends_on:
+  #     - cat
+  #   ports:
+  #     - 80:80
+  #     - 443:443
+  #     - 443:443/udp
+  #   volumes:
+  #     - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+  #     - ./caddy/data:/data
+  #     - ./caddy/config:/config
+  #   restart: unless-stopped
+
+  cheshire-cat-core:
+    image: ghcr.io/cheshire-cat-ai/core:latest
+    container_name: cheshire_cat_core
+    depends_on:
+      - cheshire-cat-vector-memory
+    ports:
+      - 1865:80
+      - 5678:5678
+    volumes:
+      - ./django_cat/cheshire_cat/volumes/static:/app/cat/static
+      - ./django_cat/cheshire_cat/volumes/plugins:/app/cat/plugins
+      - long_term_memory:/app/cat/data
+      - cheschire_cat_models:/app/cat/models
+
+  cheshire-cat-vector-memory:
+    image: qdrant/qdrant:latest
+    container_name: cheshire_cat_vector_memory
+    expose:
+      - 6333
+    volumes:
+      - long_term_memory:/qdrant/storage
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local  # Use specific Dockerfiles for development 
+    image: django_app-app:local
+    expose:
+      - 8000
+    env_file:
+      - env/.env.local
+    volumes:
+      - .:/code                     # expose local files to quickly check code
+    command: python django_cat/manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - db
+      - cheshire-cat-core
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: postgres:17.0-alpine3.20
+    volumes:
+      - postgres_data-local:/var/lib/postgresql/data/
+    env_file:
+      - ./env/db.local
+
+  mailhog:
+    image: richarvey/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+
+# networks:
+#   internal_network:
+#     internal: true
+#   external_network:
+#     external: false
+
+# networks:
+#   internal_network:
+#     driver: bridge
+#     internal: true
+
+#   public_network:
+#     driver: bridge
+ 
+volumes:
+  postgres_data-local:
+  long_term_memory:
+  cheschire_cat_models:
+    name: cheschire_cat_models
