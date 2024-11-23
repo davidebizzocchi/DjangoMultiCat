@@ -3,9 +3,10 @@ from icecream import ic
 import cheshire_cat_api.config as CatConfig
 # from users.models import UserProfile
 import requests
+import time
+from functools import wraps
+from cheshire_cat.decorators import wait_cat, HOST, PORT
 
-HOST = "cheshire-cat-core"
-PORT = 80
 
 class Cat(ccat.CatClient):
 
@@ -15,6 +16,7 @@ class Cat(ccat.CatClient):
     def on_message(self, message):
         ic(message)
 
+@wait_cat
 def get_user_id(username: str):
     url = f"http://{HOST}:{PORT}/users/"
     response = requests.get(url)
@@ -25,6 +27,7 @@ def get_user_id(username: str):
 
     return None
 
+@wait_cat
 def connect_as_admin() -> Cat:
     
     admin_id = get_user_id("admin")
@@ -34,7 +37,12 @@ def connect_as_admin() -> Cat:
     config = CatConfig(user_id=admin_id, base_url="cheshire-cat-core", port=80)
     return Cat(config=config)
 
+@wait_cat
 def create_user(user):
+    ic(get_user_id(user.username))
+    if get_user_id(user.username) is not None:
+        return True
+    
     url = f"http://{HOST}:{PORT}/users/"
 
     payload = {
@@ -58,7 +66,7 @@ def create_user(user):
 
     return False
 
-
+@wait_cat
 def delete_user(user):
     url = f"http://{HOST}:{PORT}/users/{user.cheschire_id}/"
 
