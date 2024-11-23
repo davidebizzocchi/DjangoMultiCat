@@ -3,7 +3,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             {% load static %}
-            <a class="navbar-brand" href="/"><img src="{% static 'images/logo-small-trasparent.png'  %}" alt="Superlearn logo" ></a>
+            <a class="navbar-brand" href="{% url 'home' %}"><h1>Home</h1></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -15,7 +15,6 @@
 
                     {% if request.user.is_authenticated %}
                             {% include 'base/menu_chat.html' %}
-                        {% endif %}
                         
                         {% include 'base/menu_logout.html' %}
                     {% else %}

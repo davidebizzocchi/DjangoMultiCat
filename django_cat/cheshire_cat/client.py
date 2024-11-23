@@ -1,7 +1,7 @@
 import cheshire_cat_api as ccat
 from icecream import ic
 import cheshire_cat_api.config as CatConfig
-from users.models import UserProfile
+# from users.models import UserProfile
 import requests
 
 HOST = "cheshire-cat-core"
@@ -15,19 +15,26 @@ class Cat(ccat.CatClient):
     def on_message(self, message):
         ic(message)
 
-def connect_as_admin() -> Cat:
-    url = "http://{HOST}:{PORT}/users/"
+def get_user_id(username: str):
+    url = f"http://{HOST}:{PORT}/users/"
     response = requests.get(url)
 
     for user in response.json():
-        if user["username"] == "admin":
-            user_id = user["id"]
-            break
+        if user["username"] == username:
+            return user["id"]
+
+    return None
+
+def connect_as_admin() -> Cat:
     
-    config = CatConfig(user_id=user_id, base_url="cheshire-cat-core", port=80)
+    admin_id = get_user_id("admin")
+    if admin_id is None:
+        raise ValueError("Admin user not found")
+    
+    config = CatConfig(user_id=admin_id, base_url="cheshire-cat-core", port=80)
     return Cat(config=config)
 
-def create_user(user: UserProfile):
+def create_user(user):
     url = f"http://{HOST}:{PORT}/users/"
 
     payload = {
@@ -44,8 +51,7 @@ def create_user(user: UserProfile):
 
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code == 200:
-        user.user_id = response.json()["id"]
-        user.save()
+        user.set_manual_id(response.json()["id"])
         return True
     else:
         ic(response.json())
@@ -53,8 +59,8 @@ def create_user(user: UserProfile):
     return False
 
 
-def delete_user(user: UserProfile):
-    url = f"http://{HOST}:{PORT}/users/{user.user_id}/"
+def delete_user(user):
+    url = f"http://{HOST}:{PORT}/users/{user.cheschire_id}/"
 
     response = requests.delete(url)
     if response.status_code == 200:

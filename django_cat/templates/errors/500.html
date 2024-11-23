@@ -1,0 +1,17 @@
+{% extends 'base/base.html' %}
+
+
+{% block contenuto %}
+<div class="d-flex align-items-center justify-content-center vh-80">
+    <div class="text-center">
+        <h1 class="display-1 fw-bold">Oops</h1>
+        <p class="fs-3"> <span class="text-danger">Opps!</span> something went wrong</p>
+        <p class="lead">
+            Yikes, looks like something went wrong on our end. If the issue persists, please shoot us a note so we can help out.
+          </p>
+        <a href="{% url 'home' %}" class="btn btn-primary">Home</a>
+    </div>
+</div>
+
+{% endblock %}
+

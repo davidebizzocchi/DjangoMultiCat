@@ -45,7 +45,10 @@ up-local:           ## Run the LOCAL stack via Docker on http://0.0.0.0:8000/
 	}
 
 shell-sh:			## Open a sh shell in LOCAL inside app
-	@docker compose -f docker-compose.local.yml exec app /bin/sh
+	@docker exec -it django_cat-app-1 /bin/bash
+
+shell-django:		## Open a django shell in LOCAL
+	@docker exec -it django_cat-app-1 python manage.py shell 
 
 django-log:
 	@docker logs -f django_cat-app-1

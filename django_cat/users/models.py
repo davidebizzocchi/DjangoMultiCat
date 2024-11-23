@@ -2,12 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from cheshire_cat.client import create_user, delete_user
+from cheshire_cat.client import create_user, delete_user, get_user_id
 from django.core.exceptions import RequestAborted
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    user_id = models.CharField(unique=True, null=True, blank=True)
+    cheschire_id = models.CharField(unique=True, null=True, blank=True)
 
     def __str__(self):
         """UserProfile name"""
@@ -16,6 +16,16 @@ class UserProfile(models.Model):
     def set_as_superuser(self):
         self.user.is_superuser = True
         self.user.is_staff = True
+
+    @property
+    def set_id(self):
+        self.cheschire_id = get_user_id(self.username)
+        self.save()
+        return self.cheschire_id
+
+    def set_manual_id(self, id):
+        self.cheschire_id = id
+        self.save()
 
     @property
     def is_active(self):
@@ -28,6 +38,9 @@ class UserProfile(models.Model):
     @property
     def password(self):
         return self.user.password
+    
+    def delete(self):
+        self.user.delete()
 
     def __str__(self):
         return self.user.username
@@ -41,4 +54,4 @@ def create_user_cheschire_cat(sender, instance: UserProfile, created: bool, **kw
 @receiver(pre_delete, sender=UserProfile)
 def delete_user_chesshire_cat(sender, instance: UserProfile, **kwargs):
     if delete_user(instance) == False:
-        raise RequestAborted(f"CHESCHIRE_CAT: User with id {instance.user_id} could not be deleted")
+        raise RequestAborted(f"CHESCHIRE_CAT: User with id {instance.cheschire_id} could not be deleted")
