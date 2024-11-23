@@ -3,3 +3,4 @@ email-validator
 psycopg2-binary
 python-decouple
 cheshire-cat-api
+icecream
