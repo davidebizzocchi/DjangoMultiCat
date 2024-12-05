@@ -1,0 +1,129 @@
+# docker-compose.local.yml
+
+services:
+
+  # cheshire-cat-core:
+  #   image: ghcr.io/cheshire-cat-ai/core:latest
+  #   container_name: cheshire_cat_core
+  #   depends_on:
+  #     - cheshire-cat-vector-memory
+  #   ports:
+  #     - 1865:80
+  #     - 5678:5678
+  #   volumes:
+  #     - ./django_cat/cheshire_cat/volumes/static:/app/cat/static
+  #     - ./django_cat/cheshire_cat/volumes/plugins:/app/cat/plugins
+  #     - long_term_memory:/app/cat/data
+  #     - cheschire_cat_models:/app/cat/models
+
+  #   networks:
+  #     - app_network
+
+  cheshire-cat-core:
+    build:
+      context: ./core/core
+    container_name: cheshire_cat_core
+
+    env_file:
+      - env/.env.local
+    depends_on:
+      - cheshire-cat-vector-memory
+    ports:
+      - ${CCAT_CORE_PORT:-1865}:80
+      - 5678:5678 # only for development purposes (take away in production)
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # This add an entry to /etc/hosts file in the container mapping host.docker.internal to the host machine IP addr, allowing the container to access services running on the host, not only on Win and Mac but also Linux. See https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host and https://docs.docker.com/reference/cli/docker/container/run/#add-host
+    environment:
+      # Timezone
+      - TZ=${CCAT_TIMEZONE:-UTC}
+    volumes:
+      - ./core/core:/app
+      - ./plugins:/app/cat/plugins
+
+      - long_term_memory:/app/cat/data
+      - cheschire_cat_models:/app/cat/models
+    command:
+      - python
+      - "-m"
+      - "cat.main"
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  cheshire-cat-vector-memory:
+    image: qdrant/qdrant:latest
+    container_name: cheshire_cat_vector_memory
+    expose:
+      - 6333
+    volumes:
+      - long_term_memory:/qdrant/storage
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local  # Use specific Dockerfiles for development 
+    image: django_cat-app:local
+    ports:
+      - "8000:8000"
+    env_file:
+      - env/.env.local
+    volumes:
+      - ./django_cat:/code
+    command: python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - db
+      - cheshire-cat-core
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    networks:
+      - app_network
+
+  db:
+    image: postgres:17.0-alpine3.20
+    volumes:
+      - postgres_data-local:/var/lib/postgresql/data/
+    env_file:
+      - ./env/db.local
+    networks:
+      - app_network
+
+  mailhog:
+    image: richarvey/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+    networks:
+      - app_network
+
+
+# networks:
+#   internal_network:
+#     internal: true
+#   external_network:
+#     external: false
+
+# networks:
+#   internal_network:
+#     driver: bridge
+#     internal: true
+
+#   public_network:
+#     driver: bridge
+ 
+volumes:
+  postgres_data-local:
+  long_term_memory:
+  cheschire_cat_models:
+    name: cheschire_cat_models
+
+
+networks:
+  app_network:
+    driver: bridge
