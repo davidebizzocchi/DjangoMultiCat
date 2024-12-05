@@ -2,45 +2,51 @@
 
 services:
 
-  # nginx:
-  #   build:
-  #     context: ./nginx
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   volumes:
-  #     - ./static:/staticfiles
+  # cheshire-cat-core:
+  #   image: ghcr.io/cheshire-cat-ai/core:latest
+  #   container_name: cheshire_cat_core
   #   depends_on:
-  #     - app
-  #     - cheshire-cat-core
-
-  # caddy:
-  #   image: caddy:latest
-  #   depends_on:
-  #     - cat
+  #     - cheshire-cat-vector-memory
   #   ports:
-  #     - 80:80
-  #     - 443:443
-  #     - 443:443/udp
+  #     - 1865:80
+  #     - 5678:5678
   #   volumes:
-  #     - ./caddy/Caddyfile:/etc/caddy/Caddyfile
-  #     - ./caddy/data:/data
-  #     - ./caddy/config:/config
-  #   restart: unless-stopped
+  #     - ./django_cat/cheshire_cat/volumes/static:/app/cat/static
+  #     - ./django_cat/cheshire_cat/volumes/plugins:/app/cat/plugins
+  #     - long_term_memory:/app/cat/data
+  #     - cheschire_cat_models:/app/cat/models
+
+  #   networks:
+  #     - app_network
 
   cheshire-cat-core:
-    image: ghcr.io/cheshire-cat-ai/core:latest
+    build:
+      context: ./core/core
     container_name: cheshire_cat_core
+
+    env_file:
+      - env/.env.local
     depends_on:
       - cheshire-cat-vector-memory
     ports:
-      - 1865:80
-      - 5678:5678
+      - ${CCAT_CORE_PORT:-1865}:80
+      - 5678:5678 # only for development purposes (take away in production)
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # This add an entry to /etc/hosts file in the container mapping host.docker.internal to the host machine IP addr, allowing the container to access services running on the host, not only on Win and Mac but also Linux. See https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host and https://docs.docker.com/reference/cli/docker/container/run/#add-host
+    environment:
+      # Timezone
+      - TZ=${CCAT_TIMEZONE:-UTC}
     volumes:
-      - ./django_cat/cheshire_cat/volumes/static:/app/cat/static
-      - ./django_cat/cheshire_cat/volumes/plugins:/app/cat/plugins
+      - ./core/core:/app
+      - ./plugins:/app/cat/plugins
+
       - long_term_memory:/app/cat/data
       - cheschire_cat_models:/app/cat/models
-
+    command:
+      - python
+      - "-m"
+      - "cat.main"
+    restart: unless-stopped
     networks:
       - app_network
 
@@ -52,6 +58,8 @@ services:
     volumes:
       - long_term_memory:/qdrant/storage
     restart: unless-stopped
+    networks:
+      - app_network
 
   app:
     build:

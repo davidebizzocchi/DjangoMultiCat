@@ -58,4 +58,4 @@ def start_cheshire_cat(sender=None, **kwargs):
         cat_client.close()
         ic("disconnect")
 
-    main()
+    # main()
