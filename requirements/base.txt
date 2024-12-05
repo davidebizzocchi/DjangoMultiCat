@@ -4,7 +4,7 @@ annotated-types==0.7.0
     # via pydantic
 asgiref==3.8.1
     # via django
-asttokens==2.4.1
+asttokens==3.0.0
     # via icecream
 certifi==2024.8.30
     # via requests
@@ -14,7 +14,11 @@ cheshire-cat-api==1.4.8
     # via -r requirements/base.in
 colorama==0.4.6
     # via icecream
-django==5.1.3
+django==5.1.4
+    # via
+    #   -r requirements/base.in
+    #   django-ninja
+django-ninja==1.3.0
     # via -r requirements/base.in
 django-widget-tweaks==1.5.0
     # via -r requirements/base.in
@@ -32,8 +36,10 @@ idna==3.10
     #   requests
 psycopg2-binary==2.9.10
     # via -r requirements/base.in
-pydantic==2.10.1
-    # via cheshire-cat-api
+pydantic==2.10.3
+    # via
+    #   cheshire-cat-api
+    #   django-ninja
 pydantic-core==2.27.1
     # via pydantic
 pygments==2.18.0
@@ -44,10 +50,8 @@ python-decouple==3.8
     # via -r requirements/base.in
 requests==2.32.3
     # via -r requirements/base.in
-six==1.16.0
-    # via
-    #   asttokens
-    #   python-dateutil
+six==1.17.0
+    # via python-dateutil
 sqlparse==0.5.2
     # via django
 typing-extensions==4.12.2
