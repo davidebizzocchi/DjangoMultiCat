@@ -68,3 +68,13 @@ remove-all:			## Remove migrations and DB local
 	@echo "Remove migrations and DB local"
 	@make remove-migrations
 	@make destroy-database
+
+git-sync-branches:
+	@echo "Fetching..."
+	@git fetch --prune
+	
+	@echo "Deleting local branch..."
+	@git branch -vv | grep ': gone]' | awk '{print $$1}' | xargs -r git branch -D
+	
+	@echo "Creating new branch from origin..."
+	@git branch -r | grep -v '\->' | grep -v 'origin/main\|origin/dependabot' | sed 's/origin\///' | while read branch; do git branch --track "$$branch" "origin/$$branch" 2>/dev/null || true; done
