@@ -32,7 +32,7 @@ class UserProfile(models.Model):
 
     @property
     def client(self):
-        return connect_user(self.cheschire_id)
+        return connect_user(self.cheschire_id).startup()
 
     @property
     def is_active(self):
@@ -53,7 +53,7 @@ class UserProfile(models.Model):
         return self.user.username
     
 @receiver(post_save, sender=UserProfile)
-def create_user_cheschire_cat(sender, instance: UserProfile, created: bool, **kwargs):
+def create_user_cheshire_cat(sender, instance: UserProfile, created: bool, **kwargs):
     if created:
         create_user(instance)
 
@@ -61,4 +61,4 @@ def create_user_cheschire_cat(sender, instance: UserProfile, created: bool, **kw
 @receiver(pre_delete, sender=UserProfile)
 def delete_user_chesshire_cat(sender, instance: UserProfile, **kwargs):
     if delete_user(instance) == False:
-        raise RequestAborted(f"CHESCHIRE_CAT: User with id {instance.cheschire_id} could not be deleted")
+        raise RequestAborted(f"CHESHIRE_CAT: User with id {instance.cheschire_id} could not be deleted")
