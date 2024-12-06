@@ -1,10 +1,11 @@
+from typing import Iterable
 import cheshire_cat_api as ccat
 from icecream import ic
 # from users.models import UserProfile
 import requests
 import time
 from functools import wraps
-from cheshire_cat.decorators import wait_cat, HOST, PORT
+from cheshire_cat.decorators import wait_cat, HOST, PORT, wait_for_cat
 import json
 from queue import Queue
 
@@ -15,22 +16,50 @@ CatConfig = ccat.Config
 
 
 class Cat(ccat.CatClient):
+    _instances = {}  # Dizionario per memorizzare le istanze per user_id
+
+    def __new__(cls, *args, **kwargs):
+        config = kwargs.get('config')
+        if not config:
+            return super().__new__(cls)
+        
+        user_id = config.user_id
+        if user_id not in cls._instances:
+            wait_for_cat()
+            cls._instances[user_id] = super().__new__(cls)
+        return cls._instances[user_id]
 
     def __init__(self, *args, **kwargs):
-        self._chat_token_queue = Queue()
-        self._message_content = None
-        self._stream_active = False
-        super().__init__(on_message=self.on_message, *args, **kwargs)
+        # Evita la reinizializzazione se l'istanza è già stata inizializzata
+        if not hasattr(self, '_initialized'):
+            self._chat_token_queue = Queue()
+            self._message_content = None
+            self._stream_active = False
+            super().__init__(on_message=self.on_message, *args, **kwargs)
+            self._initialized = True
 
-    def send(self, *args, **kwargs):
+    def startup(self):
+        self.connect_ws()
+
+        counter = 0
+        while not self.is_ws_connected:
+            time.sleep(0.2)
+            counter += 1
+
+            if counter == 100:
+                raise TimeoutError("Cannot connect to the websocket")
+
+        return self
+
+    def send(self, message, *args, **kwargs):
         """Send prompt to ws"""
         self._reset_new_message()
 
-        return super().send(*args, **kwargs)
+        return super().send(message, *args, **kwargs)
 
     def on_message(self, message):
         """Callback for message received"""
-        ic(message)
+        # ic(message)
 
         msg_json = json.loads(message)
         self._on_message(msg_json)
@@ -57,7 +86,7 @@ class Cat(ccat.CatClient):
         self._stream_active = False
         self._chat_token_queue.put(None)
 
-    def stream(self):
+    def stream(self) -> Iterable[ChatToken]:
         """
         Generator that yields ChatToken objects as they arrive
         """
@@ -92,7 +121,6 @@ def get_user_id(username: str):
 
     return None
 
-@wait_cat
 def connect_as_admin() -> Cat:
     
     admin_id = get_user_id("admin")
@@ -102,7 +130,6 @@ def connect_as_admin() -> Cat:
     config = CatConfig(user_id=admin_id, base_url=HOST, port=PORT)
     return Cat(config=config)
 
-@wait_cat
 def connect_user(user_id) -> Cat:
     config = CatConfig(user_id=user_id, base_url=HOST, port=PORT)
     return Cat(config=config)
