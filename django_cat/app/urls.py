@@ -16,9 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .static_view import HomeView
 
-from app.static_view import Error403View, Error404View, Error500View
+from app.static_view import HomeView, Error403View, Error404View, Error500View
+
+from ninja import NinjaAPI
+from chat.api import router as chat_router
+
+api = NinjaAPI()
+api.add_router("/chat/", chat_router)
 
 handler403 = Error403View.as_view()
 handler404 = Error404View.as_view()
@@ -29,4 +34,6 @@ urlpatterns = [
     path("", HomeView.as_view(), name="home"),
     path("users/", include("users.urls", namespace="users")),
     path("chat/", include("chat.urls", namespace="chat")),
+    path("api/", api.urls),
 ]
+
