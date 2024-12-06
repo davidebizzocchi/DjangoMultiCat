@@ -103,6 +103,11 @@ def connect_as_admin() -> Cat:
     return Cat(config=config)
 
 @wait_cat
+def connect_user(user_id) -> Cat:
+    config = CatConfig(user_id=user_id, base_url=HOST, port=PORT)
+    return Cat(config=config)
+
+@wait_cat
 def create_user(user):
     ic(get_user_id(user.username))
     if get_user_id(user.username) is not None:
