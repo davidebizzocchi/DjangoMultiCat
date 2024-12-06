@@ -1,9 +1,11 @@
 {% extends "base/base.html" %}
+{% load static %}
 
 {% block title %}Chat{% endblock %}
 
 {% block reload %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" crossorigin="" href="{% static 'css/chat.css' %}">
 {% endblock %}
 
 {% block contenuto %}
@@ -127,12 +129,12 @@
 
     <div id="app-container" data-theme="light">
         <div id="app" data-v-app="">
-                <div class="flex min-h-screen flex-col scroll-smooth bg-base-300 text-sm text-neutral transition-colors selection:bg-primary md:text-base">
+                <div class="flex min-h-70vh flex-col scroll-smooth bg-base-300 text-sm text-neutral transition-colors selection:bg-primary md:text-base">
                     <div><br></div>
                     <div id="chat-container" class="relative flex w-full max-w-screen-xl flex-col justify-center gap-4 self-center overflow-hidden !pt-0 text-sm pb-16 md:pb-20 grow p-2 md:p-4">
                         <!---->
                         <div id="responses" class="flex grow flex-col">
-                        {% for message in messaggi %}
+                        {% for message in chat_messages %}
                             {% if message.sender == "user" %}
                             <div class="chat user-message gap-x-3 chat-end">
                                 <div class="chat-image text-lg">🙂</div>
@@ -313,7 +315,7 @@
 
         // Last action: scrolling down
         let container = $("#app-container");
-        container.animate({ scrollTop: container.find("#app").get(0).scrollHeight }, 2000);
+        container.animate({ scrollTop: container.find("#app").get(0).scrollHeight }, 200);
     });
 
     // Resize textarea
@@ -335,7 +337,11 @@
     function convertToHTML(html_content) {
         return marked.parse(html_content);
     }
+</script>
 
+<script type="module">
+    // Carica la libreria SSE come modulo
+    import { SSE } from 'https://cdn.jsdelivr.net/npm/sse.js@2.4.1/lib/sse.min.js';
 
     $(document).on("submit", "#chatForm", handleSubmit);
 
@@ -358,69 +364,78 @@
         e.preventDefault();
         
         const data = new FormData(e.target);
-        const formAction = e.target.action; // Prende l'URL dal form
+        const formAction = e.target.action;
         startLoadingState();
 
         let responses = $("#responses");
 
-        // Crea e mostra il messaggio dell'utente
+        // Create user message
         let userMsg = $("#msg-user-proto").clone(true);
         userMsg.removeAttr("id");
         userMsg.find("div.message").text(`${data.get('message')}`);
         userMsg.show();
         responses.append(userMsg);
 
-        // Prepara il container per la risposta dell'assistente
+        // Create assistant message container
         let assMsg = $("#msg-assistant-proto").clone(true);
         assMsg.removeAttr("id");
         assMsg.show();
-        assMsg.testo = "";
+        assMsg.find("div.message").text("");
+        assMsg.message = "";
         responses.append(assMsg);
 
-        // Modifica la creazione della connessione SSE aggiungendo i parametri alla URL
-        const message = data.get('message');
+        // Effettua una singola chiamata POST con SSE
+        // const eventSource = new EventSource(`${formAction}`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+        //     },
+        //     body: JSON.stringify({
+        //         message: data.get('message')
+        //     })
+        // });
 
-        fetch(formAction, {
+        const eventSource = new SSE(e.target.action, {
             method: 'POST',
             headers: {
+                'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
             },
-            body: JSON.stringify({
-                message: message
-            }),
-        }).then(() => {
-            const evtSource = new EventSource(formAction);
-            // ...resto del codice esistente per gestire gli eventi
+            payload: JSON.stringify({ message: data.get("message") })
+        });
+        
+        eventSource.addEventListener("message",  function(event) {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.data) {
+                    console.log(data.data.length);
+                    assMsg.message += data.data;
+
+                    assMsg.find("div.message").html(convertToHTML(assMsg.message));
+                }
+            } catch (e) {
+                console.error("Error parsing SSE data:", e);
+            }
         });
 
-        // Inizia la connessione SSE (Server-Sent Events)
+        eventSource.addEventListener('done', function(event) {
+            eventSource.close();
+            endLoadingState();
+            // Scroll to bottom
+            let container = $("#app-container");
+            container.animate({ scrollTop: container.find("#app").get(0).scrollHeight }, 500);
+        });
 
-        // Gestisce i messaggi in arrivo
-        evtSource.onmessage = function(event) {
-            const payload = JSON.parse(e.data);
-            if (payload.data) {
-                assMsg.testo += payload.data;
-                assMsg.find("div.message").html(convertToHTML(assMsg.testo));
-            }
-        };
-
-        // Gestione eventi personalizzati
-        evtSource.addEventListener('done', function(event) {
-            evtSource.close();
+        eventSource.addEventListener("error", function(err) {
+            console.error("EventSource failed:", err);
+            eventSource.close();
             endLoadingState();
         });
 
-        // Gestione errori
-        evtSource.onerror = function(err) {
-            console.error("EventSource failed:", err);
-        };
-
-        // Chiusura connessione quando si lascia la pagina
-        window.addEventListener('beforeunload', () => {
-            evtSource.close();
-        });
+        eventSource.stream();
     }
 
     </script>
-{% endlbock %}
+
+{% endblock %}
