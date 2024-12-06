@@ -4,6 +4,8 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from cheshire_cat.client import create_user, delete_user, get_user_id
 from django.core.exceptions import RequestAborted
+from cheshire_cat.client import connect_user
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -27,6 +29,10 @@ class UserProfile(models.Model):
     def set_manual_id(self, id):
         self.cheschire_id = id
         self.save()
+
+    @property
+    def client(self):
+        return connect_user(self.cheschire_id)
 
     @property
     def is_active(self):
