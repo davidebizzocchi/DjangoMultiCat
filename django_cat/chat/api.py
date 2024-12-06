@@ -4,23 +4,30 @@ from django.http import StreamingHttpResponse
 from chat.models import Message
 import json
 from icecream import ic
+from cheshire_cat.client import Cat
 
 class MessageIn(Schema):
     message: str
 
 router = Router()
 
-def message_generator(message, user):
-    response_text = ""
-    # Simulate character by character processing
-    for char in message:
-        response_text += char
-        yield f"data: {json.dumps({'data': char})}\n\n"
+def message_generator(message, usr):
+    client: Cat = usr.userprofile.client
+
+    # response_text = ""
+    # # Simulate character by character processing
+    # for char in message:
+    #     response_text += char
+    #     yield f"data: {json.dumps({'data': char})}\n\n"
+
+    client.send(message)
+    for token in client.stream():
+        yield f"data: {json.dumps({'data': token.content})}\n\n"
     
     # Save assistant response
     Message.objects.create(
-        user=user,
-        text=response_text,
+        user=usr,
+        text=client.wait_message_content().content,
         sender=Message.Sender.ASSISTANT
     )
     

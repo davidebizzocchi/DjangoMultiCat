@@ -1,60 +1,113 @@
 from pydantic import BaseModel
 from typing import List, Literal, Optional
 from datetime import datetime
+from pydantic import BaseModel, Field, ConfigDict
+import time
+import traceback
 
-# Modello per "metadata" dentro "procedural"
-class Metadata(BaseModel):
-    source: str
-    type: str
-    trigger_type: str
-    when: int  # Timestamp (può essere un int o float a seconda delle necessità)
+# Modello copiato da cat.utils
+class BaseModelDict(BaseModel):
+    model_config = ConfigDict(
+        extra="allow",
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=() # avoid warning for `model_xxx` attributes
+    )
 
-# Modello per un elemento "procedural"
-class ProceduralElement(BaseModel):
-    id: str
-    metadata: Metadata
-    page_content: str
-    type: str
-    score: float
+    def __getitem__(self, key):
+        # deprecate dictionary usage
+        stack = traceback.extract_stack(limit=2)
+        line_code = traceback.format_list(stack)[0].split("\n")[1].strip()
 
-# Modello per "memory" dentro "why"
-class Memory(BaseModel):
-    episodic: List[str] = []
-    declarative: List[str] = []
-    procedural: List[ProceduralElement] = []
+        # return attribute
+        return getattr(self, key)
 
-# Modello per "why"
-class Why(BaseModel):
-    input: str
-    intermediate_steps: List[str] = []
-    memory: Memory
+    def __setitem__(self, key, value):
+        # deprecate dictionary usage
+        stack = traceback.extract_stack(limit=2)
+        line_code = traceback.format_list(stack)[0].split("\n")[1].strip()
 
-# Modello per "model_interactions"
+        # set attribute
+        setattr(self, key, value)
+
+    def get(self, key, default=None):
+        return getattr(self, key, default)
+
+    def __delitem__(self, key):
+        delattr(self, key)
+
+    def _get_all_attributes(self):
+        # return {**self.model_fields, **self.__pydantic_extra__}
+        return self.model_dump()
+
+    def keys(self):
+        return self._get_all_attributes().keys()
+
+    def values(self):
+        return self._get_all_attributes().values()
+
+    def items(self):
+        return self._get_all_attributes().items()
+
+    def __contains__(self, key):
+        return key in self.keys()
+
+
+# Modelli copiati da cat.convo.messages #
+
 class ModelInteraction(BaseModel):
-    model_type: str
+    model_type: Literal["llm", "embedder"]
     source: str
     prompt: str
     input_tokens: int
-    started_at: int  # Timestamp
-    reply: List[str]  # Risposta del modello
+    started_at: float = Field(default_factory=lambda: time.time())
+
+    model_config = ConfigDict(
+        protected_namespaces=()
+    )
+
+
+class LLMModelInteraction(ModelInteraction):
+    model_type: Literal["llm"] = Field(default="llm")
+    reply: str
     output_tokens: int
-    ended_at: int  # Timestamp
-
-# Modello per "agent_output"
-class AgentOutput(BaseModel):
-    output: str
-    intermediate_steps: List[str] = []
-    return_direct: bool
+    ended_at: float
 
 
-# Modelli principali
-class ChatContent(BaseModel):
+class EmbedderModelInteraction(ModelInteraction):
+    model_type: Literal["embedder"] = Field(default="embedder")
+    source: str = Field(default="recall")
+    reply: List[float]
+
+
+class MessageWhy(BaseModelDict):
+    """Class for wrapping message why
+
+    Variables:
+        input (str): input message
+        intermediate_steps (List): intermediate steps
+        memory (dict): memory
+        model_interactions (List[LLMModelInteraction | EmbedderModelInteraction]): model interactions
+    """
+
+    input: str
+    intermediate_steps: List
+    memory: dict
+    model_interactions: List[LLMModelInteraction | EmbedderModelInteraction]
+
+
+class ChatContent(BaseModelDict):
+    """Class for wrapping cat message
+
+    Variables:
+        content (str): cat message
+        user_id (str): user id
+    """
+
     content: str
     user_id: str
-    type: Literal["chat"]
-    why: Why
-    model_interactions: List[ModelInteraction] = []
-    agent_output: AgentOutput
+    type: str = "chat"
+    why: MessageWhy | None = None
 
 class ChatToken(BaseModel):
     type: Literal["chat_token"]

@@ -14,7 +14,7 @@ services:
   #     - ./django_cat/cheshire_cat/volumes/static:/app/cat/static
   #     - ./django_cat/cheshire_cat/volumes/plugins:/app/cat/plugins
   #     - long_term_memory:/app/cat/data
-  #     - cheschire_cat_models:/app/cat/models
+  #     - cheshire_cat_models:/app/cat/models
 
   #   networks:
   #     - app_network
