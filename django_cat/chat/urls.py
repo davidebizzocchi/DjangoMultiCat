@@ -1,9 +1,13 @@
+from django.urls import path, include
+from chat.views import home, ChatView
+from chat.api import router
 
-from django.urls import path
-from . import views
 
-app_name = 'chat'
+app_name = "chat"
 
 urlpatterns = [
-    path('home/', views.home, name='home'),
+    path('', home, name='home'),
+    path("chat", ChatView.as_view(), name='chat'),
 ]
+
+urlpatterns.extend(router.urls_paths(""))
