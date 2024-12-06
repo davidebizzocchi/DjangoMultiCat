@@ -6,3 +6,4 @@ cheshire-cat-api
 icecream
 requests
 django-widget-tweaks
+django-ninja
