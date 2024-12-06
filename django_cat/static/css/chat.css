@@ -8183,6 +8183,10 @@ code {
     min-height: 100vh
 }
 
+.min-h-70vh {
+    min-height: 70vh;
+}
+
 .w-24 {
     width: 6rem
 }
