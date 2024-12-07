@@ -87,6 +87,12 @@ psutil==5.9.8
     # via -r requirements/odoo.in
 psycopg2==2.9.10
     # via -r requirements/odoo.in
+pyasn1==0.6.1
+    # via
+    #   pyasn1-modules
+    #   python-ldap
+pyasn1-modules==0.4.1
+    # via python-ldap
 pycparser==2.22
     # via cffi
 pyopenssl==24.1.0
@@ -102,6 +108,8 @@ python-dateutil==2.8.2
     #   -r requirements/odoo.in
     #   freezegun
     #   vobject
+python-ldap==3.4.4
+    # via -r requirements/odoo.in
 python-stdnum==1.19
     # via -r requirements/odoo.in
 pytz==2024.2
