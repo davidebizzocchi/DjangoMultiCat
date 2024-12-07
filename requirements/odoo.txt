@@ -108,7 +108,7 @@ python-dateutil==2.8.2
     #   -r requirements/odoo.in
     #   freezegun
     #   vobject
-python-ldap==3.4.4
+python-ldap==3.4.3
     # via -r requirements/odoo.in
 python-stdnum==1.19
     # via -r requirements/odoo.in

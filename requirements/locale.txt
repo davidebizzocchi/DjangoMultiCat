@@ -148,7 +148,7 @@ python-dateutil==2.8.2
     #   vobject
 python-decouple==3.8
     # via -r requirements/base.in
-python-ldap==3.4.4
+python-ldap==3.4.3
     # via -r requirements/odoo.in
 python-stdnum==1.19
     # via -r requirements/odoo.in
