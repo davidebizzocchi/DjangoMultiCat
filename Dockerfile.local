@@ -23,13 +23,6 @@ RUN apt-get update \
     && apt-get install -y \
         netcat-openbsd \
         curl \
-        gcc \
-        g++ \
-        python3-dev \
-        libldap2-dev \
-        libsasl2-dev \
-        libssl-dev \
-        build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 
@@ -41,7 +34,7 @@ RUN uv venv /home/packages/.venv
 
 # Copy the requirements file and install dependencies
 COPY ./requirements/*.txt /code/requirements/
-RUN uv pip install --system --no-cache  -r requirements/locale.txt
+RUN uv pip install --system -r requirements/locale.txt
 
 # COPY .venv/lib/python3.13/site-packages/. /usr/local/lib/python3.13/site-packages
 
