@@ -13,9 +13,11 @@ requirements:	## Create requirements.txt from requirements.in
 
 	@rm -f requirements/base.txt
 	@rm -f requirements/locale.txt
+	@rm -f requirements/odoo.txt
 	
 	uv pip compile requirements/base.in -o requirements/base.txt
 	uv pip compile requirements/locale.in -o requirements/locale.txt
+	uv pip compile requirements/odoo.in -o requirements/odoo.txt
 
 	source .venv/bin/activate && uv pip install -r requirements/locale.txt
 
@@ -44,7 +46,7 @@ up-local:           ## Run the LOCAL stack via Docker on http://0.0.0.0:8000/
 		wait $$PID; \
 	}
 
-shell-sh:			## Open a sh shell in LOCAL inside app
+shell-bash:			## Open a sh shell in LOCAL inside app
 	@docker exec -it django_cat-app-1 /bin/bash
 
 shell-django:		## Open a django shell in LOCAL
