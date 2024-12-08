@@ -1,4 +1,4 @@
 # requirements/locale.in
 
--r odoo.in
+# -r odoo.in
 -r base.in
