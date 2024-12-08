@@ -18,6 +18,7 @@ requirements:	## Create requirements.txt from requirements.in
 	uv pip compile requirements/base.in -o requirements/base.txt
 	uv pip compile requirements/locale.in -o requirements/locale.txt
 	uv pip compile requirements/odoo.in -o requirements/odoo.txt
+	# uv pip compile requirements/_all.in -o requirements/_all.txt
 
 	source .venv/bin/activate && uv pip install -r requirements/locale.txt
 
@@ -25,7 +26,7 @@ requirements:	## Create requirements.txt from requirements.in
 	@git commit -m "automatic upgrade requirements"
 	@git push
 
-	docker rmi -f django_cat-app:local
+	# docker rmi -f django_cat-app:local
 
 requirements-load-cat:
 	source .venv/bin/activate && cp -r .cat-package/cat .venv/lib/python3.13/site-packages
@@ -49,11 +50,17 @@ up-local:           ## Run the LOCAL stack via Docker on http://0.0.0.0:8000/
 shell-bash:			## Open a sh shell in LOCAL inside app
 	@docker exec -it django_cat-app-1 /bin/bash
 
+shell-bash-odoo:			## Open a sh shell in LOCAL inside app
+	@docker exec -it django_cat-odoo-1 /bin/bash
+
 shell-django:		## Open a django shell in LOCAL
 	@docker exec -it django_cat-app-1 python manage.py shell 
 
 django-log:
 	@docker logs -f django_cat-app-1
+
+odoo-log:
+	@docker logs -f django_cat-odoo-1
 
 
 remove-migrations:	## Remove migrations
