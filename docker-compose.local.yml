@@ -80,7 +80,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
     networks:
       - app_network
 
@@ -90,6 +89,37 @@ services:
       - postgres_data-local:/var/lib/postgresql/data/
     env_file:
       - ./env/db.local
+    networks:
+      - app_network
+
+  db_odoo:
+    image: postgres:17.0-alpine3.20
+    volumes:
+      - postgres_odoo-local:/var/lib/postgresql/data/
+    env_file:
+      - ./env/db_odoo.local
+    networks:
+      - app_network
+
+  odoo:
+    build:
+      context: .
+      dockerfile: DockerfileOdoo.local  # Use specific Dockerfiles for development
+    image: django_cat-odoo:local
+    ports:
+      - "8069:8069"
+    env_file:
+      - env/.odoo.env
+    volumes:
+      - ./odoo:/code
+    command: python odoo-bin -u base -c odoo.conf
+    depends_on:
+      - db_odoo
+      - app
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - app_network
 
@@ -119,6 +149,7 @@ services:
  
 volumes:
   postgres_data-local:
+  postgres_odoo-local:
   long_term_memory:
   cheschire_cat_models:
     name: cheschire_cat_models
