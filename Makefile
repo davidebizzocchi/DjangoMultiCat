@@ -78,3 +78,6 @@ git-sync-branches:
 	
 	@echo "Creating new branch from origin..."
 	@git branch -r | grep -v '\->' | grep -v 'origin/main\|origin/dependabot' | sed 's/origin\///' | while read branch; do git branch --track "$$branch" "origin/$$branch" 2>/dev/null || true; done
+
+up-ngrok:
+	@ngrok http 8000
