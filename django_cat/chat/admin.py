@@ -6,7 +6,7 @@ from chat.models import Message
 class MessageAdmin(admin.ModelAdmin):
     list_display = ('user', 'sender', 'text_preview', 'timestamp')
     list_filter = ('sender', 'timestamp', 'user')
-    search_fields = ('text', 'user__username')
+    search_fields = ('text', 'user__username', "sender")
     date_hierarchy = 'timestamp'
     ordering = ('-timestamp',)
     
