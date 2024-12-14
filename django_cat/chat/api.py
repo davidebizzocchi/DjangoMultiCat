@@ -6,6 +6,10 @@ from chat.models import Message
 import json
 from icecream import ic
 from cheshire_cat.client import Cat
+from django.conf import settings
+import os
+from pathlib import Path
+import glob
 
 class MessageIn(Schema):
     message: str
@@ -53,13 +57,37 @@ def stream(request, data: MessageIn):
 
 @router.post("/audio-api", url_name="audio-api")
 def audio_upload(request, audio: UploadedFile = File(...)):
-    # Here you would typically:
-    # 1. Save the audio file temporarily
-    # 2. Use a speech-to-text service to convert it
-    # 3. Return the transcribed text
+    # # Create audio directory if it doesn't exist
+    # audio_dir = settings.MEDIA_ROOT / "audio"
+    # audio_dir.mkdir(parents=True, exist_ok=True)
     
-    # For now, we'll return a dummy response
+    # Get user's client
+    client = request.user.userprofile.client
+    
+    # Get transcription
+    transcribed_text = client.audio_transcription(audio.file)
+    
+    # # Get user's cheshire_cat ID and save file
+    # cheshire_id = request.user.userprofile.cheschire_id
+    
+    # # # Find next available number for this user
+    # # pattern = str(audio_dir / f"{cheshire_id}_*.wav")
+    # # existing_files = glob.glob(pattern)
+    # # next_number = len(existing_files) + 1
+    
+    # # # Create filename and save
+    # filename = f"{cheshire_id}_{next_number}.wav"
+    # filepath = audio_dir / filename
+    
+    # with open(filepath, "wb+") as destination:
+    #     audio.file.seek(0)  # Reset file pointer
+    #     for chunk in audio.chunks():
+    #         destination.write(chunk)
+            
+    # print(f"Saved audio file: {filepath}")
+    
     return JsonResponse({
         "status": "success",
-        "text": "This is a placeholder for the transcribed audio text."
+        "text": transcribed_text,
+        # "file": filename
     })
