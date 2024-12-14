@@ -7,8 +7,10 @@ from functools import wraps
 from cheshire_cat.decorators import wait_cat, HOST, PORT, wait_for_cat
 import json
 from queue import Queue
+from decouple import config
 
 from cheshire_cat.types import ChatContent, ChatToken
+from groq import Groq
 
 import cheshire_cat_api as ccat
 from cheshire_cat_api.configuration import Configuration
@@ -19,7 +21,6 @@ from cheshire_cat_api.api import (
 from cheshire_cat_api.api_client import ApiClient
 
 CatConfig = ccat.Config
-
 
 class CatClient(ccat.CatClient):
     def _connect_api(self):
@@ -63,7 +64,12 @@ class Cat(CatClient):
             self._chat_token_queue = Queue()
             self._message_content = None
             self._stream_active = False
+            self.AUDIO_MAX_SIZE = 25 * 1024 * 1024  # 25MB in bytes
+            
             super().__init__(on_message=self.on_message, *args, **kwargs)
+
+            self._groq = Groq(api_key=config("GROQ_API_KEY"))
+
             self._initialized = True
 
     def startup(self):
@@ -138,6 +144,45 @@ class Cat(CatClient):
             time.sleep(0.1)
         return self._message_content
     
+    def _transcribe(self, audio_bytes):
+        start = time.time()
+        transcription = self._groq.audio.transcriptions.create(
+            file=("temp.wav", audio_bytes),
+            model="whisper-large-v3",
+            language="it",
+            prompt="Trascrivi il messaggio dell'utente",
+            response_format="json"
+        )
+        ic("time", time.time() - start, transcription)
+        return transcription.text.strip()
+    
+    def transcribe(self, audio_bytes):
+        # Get file size
+        audio_bytes.seek(0, 2)  # Seek to end
+        file_size = audio_bytes.tell()
+        audio_bytes.seek(0)  # Reset to start
+
+        # If file is smaller than MAX_SIZE, process normally
+        if file_size <= self.AUDIO_MAX_SIZE:
+            return self._transcribe(audio_bytes.read())
+
+        # For larger files, split and process in chunks
+        full_text = []
+        chunk_size = self.AUDIO_MAX_SIZE
+        
+        while True:
+            chunk = audio_bytes.read(chunk_size)
+            if not chunk:
+                break
+
+            # Create a temporary file-like object for the chunk
+            from io import BytesIO
+            chunk_bytes = BytesIO(chunk)
+
+            full_text.append(self._transcribe(chunk_bytes))
+
+        return " ".join(full_text)
+
 @wait_cat
 def get_user_id(username: str):
     url = f"http://{HOST}:{PORT}/users/"

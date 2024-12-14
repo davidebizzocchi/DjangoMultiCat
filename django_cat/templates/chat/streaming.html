@@ -80,6 +80,37 @@
     div#contenuto-container {
         min-height: 90vh;
     }
+
+    .modal-box {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        min-width: 300px;
+        position: relative;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    /* Rimuovi il modal-backdrop esistente dato che usiamo il background del modal stesso */
+    .modal-backdrop {
+        display: none;
+    }
+
+    #audio-dialog {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .hidden {
+        display: none !important;
+    }
 </style>
 
 <div id="msg-user-proto" class="chat user-message gap-x-3 chat-end" style="display: none;">
@@ -123,6 +154,24 @@
                     </path>
                 </svg></button></div>
     </div><!---->
+</div>
+
+<!-- Audio Recording Modal -->
+<div id="audio-dialog" class="hidden">
+    <h1>ciao</h1>
+    <div class="modal-box">
+        <button id="close-modal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        <h3 class="font-bold text-lg mb-4">Voice Recording</h3>
+        <div class="py-4">
+            <div id="recording-status" class="text-center mb-4">Click to start recording</div>
+            <button id="record-button" class="btn btn-circle btn-lg btn-primary mx-auto block">
+                <svg viewBox="0 0 24 24" width="1.5em" height="1.5em" class="size-6">
+                    <path fill="currentColor" d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3z"/>
+                    <path fill="currentColor" d="M17 12c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
 </div>
 
     <h1>Chat</h1>
@@ -409,7 +458,7 @@
             try {
                 const data = JSON.parse(event.data);
                 if (data.data) {
-                    console.log(data.data.length);
+                    // console.log(data.data.length);
                     assMsg.message += data.data;
 
                     assMsg.find("div.message").html(convertToHTML(assMsg.message));
@@ -436,6 +485,138 @@
         eventSource.stream();
     }
 
+    </script>
+
+    <script>
+        // Audio Recording Logic
+        let mediaRecorder;
+        let audioChunks = [];
+        const dialog = $("#audio-dialog");
+        const recordButton = $("#record-button");
+        const recordingStatus = $("#recording-status");
+        let isRecording = false;
+
+        // Verifica supporto registrazione audio
+        function checkMediaRecorderSupport() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.log("getUserMedia not supported");
+                recordingStatus.text("Audio recording not supported in this browser");
+                recordButton.prop('disabled', true);
+                return false;
+            }
+            return true;
+        }
+
+        // Gestione apertura/chiusura modal
+        $("#input-mic-button").on("click", () => {
+            if (!checkMediaRecorderSupport()) {
+                alert("Il tuo browser non supporta la registrazione audio. Usa Chrome, Firefox o Safari aggiornati.");
+                return;
+            }
+            dialog.toggleClass("hidden");
+        });
+
+        // Chiudi il modal quando si clicca sulla X o fuori
+        $("#close-modal, #audio-dialog").on("click", (e) => {
+            if (e.target === document.getElementById('audio-dialog') || 
+                e.target.id === 'close-modal') {
+                closeModal();
+            }
+        });
+
+        function closeModal() {
+            dialog.addClass("hidden");
+            if (isRecording && mediaRecorder) {
+                mediaRecorder.stop();
+                isRecording = false;
+            }
+            recordingStatus.text("Click to start recording");
+            recordButton.removeClass("btn-error");
+            recordButton.show(); // Ripristina la visibilità del pulsante
+        }
+
+        recordButton.on("click", async () => {
+            if (!isRecording) {
+                try {
+                    const constraints = {
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    };
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            audioChunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const tracks = stream.getTracks();
+                        tracks.forEach(track => track.stop());
+                        
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const formData = new FormData();
+                        formData.append('audio', audioBlob);
+
+                        try {
+                            // Nascondi il pulsante di registrazione e mostra il messaggio
+                            recordButton.hide();
+                            recordingStatus.text("Sto trascrivendo...");
+
+                            const response = await fetch('{% url "chat:audio-api" %}', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+                                }
+                            });
+
+                            if (response.ok) {
+                                const data = await response.json();
+                                closeModal();
+                                
+                                if (data.status == "success" && data.text != "") {
+                                    
+                                    console.log(data);
+
+                                    $("#message-input").val(data.text);
+                                    $("#chatForm").submit();
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error uploading audio:', error);
+                            recordingStatus.text("Error uploading audio");
+                            recordButton.show(); // Rendi nuovamente visibile il pulsante in caso di errore
+                        }
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordingStatus.text("Recording... Click to stop");
+                    recordButton.addClass("btn-error");
+                } catch (err) {
+                    console.error('Error accessing microphone:', err);
+                    recordingStatus.text("Error accessing microphone. Make sure you've granted permission.");
+                    recordButton.prop('disabled', true);
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                recordingStatus.text("Click to start recording");
+                recordButton.removeClass("btn-error");
+            }
+        });
+
+        // Previeni la propagazione del click sul modal box
+        $(".modal-box").on("click", (e) => {
+            e.stopPropagation();
+        });
     </script>
 
 {% endblock %}

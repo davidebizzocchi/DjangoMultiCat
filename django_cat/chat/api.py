@@ -1,18 +1,26 @@
-from ninja import Router
+from ninja import Router, File
+from ninja.files import UploadedFile
 from ninja.schema import Schema
-from django.http import StreamingHttpResponse
+from django.http import StreamingHttpResponse, JsonResponse
 from chat.models import Message
 import json
 from icecream import ic
 from cheshire_cat.client import Cat
+from django.conf import settings
+import os
+from pathlib import Path
+import glob
 
 class MessageIn(Schema):
     message: str
 
 router = Router()
 
+def get_user_client(user) -> Cat:
+    return user.userprofile.client
+
 def message_generator(message, usr):
-    client: Cat = usr.userprofile.client
+    client: Cat = get_user_client(usr)
 
     # response_text = ""
     # # Simulate character by character processing
@@ -49,3 +57,40 @@ def stream(request, data: MessageIn):
     response['Cache-Control'] = 'no-cache'
     response['X-Accel-Buffering'] = 'no'
     return response
+
+@router.post("/audio-api", url_name="audio-api")
+def audio_upload(request, audio: UploadedFile = File(...)):
+    # # Create audio directory if it doesn't exist
+    # audio_dir = settings.MEDIA_ROOT / "audio"
+    # audio_dir.mkdir(parents=True, exist_ok=True)
+    
+    # # Get user's cheshire_cat ID and save file
+    # cheshire_id = request.user.userprofile.cheschire_id
+    
+    # # # Find next available number for this user
+    # # pattern = str(audio_dir / f"{cheshire_id}_*.wav")
+    # # existing_files = glob.glob(pattern)
+    # # next_number = len(existing_files) + 1
+    
+    # # # Create filename and save
+    # filename = f"{cheshire_id}_{next_number}.wav"
+    # filepath = audio_dir / filename
+    
+    # with open(filepath, "wb+") as destination:
+    #     audio.file.seek(0)  # Reset file pointer
+    #     for chunk in audio.chunks():
+    #         destination.write(chunk)
+            
+    # print(f"Saved audio file: {filepath}")
+
+    # Get user's client
+    client: Cat = get_user_client(request.user)
+    
+    # Get transcription
+    transcribed_text = client.transcribe(audio.file)
+    
+    return JsonResponse({
+        "status": "success",
+        "text": transcribed_text,
+        # "file": filename
+    })
