@@ -61,12 +61,6 @@ def audio_upload(request, audio: UploadedFile = File(...)):
     # audio_dir = settings.MEDIA_ROOT / "audio"
     # audio_dir.mkdir(parents=True, exist_ok=True)
     
-    # Get user's client
-    client = request.user.userprofile.client
-    
-    # Get transcription
-    transcribed_text = client.transcribe(audio.file)
-    
     # # Get user's cheshire_cat ID and save file
     # cheshire_id = request.user.userprofile.cheschire_id
     
@@ -85,6 +79,12 @@ def audio_upload(request, audio: UploadedFile = File(...)):
     #         destination.write(chunk)
             
     # print(f"Saved audio file: {filepath}")
+
+    # Get user's client
+    client = request.user.userprofile.client
+    
+    # Get transcription
+    transcribed_text = client.transcribe(audio.file)
     
     return JsonResponse({
         "status": "success",

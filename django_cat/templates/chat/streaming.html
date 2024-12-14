@@ -573,10 +573,16 @@
                             });
 
                             if (response.ok) {
-                                closeModal();
                                 const data = await response.json();
-                                console.log(data);
-                                // $("#message-input").val(data.text);
+                                closeModal();
+                                
+                                if (data.status == "success" && data.text != "") {
+                                    
+                                    console.log(data);
+
+                                    $("#message-input").val(data.text);
+                                    $("#chatForm").submit();
+                                }
                             }
                         } catch (error) {
                             console.error('Error uploading audio:', error);
