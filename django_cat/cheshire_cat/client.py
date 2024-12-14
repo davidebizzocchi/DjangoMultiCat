@@ -129,7 +129,7 @@ class Cat(ccat.CatClient):
         )
 
         ic("time", time.time() - start, transcription)
-        return transcription.text
+        return transcription.text.strip()
     
 @wait_cat
 def get_user_id(username: str):
