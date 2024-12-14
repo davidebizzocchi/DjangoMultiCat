@@ -438,4 +438,87 @@
 
     </script>
 
+    <!-- Audio Recording Dialog -->
+    <dialog id="audio-dialog" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Voice Recording</h3>
+            <div class="py-4">
+                <div id="recording-status" class="text-center mb-4">Click to start recording</div>
+                <button id="record-button" class="btn btn-circle btn-lg btn-primary mx-auto block">
+                    <svg viewBox="0 0 24 24" width="1.5em" height="1.5em" class="size-6">
+                        <path fill="currentColor" d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3z"/>
+                        <path fill="currentColor" d="M17 12c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <script>
+        // Audio Recording Logic
+        let mediaRecorder;
+        let audioChunks = [];
+        const dialog = document.getElementById('audio-dialog');
+        const recordButton = document.getElementById('record-button');
+        const recordingStatus = document.getElementById('recording-status');
+        let isRecording = false;
+
+        document.getElementById('input-mic-button').addEventListener('click', () => {
+            dialog.showModal();
+        });
+
+        recordButton.addEventListener('click', async () => {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const formData = new FormData();
+                        formData.append('audio', audioBlob);
+
+                        try {
+                            const response = await fetch('{% url "chat:audio-api" %}', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+                                }
+                            });
+
+                            if (response.ok) {
+                                dialog.close();
+                                const data = await response.json();
+                                document.getElementById('message-input').value = data.text;
+                            }
+                        } catch (error) {
+                            console.error('Error uploading audio:', error);
+                        }
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordingStatus.textContent = 'Recording... Click to stop';
+                    recordButton.classList.add('btn-error');
+                } catch (err) {
+                    console.error('Error accessing microphone:', err);
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                recordingStatus.textContent = 'Click to start recording';
+                recordButton.classList.remove('btn-error');
+            }
+        });
+    </script>
+
 {% endblock %}
