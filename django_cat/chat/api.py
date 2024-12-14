@@ -16,8 +16,11 @@ class MessageIn(Schema):
 
 router = Router()
 
+def get_user_client(user) -> Cat:
+    return user.userprofile.client
+
 def message_generator(message, usr):
-    client: Cat = usr.userprofile.client
+    client: Cat = get_user_client(usr)
 
     # response_text = ""
     # # Simulate character by character processing
@@ -81,7 +84,7 @@ def audio_upload(request, audio: UploadedFile = File(...)):
     # print(f"Saved audio file: {filepath}")
 
     # Get user's client
-    client = request.user.userprofile.client
+    client: Cat = get_user_client(request.user)
     
     # Get transcription
     transcribed_text = client.transcribe(audio.file)
