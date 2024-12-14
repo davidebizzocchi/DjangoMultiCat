@@ -65,7 +65,7 @@ def audio_upload(request, audio: UploadedFile = File(...)):
     client = request.user.userprofile.client
     
     # Get transcription
-    transcribed_text = client.audio_transcription(audio.file)
+    transcribed_text = client.transcribe(audio.file)
     
     # # Get user's cheshire_cat ID and save file
     # cheshire_id = request.user.userprofile.cheschire_id
