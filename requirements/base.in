@@ -8,3 +8,4 @@ requests
 django-widget-tweaks
 django-ninja
 groq
+gTTS
