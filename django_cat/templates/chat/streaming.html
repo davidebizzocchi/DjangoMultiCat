@@ -458,7 +458,7 @@
             try {
                 const data = JSON.parse(event.data);
                 if (data.data) {
-                    console.log(data.data.length);
+                    // console.log(data.data.length);
                     assMsg.message += data.data;
 
                     assMsg.find("div.message").html(convertToHTML(assMsg.message));
@@ -532,6 +532,7 @@
             }
             recordingStatus.text("Click to start recording");
             recordButton.removeClass("btn-error");
+            recordButton.show(); // Ripristina la visibilità del pulsante
         }
 
         recordButton.on("click", async () => {
@@ -564,6 +565,10 @@
                         formData.append('audio', audioBlob);
 
                         try {
+                            // Nascondi il pulsante di registrazione e mostra il messaggio
+                            recordButton.hide();
+                            recordingStatus.text("Sto trascrivendo...");
+
                             const response = await fetch('{% url "chat:audio-api" %}', {
                                 method: 'POST',
                                 body: formData,
@@ -587,6 +592,7 @@
                         } catch (error) {
                             console.error('Error uploading audio:', error);
                             recordingStatus.text("Error uploading audio");
+                            recordButton.show(); // Rendi nuovamente visibile il pulsante in caso di errore
                         }
                     };
 
