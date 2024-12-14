@@ -8,11 +8,13 @@ from functools import wraps
 from cheshire_cat.decorators import wait_cat, HOST, PORT, wait_for_cat
 import json
 from queue import Queue
+from decouple import config
 
 from cheshire_cat.types import ChatContent, ChatToken
+from groq import Groq
+
 
 CatConfig = ccat.Config
-
 
 
 class Cat(ccat.CatClient):
@@ -35,7 +37,11 @@ class Cat(ccat.CatClient):
             self._chat_token_queue = Queue()
             self._message_content = None
             self._stream_active = False
+
             super().__init__(on_message=self.on_message, *args, **kwargs)
+
+            self._groq = Groq(api_key=config("GROQ_API_KEY"))
+
             self._initialized = True
 
     def startup(self):
@@ -109,6 +115,21 @@ class Cat(ccat.CatClient):
         while self._message_content is None:
             time.sleep(0.1)
         return self._message_content
+    
+    def audio_transcription(self, audio_bytes):
+        start = time.time()
+
+        audio_bytes.seek(0)
+        transcription = self._groq.audio.transcriptions.create(
+            file=("temp.wav", audio_bytes.read()),
+            model="whisper-large-v3",
+            language="it",
+            prompt="Trascrivi il messaggio dell'utente",
+            response_format="json"
+        )
+
+        ic("time", time.time() - start, transcription)
+        return transcription.text
     
 @wait_cat
 def get_user_id(username: str):
