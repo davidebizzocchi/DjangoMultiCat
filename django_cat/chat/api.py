@@ -1,6 +1,7 @@
-from ninja import Router
+from ninja import Router, File
+from ninja.files import UploadedFile
 from ninja.schema import Schema
-from django.http import StreamingHttpResponse
+from django.http import StreamingHttpResponse, JsonResponse
 from chat.models import Message
 import json
 from icecream import ic
@@ -49,3 +50,16 @@ def stream(request, data: MessageIn):
     response['Cache-Control'] = 'no-cache'
     response['X-Accel-Buffering'] = 'no'
     return response
+
+@router.post("/audio-api", url_name="audio-api")
+def audio_upload(request, audio: UploadedFile = File(...)):
+    # Here you would typically:
+    # 1. Save the audio file temporarily
+    # 2. Use a speech-to-text service to convert it
+    # 3. Return the transcribed text
+    
+    # For now, we'll return a dummy response
+    return JsonResponse({
+        "status": "success",
+        "text": "This is a placeholder for the transcribed audio text."
+    })
