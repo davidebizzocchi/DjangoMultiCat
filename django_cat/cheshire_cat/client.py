@@ -37,7 +37,8 @@ class Cat(ccat.CatClient):
             self._chat_token_queue = Queue()
             self._message_content = None
             self._stream_active = False
-
+            self.AUDIO_MAX_SIZE = 25 * 1024 * 1024  # 25MB in bytes
+            
             super().__init__(on_message=self.on_message, *args, **kwargs)
 
             self._groq = Groq(api_key=config("GROQ_API_KEY"))
@@ -116,21 +117,45 @@ class Cat(ccat.CatClient):
             time.sleep(0.1)
         return self._message_content
     
-    def transcribe(self, audio_bytes):
+    def _transcribe(self, audio_bytes):
         start = time.time()
-
-        audio_bytes.seek(0)
         transcription = self._groq.audio.transcriptions.create(
-            file=("temp.wav", audio_bytes.read()),
+            file=("temp.wav", audio_bytes),
             model="whisper-large-v3",
             language="it",
             prompt="Trascrivi il messaggio dell'utente",
             response_format="json"
         )
-
         ic("time", time.time() - start, transcription)
         return transcription.text.strip()
     
+    def transcribe(self, audio_bytes):
+        # Get file size
+        audio_bytes.seek(0, 2)  # Seek to end
+        file_size = audio_bytes.tell()
+        audio_bytes.seek(0)  # Reset to start
+
+        # If file is smaller than MAX_SIZE, process normally
+        if file_size <= self.AUDIO_MAX_SIZE:
+            return self._transcribe(audio_bytes.read())
+
+        # For larger files, split and process in chunks
+        full_text = []
+        chunk_size = self.AUDIO_MAX_SIZE
+        
+        while True:
+            chunk = audio_bytes.read(chunk_size)
+            if not chunk:
+                break
+
+            # Create a temporary file-like object for the chunk
+            from io import BytesIO
+            chunk_bytes = BytesIO(chunk)
+
+            full_text.append(self._transcribe(chunk_bytes))
+
+        return " ".join(full_text)
+
 @wait_cat
 def get_user_id(username: str):
     url = f"http://{HOST}:{PORT}/users/"
