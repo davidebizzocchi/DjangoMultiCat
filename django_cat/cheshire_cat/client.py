@@ -116,7 +116,7 @@ class Cat(ccat.CatClient):
             time.sleep(0.1)
         return self._message_content
     
-    def audio_transcription(self, audio_bytes):
+    def transcribe(self, audio_bytes):
         start = time.time()
 
         audio_bytes.seek(0)
