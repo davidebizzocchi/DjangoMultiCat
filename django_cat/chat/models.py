@@ -15,6 +15,14 @@ class Message(models.Model):
     )
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    @classmethod
+    def get_last_assistant_message(self, user):
+        """Get last assistant message for a specific user"""
+        return self.objects.select_related('user').filter(
+            user=user,
+            sender=self.Sender.ASSISTANT
+        ).order_by('-timestamp').first()
+
     def __str__(self):
         return f"{self.sender} at {self.timestamp}: {self.text[:50]}..."
 
