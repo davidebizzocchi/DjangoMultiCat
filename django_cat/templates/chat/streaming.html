@@ -575,7 +575,8 @@
                             if (response.ok) {
                                 closeModal();
                                 const data = await response.json();
-                                $("#message-input").val(data.text);
+                                console.log(data);
+                                // $("#message-input").val(data.text);
                             }
                         } catch (error) {
                             console.error('Error uploading audio:', error);
