@@ -573,7 +573,7 @@
                     return;
                 }
 
-                recordingStatus.text("Riproduco la risposta...");
+                recordingStatus.text("Attendo risposta audio...");
 
                 const response = await fetch("{% url 'chat:speak-last-api' %}");
                 if (!response.ok) {
@@ -582,6 +582,8 @@
 
                 const audioBlob = await response.blob();
                 const audioUrl = URL.createObjectURL(audioBlob);
+
+                recordingStatus.text("Riproduco risposta...");
                 
                 responseAudio.src = audioUrl;
                 await responseAudio.play();
