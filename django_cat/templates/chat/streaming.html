@@ -158,7 +158,6 @@
 
 <!-- Audio Recording Modal -->
 <div id="audio-dialog" class="hidden">
-    <h1>ciao</h1>
     <div class="modal-box">
         <button id="close-modal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         <h3 class="font-bold text-lg mb-4">Voice Recording</h3>
@@ -513,13 +512,22 @@
                 alert("Il tuo browser non supporta la registrazione audio. Usa Chrome, Firefox o Safari aggiornati.");
                 return;
             }
-            dialog.toggleClass("hidden");
+            dialog.removeClass("hidden");
         });
 
-        // Chiudi il modal quando si clicca sulla X o fuori
-        $("#close-modal, #audio-dialog").on("click", (e) => {
-            if (e.target === document.getElementById('audio-dialog') || 
-                e.target.id === 'close-modal') {
+        // Chiudi il modal quando si clicca sulla X o fuori dal dialog
+        $(document).on("mousedown", (e) => {
+            if (dialog.is(":visible") && 
+                !$(e.target).closest(".modal-box").length && 
+                !$(e.target).closest("#input-mic-button").length &&
+                !isRecording) { // Aggiungi controllo per isRecording
+                closeModal();
+            }
+        });
+
+        // Modifica anche il comportamento del pulsante X
+        $("#close-modal").on("click", (e) => {
+            if (!isRecording) {
                 closeModal();
             }
         });
