@@ -14,40 +14,15 @@ from cheshire_cat.types import ChatContent, ChatToken
 from groq import Groq
 
 import cheshire_cat_api as ccat
-from cheshire_cat_api.configuration import Configuration
-from cheshire_cat_api.api import (
-    EmbedderApi, LargeLanguageModelApi, MemoryApi, PluginsApi,
-    RabbitHoleApi, SettingsApi, StatusApi
-)
-from cheshire_cat_api.api_client import ApiClient
 
 from gtts import gTTS
 from bs4 import BeautifulSoup
 import markdown2
 
+from cheshire_cat.custom_objects import CatClient
+
 
 CatConfig = ccat.Config
-
-class CatClient(ccat.CatClient):
-    def _connect_api(self):
-        protocol = "https" if self._conn_settings.secure_connection else "http"
-        config = Configuration(host=f"{protocol}://{self._conn_settings.base_url}:{self._conn_settings.port}")
-
-        client = ApiClient(
-            configuration=config,
-            header_name='access_token',
-            header_value=self._conn_settings.auth_key
-        )
-
-        client.set_default_header('user_id', self._conn_settings.user_id)
-
-        self.memory = MemoryApi(client)
-        self.plugins = PluginsApi(client)
-        self.rabbit_hole = RabbitHoleApi(client)
-        self.status = StatusApi(client)
-        self.embedder = EmbedderApi(client)
-        self.settings = SettingsApi(client)
-        self.llm = LargeLanguageModelApi(client)
 
 
 class Cat(CatClient):
