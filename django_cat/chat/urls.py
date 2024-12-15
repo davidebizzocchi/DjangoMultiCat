@@ -6,10 +6,10 @@ app_name = "chat"
 
 urlpatterns = [
     path('', home, name='home'),
-    path('chats/', ChatListView.as_view(), name='chat_list'),
-    path('chats/new/', create_chat, name='create_chat'),
-    path('chats/<str:chat_id>/', ChatView.as_view(), name='chat_detail'),
-    path('chats/<str:chat_id>/delete/', delete_chat, name='delete_chat'),
+    path('list/', ChatListView.as_view(), name='list'),
+    path('new/', create_chat, name='create'),
+    path('<str:chat_id>/', ChatView.as_view(), name='chat'),
+    path('<str:chat_id>/delete/', delete_chat, name='delete'),
 ]
 
 urlpatterns.extend(router.urls_paths(""))
