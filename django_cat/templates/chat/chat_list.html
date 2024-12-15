@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Le tue chat</h2>
+    
+    <form method="post" action="{% url 'chat:create_chat' %}" class="mb-4">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Nuova Chat</button>
+    </form>
+
+    <div class="list-group">
+        {% for chat in chats %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{% url 'chat:chat_detail' chat.chat_id %}" class="flex-grow-1">
+                {{ chat_titles|get_item:chat.id }}
+            </a>
+            <form method="post" action="{% url 'chat:delete_chat' chat.chat_id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm" 
+                        onclick="return confirm('Sei sicuro di voler eliminare questa chat?')">
+                    Elimina
+                </button>
+            </form>
+        </div>
+        {% empty %}
+        <p>Non hai ancora chat attive.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
