@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Dict
 from icecream import ic
 # from users.models import UserProfile
 import requests
@@ -42,9 +42,10 @@ class Cat(CatClient):
     def __init__(self, *args, **kwargs):
         # Evita la reinizializzazione se l'istanza è già stata inizializzata
         if not hasattr(self, '_initialized'):
-            self._chat_token_queue = Queue()
-            self._message_content = None
-            self._stream_active = False
+            # str is chat_id
+            self._chat_queues: Dict[str, Queue] = {}
+            self._message_contents: Dict[str, ChatContent] = {}
+            self._stream_active: Dict[str, bool] = {}
             self.AUDIO_MAX_SIZE = 25 * 1024 * 1024  # 25MB in bytes
             
             super().__init__(on_message=self.on_message, *args, **kwargs)
@@ -70,11 +71,10 @@ class Cat(CatClient):
 
         return self
 
-    def send(self, message, *args, **kwargs):
-        """Send prompt to ws"""
-        self._reset_new_message()
-
-        return super().send(message, *args, **kwargs)
+    def send(self, message, chat_id="default", *args, **kwargs):
+        """Send prompt to ws with specific chat_id"""
+        self._reset_new_message(chat_id)
+        return super().send(message, chat_id=chat_id, *args, **kwargs)
 
     def on_message(self, message):
         """Callback for message received"""
@@ -83,51 +83,67 @@ class Cat(CatClient):
         msg_json = json.loads(message)
         self._on_message(msg_json)
 
-    def _reset_new_message(self):
-        self._chat_token_queue = Queue()
-        self._message_content = None
-        self._stream_active = True
+    def _reset_new_message(self, chat_id="default"):
+        """Reset message state for a specific chat"""
+        
+        self._chat_queues[chat_id] = Queue()
+        
+        self._message_contents[chat_id] = None
+        self._stream_active[chat_id] = True
 
     def _on_message(self, message: dict):
-        """Handle for messages"""
+        """Handle messages for specific chats"""
         msg_type = message.get("type", None)
+        chat_id = message.get("chat_id", "default")
 
         if msg_type == "chat_token":
             chat_message = ChatToken(**message)
-            self._chat_token_queue.put(chat_message)
+            
+            if chat_id in self._stream_active:
+                self._chat_queues[chat_id].put(chat_message)
         
         if msg_type == "chat":
-            self._message_content = ChatContent(**message)
-            self.end_stream()
+            self._message_contents[chat_id] = ChatContent(**message)
+            self.end_stream(chat_id)
 
-    def end_stream(self):
-        """Termina lo stream mettendo un None nella coda"""
-        self._stream_active = False
-        self._chat_token_queue.put(None)
+    def end_stream(self, chat_id: str = "default"):
+        """End stream for specific chat"""
+        if chat_id in self._stream_active:
+            self._stream_active[chat_id] = False
+            self._chat_queues[chat_id].put(None)
 
-    def stream(self) -> Iterable[ChatToken]:
-        """
-        Generator that yields ChatToken objects as they arrive
-        """
-        self._stream_active = True
-        while self._stream_active:
+    def _stream(self, chat_id):
+        """Stream messages for specific chat"""
+
+        while self._stream_active.get(chat_id):
             try:
-                token = self._chat_token_queue.get(block=True)
+                token = self._chat_queues[chat_id].get(block=True)
                 if token is None:  # segnale di terminazione
                     break
-                
                 yield token
+            except Queue.Empty:
+                continue  # Continuiamo ad ascoltare se la coda è vuota
             except Exception as e:
-                ic(f"Stream error: {e}")
+                ic(f"Stream error for chat {chat_id}: {e}")
                 break
 
-    def get_message_content(self) -> ChatContent:
-        return self._message_content
+    def stream(self, chat_id: str = "default") -> Iterable[ChatToken]:
+        """Stream messages for specific chat"""
+
+        if chat_id not in self._stream_active:
+            yield f"Error: {chat_id} this chat is not active"
+            return
+        
+        # Modifica qui: yield from invece di una semplice chiamata
+        yield from self._stream(chat_id)
+
+    def get_message_content(self, chat_id: str = "default") -> ChatContent:
+        return self._message_contents.get(chat_id)
     
-    def wait_message_content(self) -> ChatContent:
-        while self._message_content is None:
+    def wait_message_content(self, chat_id: str = "default") -> ChatContent:
+        while self._message_contents.get(chat_id) is None:
             time.sleep(0.1)
-        return self._message_content
+        return self._message_contents[chat_id]
     
     def _transcribe(self, audio_bytes):
         start = time.time()
