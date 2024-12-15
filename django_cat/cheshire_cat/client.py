@@ -78,6 +78,10 @@ class Cat(CatClient):
 
             self._initialized = True
 
+    def connect_ws(self):
+        if not self.is_ws_connected:
+            return super().connect_ws()
+
     def startup(self):
         self.connect_ws()
 
