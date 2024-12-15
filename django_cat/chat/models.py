@@ -15,6 +15,14 @@ class Chat(models.Model):
         """Send message to cat"""
         return self.userprofile.client.send(message, chat_id=self.chat_id)
 
+    def stream(self):
+        """Stream messages from this specific chat"""
+        return self.userprofile.client.stream(chat_id=self.chat_id)
+
+    def wait_message_content(self):
+        """Wait and return last message content for this specific chat"""
+        return self.userprofile.client.wait_message_content(chat_id=self.chat_id)
+
     def __str__(self):
         return f"Chat with {self.user.username}, id: {self.chat_id}"
 
