@@ -108,7 +108,9 @@ class ChatContent(BaseModelDict):
     user_id: str
     type: str = "chat"
     why: MessageWhy | None = None
+    chat_id: Optional[str] = "default"
 
 class ChatToken(BaseModel):
     type: Literal["chat_token"]
     content: str
+    chat_id: Optional[str] = "default"
