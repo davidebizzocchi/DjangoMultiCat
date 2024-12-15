@@ -158,7 +158,6 @@
 
 <!-- Audio Recording Modal -->
 <div id="audio-dialog" class="hidden">
-    <h1>ciao</h1>
     <div class="modal-box">
         <button id="close-modal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         <h3 class="font-bold text-lg mb-4">Voice Recording</h3>
@@ -172,6 +171,8 @@
             </button>
         </div>
     </div>
+
+    <audio id="response-audio" class="hidden"></audio>
 </div>
 
     <h1>Chat</h1>
@@ -399,6 +400,8 @@
         submitButton.disabled = true;
         $("#message-input").val("");
         $("#chat-form-help-text").text("loading...");
+
+        isErrorResponseGenerated = false;
     }
 
     function endLoadingState() {
@@ -407,11 +410,16 @@
         $('#message-input').val("");
         $('#message-input').focus();
         $("#chat-form-help-text").text("");
+
+        isWaitingResponse = false;
     }
 
     function handleSubmit(e) {
         e.preventDefault();
         
+        isWaitingResponse = true;
+        isErrorResponseGenerated = false;
+
         const data = new FormData(e.target);
         const formAction = e.target.action;
         startLoadingState();
@@ -471,6 +479,7 @@
         eventSource.addEventListener('done', function(event) {
             eventSource.close();
             endLoadingState();
+            isWaitingResponse = false;
             // Scroll to bottom
             let container = $("#app-container");
             container.animate({ scrollTop: container.find("#app").get(0).scrollHeight }, 500);
@@ -480,6 +489,8 @@
             console.error("EventSource failed:", err);
             eventSource.close();
             endLoadingState();
+            isWaitingResponse = false;
+            isErrorResponseGenerated = true;
         });
 
         eventSource.stream();
@@ -494,7 +505,12 @@
         const dialog = $("#audio-dialog");
         const recordButton = $("#record-button");
         const recordingStatus = $("#recording-status");
+        const responseAudio = $("#response-audio")[0]; // Ottieni l'elemento audio nativo
         let isRecording = false;
+        let isWaitingResponse = false;
+        let isErrorResponseGenerated = false;
+        let isPlayingResponse = false;
+        let shouldContinue = true; // Nuova variabile per controllare il flusso
 
         // Verifica supporto registrazione audio
         function checkMediaRecorderSupport() {
@@ -513,26 +529,132 @@
                 alert("Il tuo browser non supporta la registrazione audio. Usa Chrome, Firefox o Safari aggiornati.");
                 return;
             }
-            dialog.toggleClass("hidden");
+            dialog.removeClass("hidden");
         });
 
-        // Chiudi il modal quando si clicca sulla X o fuori
-        $("#close-modal, #audio-dialog").on("click", (e) => {
-            if (e.target === document.getElementById('audio-dialog') || 
-                e.target.id === 'close-modal') {
+        // Chiudi il modal quando si clicca sulla X o fuori dal dialog
+        $(document).on("mousedown", (e) => {
+            if (dialog.is(":visible") && 
+                !$(e.target).closest(".modal-box").length && 
+                !$(e.target).closest("#input-mic-button").length &&
+                !isRecording) { // Aggiungi controllo per isRecording
+                closeModal();
+            }
+        });
+
+        // Modifica anche il comportamento del pulsante X
+        $("#close-modal").on("click", (e) => {
+            if (!isRecording) {
                 closeModal();
             }
         });
 
         function closeModal() {
             dialog.addClass("hidden");
+            shouldContinue = false; // Imposta il flag a false quando si chiude il modal
+
             if (isRecording && mediaRecorder) {
                 mediaRecorder.stop();
                 isRecording = false;
             }
+
+            // Stop audio playback if it's playing
+            if (isPlayingResponse && !responseAudio.paused) {
+                responseAudio.pause();
+                responseAudio.currentTime = 0;
+                isPlayingResponse = false;
+            }
+
             recordingStatus.text("Click to start recording");
             recordButton.removeClass("btn-error");
-            recordButton.show(); // Ripristina la visibilità del pulsante
+            recordButton.show();
+        }
+
+        async function reproduceAudioResponse() {
+            try {
+                recordingStatus.text("Attendo la risposta dell'assistente...");
+
+                while (isWaitingResponse) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    if (!shouldContinue) return;
+                }
+
+                if (isErrorResponseGenerated || !shouldContinue) {
+                    recordingStatus.text("Si è verificato un errore nella generazione della risposta");
+                    setTimeout(() => closeModal(), 2000);
+                    return;
+                }
+
+                recordingStatus.text("Attendo risposta audio...");
+
+                // Controllo se il dialogo è stato chiuso mentre si aspetta la risposta audio
+                if (!shouldContinue) return;
+
+                const response = await fetch("{% url 'chat:speak-last-api' %}");
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                // Controllo nuovamente prima di iniziare la riproduzione
+                if (!shouldContinue) return;
+
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+
+                recordingStatus.text("Riproduco risposta...");
+                isPlayingResponse = true;
+                
+                responseAudio.src = audioUrl;
+                
+                // Controlliamo se il dialogo è stato chiuso prima di iniziare la riproduzione
+                if (!shouldContinue) {
+                    isPlayingResponse = false;
+                    return;
+                }
+
+                await responseAudio.play();
+
+                // Aspetta che l'audio finisca, con possibilità di interruzione
+                await new Promise((resolve, reject) => {
+                    responseAudio.onended = () => {
+                        isPlayingResponse = false;
+                        resolve();
+                    };
+                    
+                    // Controlliamo periodicamente se dobbiamo interrompere
+                    const checkInterval = setInterval(() => {
+                        if (!shouldContinue) {
+                            clearInterval(checkInterval);
+                            isPlayingResponse = false;
+                            reject(new Error('Playback interrupted'));
+                        }
+                    }, 100);
+
+                    // Puliamo l'intervallo quando l'audio finisce
+                    responseAudio.onended = () => {
+                        clearInterval(checkInterval);
+                        isPlayingResponse = false;
+                        resolve();
+                    };
+
+                    responseAudio.onerror = () => {
+                        clearInterval(checkInterval);
+                        reject(new Error('Audio playback error'));
+                    };
+                });
+
+                if (shouldContinue) {
+                    closeModal();
+                }
+
+            } catch (error) {
+                console.error('Error playing response:', error);
+                isPlayingResponse = false;
+                if (shouldContinue) {
+                    recordingStatus.text("Errore nella riproduzione della risposta");
+                    setTimeout(() => closeModal(), 2000);
+                }
+            }
         }
 
         recordButton.on("click", async () => {
@@ -560,12 +682,18 @@
                         const tracks = stream.getTracks();
                         tracks.forEach(track => track.stop());
                         
+                        shouldContinue = true; // Reset del flag all'inizio del processo
+
+                        // Se il dialogo è stato chiuso, non procedere
+                        if (!dialog.is(":visible")) {
+                            return;
+                        }
+
                         const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                         const formData = new FormData();
                         formData.append('audio', audioBlob);
 
                         try {
-                            // Nascondi il pulsante di registrazione e mostra il messaggio
                             recordButton.hide();
                             recordingStatus.text("Sto trascrivendo...");
 
@@ -579,20 +707,22 @@
 
                             if (response.ok) {
                                 const data = await response.json();
-                                closeModal();
                                 
                                 if (data.status == "success" && data.text != "") {
-                                    
                                     console.log(data);
 
                                     $("#message-input").val(data.text);
+                                    
                                     $("#chatForm").submit();
+                                    await reproduceAudioResponse();
+                                } else {
+                                    closeModal();
                                 }
                             }
                         } catch (error) {
                             console.error('Error uploading audio:', error);
                             recordingStatus.text("Error uploading audio");
-                            recordButton.show(); // Rendi nuovamente visibile il pulsante in caso di errore
+                            recordButton.show();
                         }
                     };
 

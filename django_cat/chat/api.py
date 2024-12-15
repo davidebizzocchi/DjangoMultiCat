@@ -1,7 +1,7 @@
 from ninja import Router, File
 from ninja.files import UploadedFile
 from ninja.schema import Schema
-from django.http import StreamingHttpResponse, JsonResponse
+from django.http import StreamingHttpResponse, JsonResponse, FileResponse
 from chat.models import Message
 import json
 from icecream import ic
@@ -14,6 +14,9 @@ import glob
 class MessageIn(Schema):
     message: str
 
+class TextIn(Schema):
+    text: str
+
 router = Router()
 
 def get_user_client(user) -> Cat:
@@ -21,12 +24,6 @@ def get_user_client(user) -> Cat:
 
 def message_generator(message, usr):
     client: Cat = get_user_client(usr)
-
-    # response_text = ""
-    # # Simulate character by character processing
-    # for char in message:
-    #     response_text += char
-    #     yield f"data: {json.dumps({'data': char})}\n\n"
 
     client.send(message)
     for token in client.stream():
@@ -94,3 +91,38 @@ def audio_upload(request, audio: UploadedFile = File(...)):
         "text": transcribed_text,
         # "file": filename
     })
+
+@router.post("/speak-api", url_name="speak-api")
+def speak(request, data: TextIn):
+    client: Cat = get_user_client(request.user)
+    audio_stream = client.speak(data.text)
+    
+    response = FileResponse(
+        audio_stream,
+        content_type='audio/mp3',
+        as_attachment=False,
+        filename='speech.mp3'
+    )
+    return response
+
+@router.get("/speak-last-api", url_name="speak-last-api")
+def speak_last(request):
+    # Get last assistant message using optimized query
+    last_message = Message.get_last_assistant_message(request.user)
+    
+    if not last_message:
+        return JsonResponse({
+            "status": "error",
+            "message": "No messages found"
+        }, status=404)
+
+    client: Cat = get_user_client(request.user)
+    audio_stream = client.speak(last_message.text)
+    
+    response = FileResponse(
+        audio_stream,
+        content_type='audio/mp3',
+        as_attachment=False,
+        filename='speech.mp3'
+    )
+    return response

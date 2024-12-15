@@ -8,6 +8,7 @@ from cheshire_cat.decorators import wait_cat, HOST, PORT, wait_for_cat
 import json
 from queue import Queue
 from decouple import config
+import io
 
 from cheshire_cat.types import ChatContent, ChatToken
 from groq import Groq
@@ -19,6 +20,11 @@ from cheshire_cat_api.api import (
     RabbitHoleApi, SettingsApi, StatusApi
 )
 from cheshire_cat_api.api_client import ApiClient
+
+from gtts import gTTS
+from bs4 import BeautifulSoup
+import markdown2
+
 
 CatConfig = ccat.Config
 
@@ -176,12 +182,30 @@ class Cat(CatClient):
                 break
 
             # Create a temporary file-like object for the chunk
-            from io import BytesIO
-            chunk_bytes = BytesIO(chunk)
+            chunk_bytes = io.BytesIO(chunk)
 
             full_text.append(self._transcribe(chunk_bytes))
 
         return " ".join(full_text)
+    
+    def parse_markdown(self, text):
+        return BeautifulSoup(markdown2.markdown(text), "html.parser").get_text()
+    
+    def _speak(self, text):
+        tts = gTTS(
+            text=self.parse_markdown(text),
+            lang="it",
+        )
+
+        stream = io.BytesIO()
+        tts.write_to_fp(stream)
+
+        stream.seek(0)
+
+        return stream
+    
+    def speak(self, text):
+        return self._speak(text)
 
 @wait_cat
 def get_user_id(username: str):
