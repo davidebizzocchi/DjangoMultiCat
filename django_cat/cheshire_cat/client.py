@@ -22,6 +22,9 @@ from cheshire_cat_api.api import (
 from cheshire_cat_api.api_client import ApiClient
 
 from gtts import gTTS
+from bs4 import BeautifulSoup
+import markdown2
+
 
 CatConfig = ccat.Config
 
@@ -185,9 +188,12 @@ class Cat(CatClient):
 
         return " ".join(full_text)
     
+    def parse_markdown(self, text):
+        return BeautifulSoup(markdown2.markdown(text), "html.parser").get_text()
+    
     def _speak(self, text):
         tts = gTTS(
-            text=text,
+            text=self.parse_markdown(text),
             lang="it",
         )
 
