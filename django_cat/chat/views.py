@@ -12,7 +12,7 @@ def home(request):
 
 class ChatListView(LoginRequiredMixin, ListView):
     model = Chat
-    template_name = 'chat/chat_list.html'
+    template_name = 'chat/list.html'
     context_object_name = 'chats'
 
     def get_queryset(self):
@@ -42,18 +42,19 @@ class ChatView(LoginRequiredMixin, TemplateView):
         chat = get_object_or_404(Chat, chat_id=kwargs['chat_id'])
         context['chat'] = chat
         context['chat_messages'] = Message.objects.filter(chat=chat)
+        context['chat_id'] = chat.chat_id  # Add this line
         return context
 
 @login_required
 def create_chat(request):
     if request.method == 'POST':
         chat = Chat.objects.create(user=request.user)
-        return redirect('chat:chat_detail', chat_id=chat.chat_id)
-    return redirect('chat:chat_list')
+        return redirect('chat:chat', chat_id=chat.chat_id)
+    return redirect('chat:list')
 
 @login_required
 def delete_chat(request, chat_id):
     if request.method == 'POST':
         chat = get_object_or_404(Chat, chat_id=chat_id, user=request.user)
         chat.delete()
-    return redirect('chat:chat_list')
+    return redirect('chat:list')
