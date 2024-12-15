@@ -322,6 +322,7 @@
                             class="textarea block max-h-20 w-full resize-none overflow-auto pr-10 !outline-2 shadow-lg !outline-offset-0"
                             placeholder="Ask to AI..." style="height: 48px;">
                         </textarea>
+                        <input type="hidden" name="chat_id" value="{{ chat_id }}">
                         <div id="input-send-message-container" class="absolute right-2 top-1/2 -translate-y-1/2">
                             <button id="input-send-message" type="submit" class="btn btn-circle btn-ghost btn-sm self-center" disabled="">
                                 <svg
@@ -420,7 +421,11 @@
         isWaitingResponse = true;
         isErrorResponseGenerated = false;
 
-        const data = new FormData(e.target);
+        const formData = new FormData(e.target);
+        const data = {
+            message: formData.get('message'),
+            chat_id: formData.get('chat_id')
+        };
         const formAction = e.target.action;
         startLoadingState();
 
@@ -429,7 +434,7 @@
         // Create user message
         let userMsg = $("#msg-user-proto").clone(true);
         userMsg.removeAttr("id");
-        userMsg.find("div.message").text(`${data.get('message')}`);
+        userMsg.find("div.message").text(`${data.message}`);
         userMsg.show();
         responses.append(userMsg);
 
@@ -459,7 +464,7 @@
                 'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
                 'Content-Type': 'application/json',
             },
-            payload: JSON.stringify({ message: data.get("message") })
+            payload: JSON.stringify(data)
         });
         
         eventSource.addEventListener("message",  function(event) {
@@ -590,7 +595,7 @@
                 // Controllo se il dialogo è stato chiuso mentre si aspetta la risposta audio
                 if (!shouldContinue) return;
 
-                const response = await fetch("{% url 'chat:speak-last-api' %}");
+                const response = await fetch("{% url 'chat:speak-last-api' chat_id=chat_id %}");
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
