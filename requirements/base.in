@@ -9,3 +9,5 @@ django-widget-tweaks
 django-ninja
 groq
 gTTS
+markdown2
+beautifulsoup4
