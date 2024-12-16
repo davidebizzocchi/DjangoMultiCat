@@ -59,8 +59,15 @@ class Cat(CatClient):
             return super().connect_ws()
 
     def startup(self):
-        if not self.is_ws_connected:
-            self.connect_ws()
+        self.connect_ws()
+
+        counter = 0
+        while not self.is_ws_connected:
+            time.sleep(0.2)
+            counter += 1
+
+            if counter == 100:
+                raise TimeoutError("Cannot connect to the websocket")
 
         return self
 
