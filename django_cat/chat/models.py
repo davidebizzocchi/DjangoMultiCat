@@ -11,20 +11,36 @@ class Chat(models.Model):
     def userprofile(self) -> UserProfile:
         return self.user.userprofile
     
+    @property
+    def client(self):
+        return self.userprofile.client
+    
     def send_message(self, message):
         """Send message to cat"""
-        return self.userprofile.client.send(message, chat_id=self.chat_id)
+        return self.client.send(message, chat_id=self.chat_id)
 
     def stream(self):
         """Stream messages from this specific chat"""
-        return self.userprofile.client.stream(chat_id=self.chat_id)
+        return self.client.stream(chat_id=self.chat_id)
 
     def wait_message_content(self):
         """Wait and return last message content for this specific chat"""
-        return self.userprofile.client.wait_message_content(chat_id=self.chat_id)
+        return self.client.wait_message_content(chat_id=self.chat_id)
 
     def __str__(self):
         return f"Chat with {self.user.username}, id: {self.chat_id}"
+    
+    def delete(self, *args, **kwargs):
+        """Delete chat and all related messages"""
+        
+        result = self.client.delete_chat(self.chat_id)
+
+        if result["deleted"] == True:
+            return super().delete(*args, **kwargs)
+        
+    def wipe(self):
+        """Wipe all messages from chat"""
+        return self.client.wipe_chat(self.chat_id)
 
     class Meta:
         ordering = ['user']
