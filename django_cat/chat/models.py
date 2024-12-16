@@ -41,6 +41,10 @@ class Chat(models.Model):
     def wipe(self):
         """Wipe all messages from chat"""
         return self.client.wipe_chat(self.chat_id)
+    
+    def get_history(self):
+        """Get chat history"""
+        return self.client.get_chat_history(self.chat_id)
 
     class Meta:
         ordering = ['user']

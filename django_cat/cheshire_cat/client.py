@@ -10,7 +10,7 @@ from queue import Queue
 from decouple import config
 import io
 
-from cheshire_cat.types import ChatContent, ChatToken
+from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory
 from groq import Groq
 
 import cheshire_cat_api as ccat
@@ -207,6 +207,17 @@ class Cat(CatClient):
     
     def wipe_chat(self, chat_id):
         return self.memory.wipe_conversation_history_by_chat(chat_id)
+    
+    def get_chat_history(self, chat_id):
+        response = self.memory.get_working_memory(chat_id)
+        if "history" in response:
+            return ChatHistory(messages=[
+                ChatHistoryMessage(**msg) for msg in response["history"]
+            ])
+        return ChatHistory()
+
+    def get_chat_list(self):
+        return self.memory.get_working_memories_list()
 
 @wait_cat
 def get_user_id(username: str):
