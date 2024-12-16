@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import TemplateView, ListView
+from django.views.generic import TemplateView, ListView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
-from django.urls import reverse
+from django.urls import reverse_lazy
 
 from chat.models import Message, Chat
 
@@ -52,9 +52,14 @@ def create_chat(request):
         return redirect('chat:chat', chat_id=chat.chat_id)
     return redirect('chat:list')
 
-@login_required
-def delete_chat(request, chat_id):
-    if request.method == 'POST':
-        chat = get_object_or_404(Chat, chat_id=chat_id, user=request.user)
-        chat.delete()
-    return redirect('chat:list')
+class ChatDeleteView(LoginRequiredMixin, DeleteView):
+    model = Chat
+    template_name = 'chat/delete_confirm.html'
+    success_url = reverse_lazy('chat:list')
+    context_object_name = 'chat'
+    
+    def get_object(self, queryset=None):
+        chat = get_object_or_404(Chat, chat_id=self.kwargs['chat_id'])
+        if chat.user != self.request.user:
+            raise Http404("Chat non trovata")
+        return chat
