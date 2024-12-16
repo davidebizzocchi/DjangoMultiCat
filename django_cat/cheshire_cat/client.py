@@ -201,6 +201,9 @@ class Cat(CatClient):
     
     def speak(self, text):
         return self._speak(text)
+    
+    def delete_chat(self, chat_id):
+        return self.memory.delete_working_memory(chat_id)
 
 @wait_cat
 def get_user_id(username: str):
