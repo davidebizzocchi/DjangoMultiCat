@@ -306,7 +306,7 @@ class CatMemoryApi(MemoryApi):
         )
 
     @validate_call
-    def delete_conversation_history(
+    def wipe_conversation_history_by_chat(
         self,
         chat_id: StrictStr,
         _request_timeout: Union[
@@ -322,9 +322,9 @@ class CatMemoryApi(MemoryApi):
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
-        """Delete Conversation History
+        """Wipe Conversation History
         
-        Delete vector memory points for a specific chat_id
+        Wipe vector memory points for a specific chat_id
 
         :param chat_id: Chat ID (required)
         :type chat_id: str
@@ -341,7 +341,7 @@ class CatMemoryApi(MemoryApi):
         :return: Returns the result object
         """
 
-        _param = self._delete_conversation_history_serialize(
+        _param = self._wipe_conversation_history_serialize_by_chat(
             chat_id=chat_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -364,7 +364,7 @@ class CatMemoryApi(MemoryApi):
             response_types_map=_response_types_map,
         ).data
 
-    def _delete_conversation_history_serialize(
+    def _wipe_conversation_history_serialize_by_chat(
         self,
         chat_id: str,
         _request_auth,
