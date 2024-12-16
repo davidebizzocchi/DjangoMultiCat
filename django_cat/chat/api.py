@@ -143,3 +143,19 @@ def speak_last(request, chat_id: str):
         filename='speech.mp3'
     )
     return response
+
+@router.post("/wipe-chat/{chat_id}", url_name="wipe-chat-api")
+def wipe_chat(request, chat_id: str):
+    # Get chat and verify ownership
+    chat = get_object_or_404(Chat, chat_id=chat_id, user=request.user)
+    
+    # Wipe chat memory
+    chat.wipe()
+    
+    # Delete all messages from database
+    Message.objects.filter(chat=chat).delete()
+    
+    return JsonResponse({
+        "status": "success",
+        "message": "Chat memory wiped successfully"
+    })

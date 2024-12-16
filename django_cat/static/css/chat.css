@@ -98,3 +98,26 @@ div#contenuto-container {
 .hidden {
     display: none !important;
 }
+
+/* Aggiungi questi stili per il bottone wipe */
+#wipe-chat {
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+#wipe-chat:hover {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.btn-search-action {
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    height: 60px;
+}
+
+.btn-search-action > span.grow {
+    font-size: 0.8rem;
+}

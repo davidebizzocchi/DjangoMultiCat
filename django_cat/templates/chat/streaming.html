@@ -55,6 +55,34 @@
     function convertToHTML(html_content) {
         return marked.parse(html_content);
     }
+
+    // Wipe chat handler
+    $(document).on("click", "#wipe-chat", async function(e) {
+        e.preventDefault();
+        
+        // if (!confirm("Sei sicuro di voler cancellare la memoria della chat? Questa azione non può essere annullata.")) {
+        //     return;
+        // }
+
+        try {
+            const response = await fetch('{% url "chat:wipe-chat-api" chat_id=chat_id %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
+                }
+            });
+
+            if (response.ok) {
+                // Clear messages from UI
+                $("#responses").empty();
+            } else {
+                alert("Errore durante la pulizia della chat");
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert("Errore durante la pulizia della chat");
+        }
+    });
 </script>
 
     {% include 'chat/_streaming/js_sse.js' %}
