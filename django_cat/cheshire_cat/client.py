@@ -204,6 +204,9 @@ class Cat(CatClient):
     
     def delete_chat(self, chat_id):
         return self.memory.delete_working_memory(chat_id)
+    
+    def wipe_chat(self, chat_id):
+        return self.memory.wipe_conversation_history_by_chat(chat_id)
 
 @wait_cat
 def get_user_id(username: str):
