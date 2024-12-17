@@ -156,6 +156,8 @@ merge-and-close:
 	git checkout dev; \
 	git merge --no-ff $$BRANCH; \
 	git commit -m "Close #$$ISSUE_NUM"; \
+	echo "\nPremi INVIO per confermare il push e chiudere l'issue #$$ISSUE_NUM..."; \
+	read ans; \
 	git push origin dev; \
 	git push origin --delete $$BRANCH; \
 	$(MAKE) git-sync-branches
