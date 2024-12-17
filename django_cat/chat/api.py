@@ -10,9 +10,12 @@ from django.conf import settings
 import os
 from pathlib import Path
 import glob
+from django.shortcuts import get_object_or_404
+from chat.models import Chat
 
 class MessageIn(Schema):
     message: str
+    chat_id: str
 
 class TextIn(Schema):
     text: str
@@ -22,18 +25,23 @@ router = Router()
 def get_user_client(user) -> Cat:
     return user.userprofile.client
 
-def message_generator(message, usr):
-    client: Cat = get_user_client(usr)
-
-    client.send(message)
-    for token in client.stream():
+def message_generator(message, chat_id, usr):
+    # Get chat and verify ownership
+    chat = get_object_or_404(Chat, chat_id=chat_id, user=usr)
+    
+    # Send message using chat
+    chat.send_message(message)
+    
+    # Stream responses from specific chat
+    for token in chat.stream():
         yield f"data: {json.dumps({'data': token.content})}\n\n"
     
     # Save assistant response
     Message.objects.create(
         user=usr,
-        text=client.wait_message_content().content,
-        sender=Message.Sender.ASSISTANT
+        text=chat.wait_message_content().content,
+        sender=Message.Sender.ASSISTANT,
+        chat=chat
     )
     
     yield "event: done\ndata: {}\n\n"
@@ -41,14 +49,16 @@ def message_generator(message, usr):
 @router.post("/stream-api", url_name="stream-api")
 def stream(request, data: MessageIn):
     # Save user message
+    chat = get_object_or_404(Chat, chat_id=data.chat_id, user=request.user)
     Message.objects.create(
         user=request.user,
         text=data.message,
-        sender=Message.Sender.USER
+        sender=Message.Sender.USER,
+        chat=chat
     )
 
     response = StreamingHttpResponse(
-        message_generator(data.message, request.user),
+        message_generator(data.message, data.chat_id, request.user),
         content_type='text/event-stream'
     )
     response['Cache-Control'] = 'no-cache'
@@ -105,10 +115,17 @@ def speak(request, data: TextIn):
     )
     return response
 
-@router.get("/speak-last-api", url_name="speak-last-api")
-def speak_last(request):
-    # Get last assistant message using optimized query
-    last_message = Message.get_last_assistant_message(request.user)
+@router.get("/speak-last-api/{chat_id}", url_name="speak-last-api")
+def speak_last(request, chat_id: str):
+    # Get chat and verify ownership
+    chat = get_object_or_404(Chat, chat_id=chat_id, user=request.user)
+    
+    # Get last assistant message for this specific chat
+    last_message = Message.objects.filter(
+        chat=chat,
+        user=request.user,
+        sender=Message.Sender.ASSISTANT
+    ).order_by('-timestamp').first()
     
     if not last_message:
         return JsonResponse({
@@ -126,3 +143,19 @@ def speak_last(request):
         filename='speech.mp3'
     )
     return response
+
+@router.post("/wipe-chat/{chat_id}", url_name="wipe-chat-api")
+def wipe_chat(request, chat_id: str):
+    # Get chat and verify ownership
+    chat = get_object_or_404(Chat, chat_id=chat_id, user=request.user)
+    
+    # Wipe chat memory
+    chat.wipe()
+    
+    # Delete all messages from database
+    Message.objects.filter(chat=chat).delete()
+    
+    return JsonResponse({
+        "status": "success",
+        "message": "Chat memory wiped successfully"
+    })

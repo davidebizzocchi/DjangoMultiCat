@@ -14,6 +14,32 @@ from pathlib import Path
 from decouple import config
 import os
 from django.contrib.messages import constants as messages
+import sentry_sdk
+
+
+def get_version_from_file():
+    try:
+        with open('VERSION', 'r') as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return "v0.0.0-unknown"
+    
+ENVIRONMENT_TYPE = config("ENVIRONMENT_TYPE", default="none")
+
+# Sentry init
+sentry_sdk.init(
+    dsn=config("SENTRY_DNS"),
+    environment=ENVIRONMENT_TYPE,
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    traces_sample_rate=config("SENTRY_traces_sample_rate", cast=float, default=1.0),
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=config("SENTRY_profiles_sample_rate", cast=float, default=1.0),
+    send_default_pii=True,
+    release=get_version_from_file()
+)
 
 
 

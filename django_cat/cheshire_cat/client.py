@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Dict, List
 from icecream import ic
 # from users.models import UserProfile
 import requests
@@ -10,79 +10,65 @@ from queue import Queue
 from decouple import config
 import io
 
-from cheshire_cat.types import ChatContent, ChatToken
+from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory
 from groq import Groq
 
 import cheshire_cat_api as ccat
-from cheshire_cat_api.configuration import Configuration
-from cheshire_cat_api.api import (
-    EmbedderApi, LargeLanguageModelApi, MemoryApi, PluginsApi,
-    RabbitHoleApi, SettingsApi, StatusApi
-)
-from cheshire_cat_api.api_client import ApiClient
 
 from gtts import gTTS
 from bs4 import BeautifulSoup
 import markdown2
 
+from cheshire_cat.custom_objects import CatClient
+
 
 CatConfig = ccat.Config
 
-class CatClient(ccat.CatClient):
-    def _connect_api(self):
-        protocol = "https" if self._conn_settings.secure_connection else "http"
-        config = Configuration(host=f"{protocol}://{self._conn_settings.base_url}:{self._conn_settings.port}")
-
-        client = ApiClient(
-            configuration=config,
-            header_name='access_token',
-            header_value=self._conn_settings.auth_key
-        )
-
-        client.set_default_header('user_id', self._conn_settings.user_id)
-
-        self.memory = MemoryApi(client)
-        self.plugins = PluginsApi(client)
-        self.rabbit_hole = RabbitHoleApi(client)
-        self.status = StatusApi(client)
-        self.embedder = EmbedderApi(client)
-        self.settings = SettingsApi(client)
-        self.llm = LargeLanguageModelApi(client)
-
-
 class Cat(CatClient):
-    _instances = {}  # Dizionario per memorizzare le istanze per user_id
+    _instances = {}
 
     def __new__(cls, *args, **kwargs):
         config = kwargs.get('config')
         if not config:
-            return super().__new__(cls)
+            raise ValueError("Config is required")
         
         user_id = config.user_id
+        
         if user_id not in cls._instances:
             wait_for_cat()
-            cls._instances[user_id] = super().__new__(cls)
+            instance = super().__new__(cls)
+            instance._initialized = False  # Flag per evitare reinizializzazione
+            cls._instances[user_id] = instance
         return cls._instances[user_id]
 
     def __init__(self, *args, **kwargs):
-        # Evita la reinizializzazione se l'istanza è già stata inizializzata
-        if not hasattr(self, '_initialized'):
-            self._chat_token_queue = Queue()
-            self._message_content = None
-            self._stream_active = False
+        if not hasattr(self, '_initialized') or not self._initialized:
+            # str is chat_id
+            self._chat_queues: Dict[str, Queue] = {}
+            self._message_contents: Dict[str, ChatContent] = {}
+            self._stream_active: Dict[str, bool] = {}
             self.AUDIO_MAX_SIZE = 25 * 1024 * 1024  # 25MB in bytes
             
             super().__init__(on_message=self.on_message, *args, **kwargs)
 
             self._groq = Groq(api_key=config("GROQ_API_KEY"))
-
+            self.startup()
+            
             self._initialized = True
+
+    def _check_ws_connection(self):
+        if not self.is_ws_connected:
+            self.startup()
 
     def connect_ws(self):
         if not self.is_ws_connected:
             return super().connect_ws()
 
     def startup(self):
+        ic(self.is_ws_connected)
+        if self.is_ws_connected:
+            return self
+        
         self.connect_ws()
 
         counter = 0
@@ -95,11 +81,11 @@ class Cat(CatClient):
 
         return self
 
-    def send(self, message, *args, **kwargs):
-        """Send prompt to ws"""
-        self._reset_new_message()
-
-        return super().send(message, *args, **kwargs)
+    def send(self, message, chat_id="default", *args, **kwargs):
+        """Send prompt to ws with specific chat_id"""
+        self._reset_new_message(chat_id)
+        self._check_ws_connection()
+        return super().send(message, chat_id=chat_id, *args, **kwargs)
 
     def on_message(self, message):
         """Callback for message received"""
@@ -108,51 +94,67 @@ class Cat(CatClient):
         msg_json = json.loads(message)
         self._on_message(msg_json)
 
-    def _reset_new_message(self):
-        self._chat_token_queue = Queue()
-        self._message_content = None
-        self._stream_active = True
+    def _reset_new_message(self, chat_id="default"):
+        """Reset message state for a specific chat"""
+        
+        self._chat_queues[chat_id] = Queue()
+        
+        self._message_contents[chat_id] = None
+        self._stream_active[chat_id] = True
 
     def _on_message(self, message: dict):
-        """Handle for messages"""
+        """Handle messages for specific chats"""
         msg_type = message.get("type", None)
+        chat_id = message.get("chat_id", "default")
 
         if msg_type == "chat_token":
             chat_message = ChatToken(**message)
-            self._chat_token_queue.put(chat_message)
+            
+            if chat_id in self._stream_active:
+                self._chat_queues[chat_id].put(chat_message)
         
         if msg_type == "chat":
-            self._message_content = ChatContent(**message)
-            self.end_stream()
+            self._message_contents[chat_id] = ChatContent(**message)
+            self.end_stream(chat_id)
 
-    def end_stream(self):
-        """Termina lo stream mettendo un None nella coda"""
-        self._stream_active = False
-        self._chat_token_queue.put(None)
+    def end_stream(self, chat_id: str = "default"):
+        """End stream for specific chat"""
+        if chat_id in self._stream_active:
+            self._stream_active[chat_id] = False
+            self._chat_queues[chat_id].put(None)
 
-    def stream(self) -> Iterable[ChatToken]:
-        """
-        Generator that yields ChatToken objects as they arrive
-        """
-        self._stream_active = True
-        while self._stream_active:
+    def _stream(self, chat_id):
+        """Stream messages for specific chat"""
+
+        while self._stream_active.get(chat_id):
             try:
-                token = self._chat_token_queue.get(block=True)
+                token = self._chat_queues[chat_id].get(block=True)
                 if token is None:  # segnale di terminazione
                     break
-                
                 yield token
+            except Queue.Empty:
+                continue  # Continuiamo ad ascoltare se la coda è vuota
             except Exception as e:
-                ic(f"Stream error: {e}")
+                ic(f"Stream error for chat {chat_id}: {e}")
                 break
 
-    def get_message_content(self) -> ChatContent:
-        return self._message_content
+    def stream(self, chat_id: str = "default") -> Iterable[ChatToken]:
+        """Stream messages for specific chat"""
+
+        if chat_id not in self._stream_active:
+            yield f"Error: {chat_id} this chat is not active"
+            return
+        
+        # Modifica qui: yield from invece di una semplice chiamata
+        yield from self._stream(chat_id)
+
+    def get_message_content(self, chat_id: str = "default") -> ChatContent:
+        return self._message_contents.get(chat_id)
     
-    def wait_message_content(self) -> ChatContent:
-        while self._message_content is None:
+    def wait_message_content(self, chat_id: str = "default") -> ChatContent:
+        while self._message_contents.get(chat_id) is None:
             time.sleep(0.1)
-        return self._message_content
+        return self._message_contents[chat_id]
     
     def _transcribe(self, audio_bytes):
         start = time.time()
@@ -210,6 +212,31 @@ class Cat(CatClient):
     
     def speak(self, text):
         return self._speak(text)
+    
+    def get_collections_name(self, name: str) -> Iterable[str]:
+        for collection in self.memory.get_collections()["collections"]:
+            yield collection["name"]
+
+    def delete_chat(self, chat_id):
+        self.memory.wipe_memory_points_by_metadata(
+            collection_id="episodic",
+            body={"chat_id": chat_id}
+        )
+        return self.memory.delete_working_memory(chat_id)
+    
+    def wipe_chat(self, chat_id):
+        return self.memory.wipe_conversation_history_by_chat(chat_id)
+    
+    def get_chat_history(self, chat_id):
+        response = self.memory.get_working_memory(chat_id)
+        if "history" in response:
+            return ChatHistory(messages=[
+                ChatHistoryMessage(**msg) for msg in response["history"]
+            ])
+        return ChatHistory()
+
+    def get_chat_list(self):
+        return self.memory.get_working_memories_list()
 
 @wait_cat
 def get_user_id(username: str):

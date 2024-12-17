@@ -1,0 +1,63 @@
+
+<div id="msg-user-proto" class="chat user-message gap-x-3 chat-end" style="display: none;">
+    <div class="chat-image text-lg">🙂</div>
+    <div class="chat-header"><span class="chat-sender">You</span> <time class="timestamp text-xs opacity-50"></time></div>
+    <div class="chat-bubble flex min-h-fit w-fit flex-col break-words rounded-lg bg-base-100 p-2 text-neutral shadow-md md:p-3">
+        <div class="message text-ellipsis">
+        </div><!----><!---->
+    </div><!----><!---->
+</div>
+
+<div id="msg-assistant-proto" class="chat assistant-message gap-x-3 chat-start" style="display: none;">
+    <div class="chat-image text-lg">🤖</div>
+    <div class="chat-header"><span class="chat-sender">Assistant</span> <time class="text-xs opacity-50"></time></div>
+    <div class="chat-bubble flex min-h-fit w-fit flex-col break-words rounded-lg bg-base-100 p-2 text-neutral shadow-md md:p-3">
+        <div class="message markdown text-ellipsis">
+        </div><!----><!---->
+    </div>
+    <div class="chat-footer mt-1 flex gap-1">
+        <div class="tooltip tooltip-bottom" data-tip="Copy"><button
+                class="btn btn-square btn-ghost btn-xs"><svg viewBox="0 0 24 24" width="1.2em"
+                    height="1.2em" class="size-4">
+                    <path fill="none" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="1.5"
+                        d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0q.083.292.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0q.002-.32.084-.612m7.332 0q.969.073 1.927.184c1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48 48 0 0 1 1.927-.184">
+                    </path>
+                </svg></button></div>
+        <div class="tooltip tooltip-bottom" data-tip="Regenerate"><button
+                class="btn btn-square btn-ghost btn-xs"><svg viewBox="0 0 24 24" width="1.2em"
+                    height="1.2em" class="size-4">
+                    <path fill="none" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="1.5"
+                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99">
+                    </path>
+                </svg></button></div>
+        <div class="tooltip tooltip-bottom" data-tip="Why this response"><button
+                class="btn btn-square btn-ghost btn-xs"><svg viewBox="0 0 256 256" width="1.2em"
+                    height="1.2em" class="size-4">
+                    <path fill="currentColor"
+                        d="M192 96c0 28.51-24.47 52.11-56 55.56V160a8 8 0 0 1-16 0v-16a8 8 0 0 1 8-8c26.47 0 48-17.94 48-40s-21.53-40-48-40s-48 17.94-48 40a8 8 0 0 1-16 0c0-30.88 28.71-56 64-56s64 25.12 64 56m-64 96a16 16 0 1 0 16 16a16 16 0 0 0-16-16">
+                    </path>
+                </svg></button></div>
+    </div><!---->
+</div>
+
+<!-- Audio Recording Modal -->
+<div id="audio-dialog" class="hidden">
+    <div class="modal-box">
+        <button id="close-modal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        <h3 class="font-bold text-lg mb-4">Voice Recording</h3>
+        <div class="py-4">
+            <div id="recording-status" class="text-center mb-4">Click to start recording</div>
+            <button id="record-button" class="btn btn-circle btn-lg btn-primary mx-auto block">
+                <svg viewBox="0 0 24 24" width="1.5em" height="1.5em" class="size-6">
+                    <path fill="currentColor" d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3z"/>
+                    <path fill="currentColor" d="M17 12c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <audio id="response-audio" class="hidden"></audio>
+</div>
+

@@ -1,5 +1,52 @@
 from django.db import models
-from django.contrib.auth.models import User
+from users.models import User, UserProfile
+import uuid
+
+
+class Chat(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chats')
+    chat_id = models.CharField(max_length=255, unique=True, default=uuid.uuid4)
+
+    @property
+    def userprofile(self) -> UserProfile:
+        return self.user.userprofile
+    
+    @property
+    def client(self):
+        return self.userprofile.client
+    
+    def send_message(self, message):
+        """Send message to cat"""
+        return self.client.send(message, chat_id=self.chat_id)
+
+    def stream(self):
+        """Stream messages from this specific chat"""
+        return self.client.stream(chat_id=self.chat_id)
+
+    def wait_message_content(self):
+        """Wait and return last message content for this specific chat"""
+        return self.client.wait_message_content(chat_id=self.chat_id)
+
+    def __str__(self):
+        return f"Chat with {self.user.username}, id: {self.chat_id}"
+    
+    def delete(self, *args, **kwargs):
+        """Delete chat and all related messages"""
+        
+        result = self.client.delete_chat(self.chat_id)
+
+        return super().delete(*args, **kwargs)
+        
+    def wipe(self):
+        """Wipe all messages from chat"""
+        return self.client.wipe_chat(self.chat_id)
+    
+    def get_history(self):
+        """Get chat history"""
+        return self.client.get_chat_history(self.chat_id)
+
+    class Meta:
+        ordering = ['user']
 
 class Message(models.Model):
     class Sender(models.TextChoices):
@@ -14,6 +61,7 @@ class Message(models.Model):
         default=Sender.USER
     )
     timestamp = models.DateTimeField(auto_now_add=True)
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='messages')
 
     @classmethod
     def get_last_assistant_message(self, user):
@@ -28,3 +76,4 @@ class Message(models.Model):
 
     class Meta:
         ordering = ['timestamp']
+

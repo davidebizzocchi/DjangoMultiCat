@@ -1,9 +1,10 @@
-from pydantic import BaseModel
-from typing import List, Literal, Optional
+from pydantic import BaseModel, field_validator
+from typing import List, Literal, Optional, Union
 from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict
 import time
 import traceback
+from enum import Enum
 
 # Modello copiato da cat.utils
 class BaseModelDict(BaseModel):
@@ -108,7 +109,43 @@ class ChatContent(BaseModelDict):
     user_id: str
     type: str = "chat"
     why: MessageWhy | None = None
+    chat_id: Optional[str] = "default"
 
 class ChatToken(BaseModel):
     type: Literal["chat_token"]
     content: str
+    chat_id: Optional[str] = "default"
+
+class Role(str, Enum):
+    AI = "AI"
+    Human = "Human"
+
+class ChatHistoryMessage(BaseModel):
+    who: str
+    message: str
+    why: Union[MessageWhy, dict] = {}  # Modificato per accettare anche dict vuoto
+    when: datetime
+    role: Role
+
+    model_config = ConfigDict(
+        use_enum_values=True
+    )
+
+    @field_validator('when', mode='before')
+    @classmethod
+    def convert_timestamp(cls, v):
+        if isinstance(v, (int, float)):
+            return datetime.fromtimestamp(v)
+        return v
+    
+    @field_validator('why', mode='before') 
+    @classmethod
+    def validate_why(cls, v):
+        if isinstance(v, dict) and not v:  # Se è un dict vuoto
+            return v
+        if isinstance(v, dict):  # Se è un dict non vuoto
+            return MessageWhy(**v)
+        return v
+
+class ChatHistory(BaseModel):
+    messages: List[ChatHistoryMessage] = []

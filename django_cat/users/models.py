@@ -32,7 +32,7 @@ class UserProfile(models.Model):
 
     @property
     def client(self):
-        return connect_user(self.cheschire_id).startup()
+        return connect_user(self.cheschire_id)
 
     @property
     def is_active(self):
