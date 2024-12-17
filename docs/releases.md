@@ -1,5 +1,19 @@
 # Releases
 
+## Release v0.0.7-618e405
+
+### Informazioni Release
+- **Branch di origine**: 17-issue-define-version
+- **Branch di destinazione**: dev
+- **Issue**: [#17](https://github.com/davidebizzocchi/DjangoCat/issues/17)
+- **Tipo**: issue
+- **Versione precedente**: v0.0.6-fb7b5d6
+- **Nuova versione**: v0.0.7-618e405
+
+### Commit
+618e405 - makefile
+
+---
 ## Release v0.0.6-fb7b5d6
 
 ### Informazioni Release
