@@ -1,4 +1,4 @@
-from typing import Iterable, Dict
+from typing import Iterable, Dict, List
 from icecream import ic
 # from users.models import UserProfile
 import requests
@@ -213,7 +213,15 @@ class Cat(CatClient):
     def speak(self, text):
         return self._speak(text)
     
+    def get_collections_name(self, name: str) -> Iterable[str]:
+        for collection in self.memory.get_collections()["collections"]:
+            yield collection["name"]
+
     def delete_chat(self, chat_id):
+        self.memory.wipe_memory_points_by_metadata(
+            collection_id="episodic",
+            body={"chat_id": chat_id}
+        )
         return self.memory.delete_working_memory(chat_id)
     
     def wipe_chat(self, chat_id):
