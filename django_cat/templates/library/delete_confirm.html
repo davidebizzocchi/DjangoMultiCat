@@ -5,11 +5,11 @@
 <div class="card w-96 bg-base-100 shadow-xl mx-auto mt-10">
     <div class="card-body">
         <h2 class="card-title text-error">Conferma Eliminazione</h2>
-        <p>Sei sicuro di voler eliminare questa chat?</p>
+        <p>Sei sicuro di voler eliminare la libreria "{{ library.name }}"?</p>
         <p class="text-sm opacity-70">Questa azione non può essere annullata.</p>
         <div class="card-actions justify-end mt-4">
-            <a href="{% url 'chat:list' %}" class="btn btn-secondary">Annulla</a>
-            <form method="post" action="{% url 'chat:delete' chat.chat_id %}" class="d-inline">
+            <a href="{% url 'library:list' %}" class="btn btn-secondary">Annulla</a>
+            <form method="post" action="{% url 'library:delete' library.library_id %}" class="d-inline">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger">Elimina</button>
             </form>
