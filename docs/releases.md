@@ -3,6 +3,21 @@
 ## Release v0.0.10-6e49b2b
 
 ### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
+f567a49 - Merge branch '17-issue-define-version' into dev
+83ba07d - makefile
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
 - **Branch di origine**: 17-issue-define-version
 - **Branch di destinazione**: dev
 - **Issue**: [#17](https://github.com/davidebizzocchi/DjangoCat/issues/17)
