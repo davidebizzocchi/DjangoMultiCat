@@ -24,24 +24,25 @@ from cheshire_cat.custom_objects import CatClient
 
 CatConfig = ccat.Config
 
-
 class Cat(CatClient):
-    _instances = {}  # Dizionario per memorizzare le istanze per user_id
+    _instances = {}
 
     def __new__(cls, *args, **kwargs):
         config = kwargs.get('config')
         if not config:
-            return super().__new__(cls)
+            raise ValueError("Config is required")
         
         user_id = config.user_id
+        
         if user_id not in cls._instances:
             wait_for_cat()
-            cls._instances[user_id] = super().__new__(cls)
+            instance = super().__new__(cls)
+            instance._initialized = False  # Flag per evitare reinizializzazione
+            cls._instances[user_id] = instance
         return cls._instances[user_id]
 
     def __init__(self, *args, **kwargs):
-        # Evita la reinizializzazione se l'istanza è già stata inizializzata
-        if not hasattr(self, '_initialized'):
+        if not hasattr(self, '_initialized') or not self._initialized:
             # str is chat_id
             self._chat_queues: Dict[str, Queue] = {}
             self._message_contents: Dict[str, ChatContent] = {}
@@ -52,14 +53,19 @@ class Cat(CatClient):
 
             self._groq = Groq(api_key=config("GROQ_API_KEY"))
             self.startup()
-
+            
             self._initialized = True
+
+    def _check_ws_connection(self):
+        if not self.is_ws_connected:
+            self.startup()
 
     def connect_ws(self):
         if not self.is_ws_connected:
             return super().connect_ws()
 
     def startup(self):
+        ic(self.is_ws_connected)
         if self.is_ws_connected:
             return self
         
@@ -78,6 +84,7 @@ class Cat(CatClient):
     def send(self, message, chat_id="default", *args, **kwargs):
         """Send prompt to ws with specific chat_id"""
         self._reset_new_message(chat_id)
+        self._check_ws_connection()
         return super().send(message, chat_id=chat_id, *args, **kwargs)
 
     def on_message(self, message):
