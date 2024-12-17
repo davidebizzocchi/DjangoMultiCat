@@ -156,9 +156,18 @@ merge-and-close:
 	git merge --no-ff $$BRANCH; \
 	git add django_cat/VERSION docs/releases.md; \
 	git commit -m "Close #$$ISSUE_NUM"; \
-	git push origin dev
+	git push origin dev; \
+	git push origin --delete $$BRANCH; \
+	$(MAKE) git-sync-branches
+
+check-uncommitted:
+	@if [ -n "$$(git status --porcelain)" ]; then \
+		echo "Errore: Ci sono modifiche non committate. Esegui git status per vedere i dettagli."; \
+		exit 1; \
+	fi
 
 release: ## Esegui una nuova release
+	@make -s check-uncommitted
 	@make -s update-releases-md
 	@make -s merge-and-close
 	@echo "Release completata con successo"
