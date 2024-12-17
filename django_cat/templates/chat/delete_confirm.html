@@ -7,10 +7,10 @@
         <p>Sei sicuro di voler eliminare questa chat?</p>
         <p class="text-sm opacity-70">Questa azione non può essere annullata.</p>
         <div class="card-actions justify-end mt-4">
-            <a href="{% url 'chat:list' %}" class="btn btn-ghost">Annulla</a>
+            <a href="{% url 'chat:list' %}" class="btn btn-secondary">Annulla</a>
             <form method="post" action="{% url 'chat:delete' chat.chat_id %}" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-error">Elimina</button>
+                <button type="submit" class="btn btn-danger">Elimina</button>
             </form>
         </div>
     </div>
