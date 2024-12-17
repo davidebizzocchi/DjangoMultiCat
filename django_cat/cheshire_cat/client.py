@@ -51,6 +51,7 @@ class Cat(CatClient):
             super().__init__(on_message=self.on_message, *args, **kwargs)
 
             self._groq = Groq(api_key=config("GROQ_API_KEY"))
+            self.startup()
 
             self._initialized = True
 
@@ -59,6 +60,9 @@ class Cat(CatClient):
             return super().connect_ws()
 
     def startup(self):
+        if self.is_ws_connected:
+            return self
+        
         self.connect_ws()
 
         counter = 0
