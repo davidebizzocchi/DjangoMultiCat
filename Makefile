@@ -121,11 +121,11 @@ release:
 	ISSUE_NUM=$$(echo $$BRANCH | cut -d'-' -f1); \
 	TYPE=$$(echo $$BRANCH | cut -d'-' -f2); \
 	OLD_VERSION=$$(cat django_cat/VERSION); \
-	if [ "$$TYPE" = "patch" ]; then \
+	if [ "$$TYPE" = "issue" ]; then \
 		$(MAKE) bump-patch; \
-	elif [ "$$TYPE" = "minor" ]; then \
+	elif [ "$$TYPE" = "feature" ]; then \
 		$(MAKE) bump-minor; \
-	elif [ "$$TYPE" = "major" ]; then \
+	elif [ "$$TYPE" = "release" ]; then \
 		$(MAKE) bump-major; \
 	fi; \
 	NEW_VERSION=$$(cat django_cat/VERSION); \
