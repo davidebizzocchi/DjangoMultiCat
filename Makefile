@@ -146,7 +146,9 @@ create-release-note:
 
 update-releases-md:
 	@RELEASE_NOTE=$$(make -s create-release-note); \
-	echo "# Releases\n\n$$RELEASE_NOTE$$(tail -n +2 docs/releases.md)" > docs/releases.md
+	echo "# Releases\n\n$$RELEASE_NOTE$$(tail -n +2 docs/releases.md)" > docs/releases.md; \
+	git add django_cat/VERSION docs/releases.md; \
+	git commit -m "Update release notes and version"
 
 merge-and-close:
 	@BRANCH_INFO=$$(make -s get-branch-info); \
@@ -154,7 +156,6 @@ merge-and-close:
 	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
 	git checkout dev; \
 	git merge --no-ff $$BRANCH; \
-	git add django_cat/VERSION docs/releases.md; \
 	git commit -m "Close #$$ISSUE_NUM"; \
 	git push origin dev; \
 	git push origin --delete $$BRANCH; \
