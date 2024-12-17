@@ -116,10 +116,20 @@ bump-major:
 	echo "v$$((MAJOR + 1)).0.0" > django_cat/VERSION; \
 	$(MAKE) update-version
 
-release:
+get-branch-info:
 	@BRANCH=$$(git rev-parse --abbrev-ref HEAD); \
 	ISSUE_NUM=$$(echo $$BRANCH | cut -d'-' -f1); \
 	TYPE=$$(echo $$BRANCH | cut -d'-' -f2); \
+	echo "$$BRANCH|$$ISSUE_NUM|$$TYPE"
+
+get-commits:
+	@git log --pretty=format:"%h - %s" origin/dev..HEAD
+
+create-release-note:
+	@BRANCH_INFO=$$(make -s get-branch-info); \
+	BRANCH=$$(echo $$BRANCH_INFO | cut -d'|' -f1); \
+	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
+	TYPE=$$(echo $$BRANCH_INFO | cut -d'|' -f3); \
 	OLD_VERSION=$$(cat django_cat/VERSION); \
 	if [ "$$TYPE" = "issue" ]; then \
 		$(MAKE) bump-patch; \
@@ -129,16 +139,28 @@ release:
 		$(MAKE) bump-major; \
 	fi; \
 	NEW_VERSION=$$(cat django_cat/VERSION); \
-	COMMITS=$$(git log --pretty=format:"%h - %s" $$BRANCH..HEAD); \
-	RELEASE_NOTE="## Release $$NEW_VERSION\n\n### Informazioni Release\n- **Branch di origine**: $$BRANCH\n- **Branch di destinazione**: dev\n- **Issue**: #$$ISSUE_NUM\n- **Tipo**: $$TYPE\n- **Versione precedente**: $$OLD_VERSION\n- **Nuova versione**: $$NEW_VERSION\n\n### Commit\n$$COMMITS\n\n---\n"; \
+	COMMITS=$$(make -s get-commits); \
+	echo "## Release $$NEW_VERSION\n\n### Informazioni Release\n- **Branch di origine**: $$BRANCH\n- **Branch di destinazione**: dev\n- **Issue**: #$$ISSUE_NUM\n- **Tipo**: $$TYPE\n- **Versione precedente**: $$OLD_VERSION\n- **Nuova versione**: $$NEW_VERSION\n\n### Commit\n$$COMMITS\n\n---\n"
+
+update-releases-md:
+	@RELEASE_NOTE=$$(make -s create-release-note); \
+	echo "$$RELEASE_NOTE" > temp_release.md; \
 	sed -i '' '3i\
 	\
-	'"$$RELEASE_NOTE" docs/releases.md; \
-	git add django_cat/VERSION docs/releases.md; \
-	git commit -m "Release $$NEW_VERSION"; \
+	'"$$(<temp_release.md)" docs/releases.md; \
+	rm temp_release.md
+
+merge-and-close:
+	@BRANCH_INFO=$$(make -s get-branch-info); \
+	BRANCH=$$(echo $$BRANCH_INFO | cut -d'|' -f1); \
+	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
 	git checkout dev; \
 	git merge --no-ff $$BRANCH; \
 	git add django_cat/VERSION docs/releases.md; \
 	git commit -m "Close #$$ISSUE_NUM"; \
-	git push origin dev; \
-	echo "Released version $$NEW_VERSION from $$BRANCH to dev (Issue #$$ISSUE_NUM, Type: $$TYPE)"
+	git push origin dev
+
+release: ## Esegui una nuova release
+	@make -s update-releases-md
+	@make -s merge-and-close
+	@echo "Release completata con successo"
