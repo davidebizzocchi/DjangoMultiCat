@@ -154,10 +154,10 @@ merge-and-close:
 	BRANCH=$$(echo $$BRANCH_INFO | cut -d'|' -f1); \
 	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
 	git checkout dev; \
-	git merge --no-ff $$BRANCH; \
-	git commit -m "Close #$$ISSUE_NUM"; \
+	git merge --no-ff --no-edit $$BRANCH; \
 	echo "\nPremi INVIO per confermare il push e chiudere l'issue #$$ISSUE_NUM..."; \
 	read ans; \
+	git commit -m "Close #$$ISSUE_NUM"; \
 	git push origin dev; \
 	git push origin --delete $$BRANCH; \
 	$(MAKE) git-sync-branches

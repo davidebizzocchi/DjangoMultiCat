@@ -1,5 +1,19 @@
 # Releases
 
+## Release v0.0.9-be5e4f9
+
+### Informazioni Release
+- **Branch di origine**: 17-issue-define-version
+- **Branch di destinazione**: dev
+- **Issue**: [#17](https://github.com/davidebizzocchi/DjangoCat/issues/17)
+- **Tipo**: issue
+- **Versione precedente**: v0.0.8-e86f9f4
+- **Nuova versione**: v0.0.9-be5e4f9
+
+### Commit
+be5e4f9 - makefile
+
+---
 ## Release v0.0.8-e86f9f4
 
 ### Informazioni Release
