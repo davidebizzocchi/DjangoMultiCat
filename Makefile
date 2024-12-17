@@ -1,3 +1,5 @@
+# v17-12-2024
+
 .PHONY: help activate requirements
 
 help:	## Print this help 
@@ -140,15 +142,13 @@ create-release-note:
 	fi; \
 	NEW_VERSION=$$(cat django_cat/VERSION); \
 	COMMITS=$$(make -s get-commits); \
-	echo "## Release $$NEW_VERSION\n\n### Informazioni Release\n- **Branch di origine**: $$BRANCH\n- **Branch di destinazione**: dev\n- **Issue**: #$$ISSUE_NUM\n- **Tipo**: $$TYPE\n- **Versione precedente**: $$OLD_VERSION\n- **Nuova versione**: $$NEW_VERSION\n\n### Commit\n$$COMMITS\n\n---\n"
+	echo "## Release $$NEW_VERSION\n\n### Informazioni Release\n- **Branch di origine**: $$BRANCH\n- **Branch di destinazione**: dev\n- **Issue**: [#$$ISSUE_NUM](https://github.com/davidebizzocchi/DjangoCat/issues/$$ISSUE_NUM)\n- **Tipo**: $$TYPE\n- **Versione precedente**: $$OLD_VERSION\n- **Nuova versione**: $$NEW_VERSION\n\n### Commit\n$$COMMITS\n\n---\n"
 
 update-releases-md:
 	@RELEASE_NOTE=$$(make -s create-release-note); \
-	echo "$$RELEASE_NOTE" > temp_release.md; \
-	sed -i '' '3i\
-	\
-	'"$$(<temp_release.md)" docs/releases.md; \
-	rm temp_release.md
+	echo "# Releases\n\n$$RELEASE_NOTE$$(tail -n +2 docs/releases.md)" > docs/releases.md; \
+	git add django_cat/VERSION docs/releases.md; \
+	git commit -m "Update release notes and version"
 
 merge-and-close:
 	@BRANCH_INFO=$$(make -s get-branch-info); \
@@ -156,11 +156,19 @@ merge-and-close:
 	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
 	git checkout dev; \
 	git merge --no-ff $$BRANCH; \
-	git add django_cat/VERSION docs/releases.md; \
 	git commit -m "Close #$$ISSUE_NUM"; \
-	git push origin dev
+	git push origin dev; \
+	git push origin --delete $$BRANCH; \
+	$(MAKE) git-sync-branches
+
+check-uncommitted:
+	@if [ -n "$$(git status --porcelain)" ]; then \
+		echo "Errore: Ci sono modifiche non committate. Esegui git status per vedere i dettagli."; \
+		exit 1; \
+	fi
 
 release: ## Esegui una nuova release
+	@make -s check-uncommitted
 	@make -s update-releases-md
 	@make -s merge-and-close
 	@echo "Release completata con successo"
