@@ -147,8 +147,7 @@ create-release-note:
 update-releases-md:
 	@RELEASE_NOTE=$$(make -s create-release-note); \
 	echo "# Releases\n\n$$RELEASE_NOTE$$(tail -n +2 docs/releases.md)" > docs/releases.md; \
-	git add django_cat/VERSION docs/releases.md; \
-	git commit -m "Update release notes and version"
+	git add django_cat/VERSION docs/releases.md;
 
 merge-and-close:
 	@BRANCH_INFO=$$(make -s get-branch-info); \
@@ -170,5 +169,7 @@ check-uncommitted:
 release: ## Esegui una nuova release
 	@make -s check-uncommitted
 	@make -s update-releases-md
+	@VERSION=$$(cat django_cat/VERSION); \
+	git commit -m "Update release notes for $$VERSION"
 	@make -s merge-and-close
 	@echo "Release completata con successo"
