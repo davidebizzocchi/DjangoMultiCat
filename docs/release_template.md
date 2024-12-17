@@ -3,6 +3,7 @@
 ## Release [version]
 
 ### Informazioni Release
+
 - **Branch di origine**: [branch-name]
 - **Branch di destinazione**: [target-branch]
 - **Issue**: #[numero]
@@ -11,6 +12,7 @@
 - **Nuova versione**: [new-version]
 
 ### Commit
+
 [commit-hash] - [commit-message]
 [commit-hash] - [commit-message]
 ...
