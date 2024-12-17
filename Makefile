@@ -146,11 +146,7 @@ create-release-note:
 
 update-releases-md:
 	@RELEASE_NOTE=$$(make -s create-release-note); \
-	echo "$$RELEASE_NOTE" > temp_release.md; \
-	sed -i '' '3i\
-	\
-	'"$$(<temp_release.md)" docs/releases.md; \
-	rm temp_release.md
+	echo "# Releases\n\n$$RELEASE_NOTE$$(tail -n +2 docs/releases.md)" > docs/releases.md
 
 merge-and-close:
 	@BRANCH_INFO=$$(make -s get-branch-info); \
