@@ -35,8 +35,7 @@ class Chat(models.Model):
         
         result = self.client.delete_chat(self.chat_id)
 
-        if result["deleted"] == True:
-            return super().delete(*args, **kwargs)
+        return super().delete(*args, **kwargs)
         
     def wipe(self):
         """Wipe all messages from chat"""
