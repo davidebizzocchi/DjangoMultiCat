@@ -35,6 +35,28 @@ class FileUploadView(LoginRequiredMixin, CreateView):
                         self.request,
                         f'File aggiunto alle librerie: {", ".join(lib.name for lib in uploaded)}'
                     )
+                
+                # Registra handler per le notifiche di ingestione
+                handler_id = file.wait_ingest()
+                
+                def handle_ingest_notification(notification):
+                    result = notification
+                    if result and isinstance(result, dict):
+                        if result["type"] == "progress":
+                            messages.info(
+                                self.request,
+                                f'Lettura {result["filename"]}: {result["percentage"]}%'
+                            )
+                        elif result["type"] == "complete":
+                            messages.success(
+                                self.request,
+                                f'Completata lettura di {result["filename"]} con {result["thoughts"]} thoughts'
+                            )
+                            # Rimuovi l'handler una volta completato
+                            file.client.unregister_notification_handler(handler_id)
+                
+                file.client.register_notification_handler(handle_ingest_notification)
+                
             else:
                 messages.warning(
                     self.request,
