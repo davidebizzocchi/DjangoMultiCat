@@ -62,7 +62,7 @@ class FileUploadForm(forms.Form):
         self.fields["libraries"].help_text = (
             ""
             if Library.objects.filter(user=self.user).exists()
-            else "Non hai ancora creato nessun Vector Store."
+            else "Non hai ancora creato nessuna Libreria."
         )
 
         if self._is_instanced:
@@ -151,10 +151,12 @@ class FileUploadForm(forms.Form):
 
         return saved
     
-    def save_file(self, file, file_path):
+    def save_file(self, file, file_path: Path):
         """
         Funzione per salvare il file nel filesystem e restituire il suo percorso.
+        Crea le directory necessarie se non esistono.
         """
+        file_path.parent.mkdir(parents=True, exist_ok=True)
         
         with open(file_path, "wb") as f:
             for chunk in file.chunks():
@@ -183,7 +185,7 @@ class FileUploadForm(forms.Form):
                 and library not in library_select  # Associato, ma non selezionato -> elimino
         ]
 
-        instance.upload_in_library_list(libraries_to_upload)
-        instance.delete_in_library_list(libraries_to_delete)
+        instance.assoc_library_list(libraries_to_upload)
+        # instance.delete_in_library_list(libraries_to_delete)
 
         return libraries_to_upload, libraries_to_delete
