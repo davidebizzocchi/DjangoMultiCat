@@ -161,5 +161,9 @@ class GenericMessage(BaseModel):
 
 class Notification(BaseModel):
     type: str = "notification"
-    message: str
+    content: str
     received_at: float = Field(default_factory=lambda: time.time())
+
+    @property
+    def message(self):
+        return self.content
