@@ -2,10 +2,12 @@ from django.db import models
 from users.models import User, UserProfile
 import uuid
 from app.utils import BaseUserModel
+from library.models import Library
 
 
 class Chat(BaseUserModel):
     chat_id = models.CharField(max_length=255, unique=True, default=uuid.uuid4)
+    libraries = models.ManyToManyField(Library, related_name='chats', blank=True)
 
     def send_message(self, message):
         """Send message to cat"""
