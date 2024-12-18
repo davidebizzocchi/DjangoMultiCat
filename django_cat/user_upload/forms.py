@@ -6,9 +6,9 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django import forms
 from icecream import ic
 
-from django_cat.library.models import Library
-from django_cat.user_upload.fields import FileObject
-from django_cat.user_upload.models import File
+from library.models import Library
+from user_upload.fields import FileObject
+from user_upload.models import File
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -29,6 +29,29 @@ class MultipleFileField(forms.FileField):
         
         ic("clean", result)
         return result
+
+
+class FileUploadForm(forms.ModelForm):
+    class Meta:
+        model = File
+        fields = ['file', 'library']
+
+
+class FileAssociationForm(forms.ModelForm):
+    libraries = forms.ModelMultipleChoiceField(
+        queryset=Library.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
+    class Meta:
+        model = File
+        fields = ['libraries']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance:
+            self.fields['libraries'].initial = self.instance.libraries.all()
 
 
 class FileUploadForm(forms.Form):
