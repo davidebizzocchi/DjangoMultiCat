@@ -73,11 +73,9 @@ class File(BaseUserModel):
         if self.ingested:
             return True
         
-    def wait_ingest(self, request):
-        ingest_complete = Event()
-        progress = {"current": 0}
+    def wait_ingest(self):
         file_id = str(self.file_id)
-        
+
         def handle_notification(notification: Notification):
             message = notification.message
             
@@ -85,30 +83,25 @@ class File(BaseUserModel):
             if match := re.match(r"Read (\d+)% of (.+)", message):
                 percentage, source = match.groups()
                 if file_id in source:  # Verifichiamo che la notifica sia per questo file
-                    progress["current"] = int(percentage)
+                    return {
+                        "type": "progress",
+                        "percentage": int(percentage),
+                        "filename": self.title,
+                    }
                 
             # Match per il completamento
             elif match := re.match(r"Finished reading (.+), I made (\d+) thoughts on it\.", message):
                 source, thoughts = match.groups()
                 if file_id in source:  # Verifichiamo che la notifica sia per questo file
-                    progress["thoughts"] = int(thoughts)
-                    progress["source"] = source
-                    ingest_complete.set()
+                    self.ingested = True
+                    self.save()
+                    return {
+                        "type": "complete", 
+                        "thoughts": int(thoughts),
+                        "filename": self.title
+                    }
 
-        # Registra l'handler per le notifiche e salva l'ID
-        handler_id = self.client.register_notification_handler(handle_notification)
-        
-        try:
-            # Aspetta il completamento o il timeout
-            timeout = config("INGEST_TIMEOUT", cast=int, default=300)  # 5 minuti default
-            if ingest_complete.wait(timeout):
-                self.ingested = True
-                self.save()
-                return progress
-            return {"error": "Timeout during ingestion"}
-        finally:
-            # Rimuovi l'handler usando il suo ID
-            self.client.unregister_notification_handler(handler_id)
+        return self.client.register_notification_handler(handle_notification)
 
     def upload(self):
         """
