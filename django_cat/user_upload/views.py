@@ -3,8 +3,8 @@ from django.views.generic import CreateView, ListView, DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
-from .models import File, FileLibraryAssociation
-from .forms import FileUploadForm, FileAssociationForm
+from user_upload.models import File, FileLibraryAssociation
+from user_upload.forms import FileUploadForm
 
 class FileUploadView(LoginRequiredMixin, CreateView):
     model = File
@@ -12,8 +12,13 @@ class FileUploadView(LoginRequiredMixin, CreateView):
     template_name = 'user_upload/file_upload.html'
     success_url = reverse_lazy('chat:file_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
-        form.instance.userprofile = self.request.user.userprofile
+        saved_files = form.save()
         return super().form_valid(form)
 
 class FileListView(LoginRequiredMixin, ListView):
@@ -37,17 +42,14 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
 
 class FileAssociationView(LoginRequiredMixin, UpdateView):
     model = File
-    form_class = FileAssociationForm
+    form_class = FileUploadForm
     template_name = 'user_upload/file_assoc.html'
     success_url = reverse_lazy('chat:file_list')
     slug_field = 'file_id'
     slug_url_kwarg = 'file_id'
 
-    def get_queryset(self):
-        return File.objects.filter(userprofile=self.request.user.userprofile)
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        selected_libraries = form.cleaned_data['libraries']
-        self.object.assoc_library_list(selected_libraries)
-        return response
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        kwargs['instance'] = self.get_object()
+        return kwargs
