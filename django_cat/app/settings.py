@@ -109,7 +109,8 @@ INSTALLED_APPS = [
     # your app
     "users",
     "chat",
-    "library"
+    "library",
+    "user_upload",
 ]
 
 MIDDLEWARE = [
