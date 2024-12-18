@@ -6,6 +6,8 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from user_upload.models import File, FileLibraryAssociation
 from user_upload.forms import FileUploadForm
+from icecream import ic
+
 
 class FileUploadView(LoginRequiredMixin, CreateView):
     model = File
@@ -36,26 +38,21 @@ class FileUploadView(LoginRequiredMixin, CreateView):
                         f'File aggiunto alle librerie: {", ".join(lib.name for lib in uploaded)}'
                     )
                 
-                # Registra handler per le notifiche di ingestione
-                handler_id = file.wait_ingest()
+                def _on_step(perc):
+                    ic(f'Lettura {file.title}: {perc}%')
+                    messages.info(
+                        self.request,
+                        f'Lettura {file.title}: {perc}%'
+                    )
                 
-                def handle_ingest_notification(notification):
-                    result = notification
-                    if result and isinstance(result, dict):
-                        if result["type"] == "progress":
-                            messages.info(
-                                self.request,
-                                f'Lettura {result["filename"]}: {result["percentage"]}%'
-                            )
-                        elif result["type"] == "complete":
-                            messages.success(
-                                self.request,
-                                f'Completata lettura di {result["filename"]} con {result["thoughts"]} thoughts'
-                            )
-                            # Rimuovi l'handler una volta completato
-                            file.client.unregister_notification_handler(handler_id)
-                
-                file.client.register_notification_handler(handle_ingest_notification)
+                def _on_complete(thoughts):
+                    ic(f'Completata lettura di {file.title} con {thoughts} thoughts')
+                    messages.success(
+                        self.request,
+                        f'Completata lettura di {file.title} con {thoughts} thoughts'
+                    )
+
+                handler_id = file.wait_ingest(_on_step, _on_complete)
                 
             else:
                 messages.warning(
