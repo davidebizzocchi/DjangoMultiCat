@@ -15,14 +15,7 @@ from decouple import config
 import os
 from django.contrib.messages import constants as messages
 import sentry_sdk
-
-
-def get_version_from_file():
-    try:
-        with open('VERSION', 'r') as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        return "v0.0.0-unknown"
+from app.pre_utils import get_version_from_file
     
 ENVIRONMENT_TYPE = config("ENVIRONMENT_TYPE", default="none")
 
