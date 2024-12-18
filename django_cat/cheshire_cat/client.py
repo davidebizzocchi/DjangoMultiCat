@@ -1,3 +1,4 @@
+import mimetypes
 from typing import Iterable, Dict, List
 from icecream import ic
 # from users.models import UserProfile
@@ -300,6 +301,24 @@ class Cat(CatClient):
         """Restituisce le notifiche recenti dopo aver pulito quelle vecchie"""
         self._cleanup_old_notifications()
         return list(self._notifications)
+    
+    def upload_file(self, file, metadata: Dict):
+        url =  f"http://{HOST}:{PORT}/rabbithole/"
+        files = {"file": (
+            file.title,
+            open(file.file.path.absolute(), "rb"),
+            mimetypes.guess_type(file.file.path.absolute())[0]
+        )}
+
+        payload = {
+            "metadata": json.dumps(metadata)
+        }
+
+        return requests.post(
+            url=url,
+            files=files,
+            data=payload
+        ).json()
 
 @wait_cat
 def get_user_id(username: str):
