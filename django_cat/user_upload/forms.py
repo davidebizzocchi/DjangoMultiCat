@@ -104,8 +104,7 @@ class FileUploadForm(forms.Form):
 
         if self._is_instanced:
             uploaded, deleted = self.add_to_libraries(self.instance)
-            saved.append([True, self.instance, uploaded, deleted])
-            return saved
+            return True, self.instance, uploaded, deleted
 
         files: List[InMemoryUploadedFile] = self.cleaned_data["file"]
         
