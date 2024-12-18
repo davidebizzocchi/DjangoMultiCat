@@ -11,6 +11,26 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+79398cf - Merge branch '21-issue-check-library-file-association' into dev
+30dc1b2 - upgrade assoc in form
+9331740 - remake form_valid in assoc file
+09bc779 - delete library in models
+73a08b1 - delete library
+380c219 - clean_libraries
+518cbaf - get success url
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 1e16539 - Merge branch '20-issue-caricamento-file' into dev
 8649636 - core
 b072833 - file upload
