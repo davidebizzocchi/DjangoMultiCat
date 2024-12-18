@@ -11,6 +11,29 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+ad23faa - Merge branch '19-feauture-libreria' into dev
+9e9e7a9 - core
+1324c58 - add library
+52db35c - library migration
+ba91c26 - library form
+b406a86 - library view
+9f60273 - fix template
+fb3183b - fix template
+2b79f5d - add header
+d84d48e - library and templates
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 f567a49 - Merge branch '17-issue-define-version' into dev
 83ba07d - makefile
 
