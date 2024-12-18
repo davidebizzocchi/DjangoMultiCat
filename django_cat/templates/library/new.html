@@ -1,0 +1,15 @@
+{% extends "base/base.html" %}
+{% block title %}Nuova Libreria{% endblock %}
+
+{% block contenuto %}
+<div class="container mt-4">
+    <h2>Create New Library</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="btn btn-primary">Create Library</button>
+    </form>
+</div>
+{% endblock %}

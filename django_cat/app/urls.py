@@ -34,6 +34,7 @@ urlpatterns = [
     path("", HomeView.as_view(), name="home"),
     path("users/", include("users.urls", namespace="users")),
     path("chat/", include("chat.urls", namespace="chat")),
+    path("library/", include("library.urls", namespace="library")),
     path("api/", api.urls),
 ]
 
