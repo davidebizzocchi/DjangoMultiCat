@@ -11,6 +11,25 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+dc53ea1 - Merge branch '23-issue-add-footer-version' into dev
+b2ba2eb - beautiful
+bb798ba - wrong name
+5027f78 - tag for version
+9422bca - get version function
+5e6d42b - footer template
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 015f0a0 - Merge branch '22-issue-associare-una-libreria-ad-una-chat' into dev
 3bf6661 - nuova chat button
 96dae0d - add library to chat
