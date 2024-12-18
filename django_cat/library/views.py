@@ -2,17 +2,19 @@ from django.shortcuts import redirect
 from django.views.generic import CreateView, DeleteView, DetailView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from .models import Library
+from library.models import Library
+from library.forms import LibraryForm
+
 
 class NewLibraryView(LoginRequiredMixin, CreateView):
     model = Library
     template_name = 'library/new.html'
-    fields = ['name']
+    form_class = LibraryForm
 
     def form_valid(self, form):
         form.instance.user = self.request.user
         library = form.save()
-        return redirect('library:library', library_id=library.library_id)
+        return redirect('library:list')
 
 class DeleteLibraryView(LoginRequiredMixin, DeleteView):
     model = Library
