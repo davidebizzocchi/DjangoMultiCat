@@ -95,6 +95,9 @@ class FileAssociationView(LoginRequiredMixin, UpdateView):
     slug_field = 'file_id'
     slug_url_kwarg = 'file_id'
 
+    def get_success_url(self):
+        return self.success_url
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
