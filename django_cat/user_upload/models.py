@@ -16,8 +16,8 @@ from threading import Event
 
 
 class FileLibraryAssociation(models.Model):
-    file = models.ForeignKey('File', on_delete=models.CASCADE, related_name='libraries')
-    library = models.ForeignKey(Library, on_delete=models.CASCADE, related_name='files')
+    file = models.ForeignKey('File', on_delete=models.CASCADE, related_name='associations')
+    library = models.ForeignKey(Library, on_delete=models.CASCADE, related_name='associations')
 
     def __str__(self):
         return f"{self.file} in {self.library}"
@@ -31,8 +31,19 @@ class File(BaseUserModel):
     file: FileObject = models.JSONField(encoder=FileObjectEncoder, decoder=FileObjectDecoder)
     file_id = models.CharField(max_length=255, unique=True, default=uuid.uuid4)
     hash = models.CharField(null=True, blank=True)
-    library = models.ForeignKey(Library, on_delete=models.CASCADE, related_name='files')
     ingested = models.BooleanField(default=False)
+
+    @property 
+    def libraries(self):
+        """Returns all libraries associated with this file with optimized query"""
+        return Library.objects.filter(
+            associations__file=self
+        ).select_related('user').only(
+            'id', 
+            'name',
+            'library_id',
+            'user__username'
+        )
 
     def _get_library_from_id(self, library_id: str):
         return Library.objects.get(library_id=library_id)
