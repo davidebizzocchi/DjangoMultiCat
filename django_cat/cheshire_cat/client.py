@@ -305,7 +305,7 @@ class Cat(CatClient):
     def upload_file(self, file, metadata: Dict, chunk_size=None, chunk_overlap=None):
         url =  f"http://{HOST}:{PORT}/rabbithole/"
         files = {"file": (
-            file.title,
+            str(file.file_id),
             open(file.file.path.absolute(), "rb"),
             mimetypes.guess_type(file.file.path.absolute())[0]
         )}
