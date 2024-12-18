@@ -5,17 +5,24 @@
 {% block contenuto %}
 <h2>Le tue chat</h2>
     
-<form method="post" action="{% url 'chat:create' %}" class="mb-4">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-success">Nuova Chat</button>
-</form>
+<a href="{% url 'chat:create' %}" class="btn btn-success mb-4">Nuova Chat</a>
 
 <div class="list-group">
     {% for chat in chats %}
     <div class="list-group-item d-flex justify-content-between align-items-center">
-        <a href="{% url 'chat:chat' chat.chat_id %}" class="flex-grow-1">
-            {{ chat_titles|get:chat.id }}
-        </a>
+        <div class="flex-grow-1">
+            <a href="{% url 'chat:chat' chat.chat_id %}">
+                {{ chat_titles|get:chat.id }}
+            </a>
+            {% if chat.libraries.exists %}
+            <div class="small text-muted mt-1">
+                Librerie: 
+                {% for lib in chat.libraries.all %}
+                    <span class="badge bg-secondary">{{ lib.name }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
         <a href="{% url 'chat:delete' chat.chat_id %}" class="btn btn-danger btn-sm">
             Elimina
         </a>
