@@ -7,6 +7,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 from app.utils import BaseUserModel
+from django_cat.cheshire_cat.types import Notification
 from user_upload.fields import FileObject, FileObjectDecoder, FileObjectEncoder
 from decouple import config
 from library.models import Library
@@ -65,7 +66,7 @@ class File(BaseUserModel):
         progress = {"current": 0}
         file_id = str(self.file_id)
         
-        def handle_notification(notification):
+        def handle_notification(notification: Notification):
             message = notification.message
             
             # Match per il progresso di lettura
@@ -101,9 +102,10 @@ class File(BaseUserModel):
         """
         Store file in the cat with metadata including author and file_id
         """
+        file_id = str(self.file_id)
         metadata = {
             "author": self.userprofile.cheschire_id,
-            "file_id": str(self.file_id)
+            "source": file_id
         }
         
         with open(self.file.path, 'rb') as f:
