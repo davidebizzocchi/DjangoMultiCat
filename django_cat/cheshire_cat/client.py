@@ -302,7 +302,7 @@ class Cat(CatClient):
         self._cleanup_old_notifications()
         return list(self._notifications)
     
-    def upload_file(self, file, metadata: Dict):
+    def upload_file(self, file, metadata: Dict, chunk_size=None, chunk_overlap=None):
         url =  f"http://{HOST}:{PORT}/rabbithole/"
         files = {"file": (
             file.title,
@@ -311,7 +311,9 @@ class Cat(CatClient):
         )}
 
         payload = {
-            "metadata": json.dumps(metadata)
+            "metadata": json.dumps(metadata),
+            "chunk_overlap": chunk_overlap,
+            "chunk_size": chunk_size,
         }
 
         return requests.post(
@@ -319,6 +321,14 @@ class Cat(CatClient):
             files=files,
             data=payload
         ).json()
+    
+    def delete_file(self, file):
+        return self.memory.wipe_memory_points_by_metadata(
+            collection_id="declarative",
+            body={
+                "file_id": str(file.file_id)
+            }
+        )
 
 @wait_cat
 def get_user_id(username: str):
