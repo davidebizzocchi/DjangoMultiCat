@@ -527,6 +527,118 @@ class CatMemoryApi(MemoryApi):
             _request_auth=_request_auth
         )
 
+    @validate_call
+    def update_points_metadata(
+        self,
+        collection_id: StrictStr,
+        search: Dict[StrictStr, Any] = {},
+        update: Dict[StrictStr, Any] = {},
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Update points metadata in a collection by metadata filter
+        
+        :param collection_id: Collection ID (required)
+        :type collection_id: str
+        :param search: Metadata filter to search points
+        :type search: dict
+        :param update: New metadata to update
+        :type update: dict
+        :param _request_timeout: timeout setting for this request
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: override auth settings for request
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request
+        :type _content_type: str, Optional
+        :param _headers: override headers for request
+        :type _headers: dict, optional
+        :param _host_index: override host index for request
+        :type _host_index: int, optional
+        :return: Returns the result object
+        """
+
+        _param = self._update_points_metadata_serialize(
+            collection_id=collection_id,
+            search=search,
+            update=update,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "object",
+            '400': "object"
+        }
+        
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    def _update_points_metadata_serialize(
+        self,
+        collection_id: str,
+        search: Dict[str, Any],
+        update: Dict[str, Any],
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> Tuple:
+        _host = None
+        _collection_formats: Dict[str, str] = {}
+        _path_params: Dict[str, str] = {'collection_id': collection_id}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, str] = {}
+        _body_params = {
+            'search': search,
+            'update': update
+        }
+
+        # set the HTTP header `Accept` and `Content-Type`
+        _header_params['Accept'] = self.api_client.select_header_accept([
+            'application/json'
+        ])
+        _header_params['Content-Type'] = self.api_client.select_header_content_type([
+            'application/json'
+        ])
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method='PATCH',
+            resource_path='/memory/collections/{collection_id}/points/metadata',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
 
 class CatClient(ccat.CatClient):
     def _connect_api(self):
