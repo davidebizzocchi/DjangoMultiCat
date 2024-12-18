@@ -27,7 +27,6 @@ class MultipleFileField(forms.FileField):
         else:
             result = [single_file_clean(data, initial)]
         
-        ic("clean", result)
         return result
 
 
@@ -48,7 +47,6 @@ class FileUploadForm(forms.Form):
     instance = None
 
     def __init__(self, *args, **kwargs):
-        ic.enable()
         self.user = kwargs.pop("user", None)
 
         self.instance = kwargs.pop("instance", None)
@@ -71,8 +69,6 @@ class FileUploadForm(forms.Form):
             )
             self.fields.pop("file")
 
-        ic("init")
-
     @property
     def _is_instanced(self):
         return self.instance and self.instance.pk
@@ -82,7 +78,6 @@ class FileUploadForm(forms.Form):
         if not libraries_id:
             return Library.objects.none()
         
-        ic("clean vects", libraries_id)
         return Library.objects.filter(user=self.user, library_id__in=libraries_id)
     
     def clean_file(self):
@@ -105,7 +100,6 @@ class FileUploadForm(forms.Form):
         
 
     def save(self, commit=True):
-        ic(self._is_instanced)
         saved: List[List[bool, File, List[Library], List[Library]]] = []  # bool = True -> created / False -> not created, first VectorStore add / secondo Vectorstore delete
 
         if self._is_instanced:
@@ -115,8 +109,6 @@ class FileUploadForm(forms.Form):
 
         files: List[InMemoryUploadedFile] = self.cleaned_data["file"]
         
-        ic(files)
-
         for f in files:
             file_hash = File.calculate_file_has_from_instance(f)
             possible_files = File.objects.filter(user=self.user, hash=file_hash)
@@ -131,8 +123,6 @@ class FileUploadForm(forms.Form):
                     file_path = settings.UPLOADS_ROOT / (str(counter) + file_hash_norm)
                     counter += 1
 
-                ic(file_hash_norm, file_path)
-
                 self.save_file(f, file_path)
             
                 instance = File.objects.create(
@@ -146,7 +136,6 @@ class FileUploadForm(forms.Form):
                 saved.append([True, instance, uploaded, deleted])
 
             else:
-                ic("Il file esiste già!")
                 saved.append([False, possible_files.first(), [], []])
 
         return saved
