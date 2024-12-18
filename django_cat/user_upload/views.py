@@ -16,10 +16,14 @@ class FileUploadView(LoginRequiredMixin, CreateView):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
+    
+    def get_success_url(self):
+        return self.success_url
 
     def form_valid(self, form):
         saved_files = form.save()
         return super().form_valid(form)
+
 
 class FileListView(LoginRequiredMixin, ListView):
     model = File
