@@ -1,3 +1,4 @@
+import mimetypes
 from typing import Iterable, Dict, List
 from icecream import ic
 # from users.models import UserProfile
@@ -9,8 +10,11 @@ import json
 from queue import Queue
 from decouple import config
 import io
+from collections import deque
+from typing import NamedTuple, Deque
+import uuid
 
-from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory
+from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification
 from groq import Groq
 
 import cheshire_cat_api as ccat
@@ -26,6 +30,7 @@ CatConfig = ccat.Config
 
 class Cat(CatClient):
     _instances = {}
+    # _ref_counts = {}  # Nuovo: contatore dei riferimenti
 
     def __new__(cls, *args, **kwargs):
         config = kwargs.get('config')
@@ -37,9 +42,28 @@ class Cat(CatClient):
         if user_id not in cls._instances:
             wait_for_cat()
             instance = super().__new__(cls)
-            instance._initialized = False  # Flag per evitare reinizializzazione
+            instance._initialized = False
             cls._instances[user_id] = instance
+            # cls._ref_counts[user_id] = 0  # Inizializza il contatore
+        
+        # cls._ref_counts[user_id] += 1  # Incrementa il contatore
         return cls._instances[user_id]
+
+    # def __del__(self):
+    #     """Gestisce la chiusura del websocket solo quando non ci sono più riferimenti"""
+    #     if hasattr(self, 'config'):  # Verifica che l'istanza sia stata inizializzata
+    #         user_id = self.config.user_id
+    #         if user_id in self._ref_counts:
+    #             self._ref_counts[user_id] -= 1
+                
+    #             # Chiudi il websocket solo se non ci sono più riferimenti
+    #             if self._ref_counts[user_id] <= 0:
+    #                 if user_id in self._instances:
+    #                     del self._instances[user_id]
+    #                 if user_id in self._ref_counts:
+    #                     del self._ref_counts[user_id]
+    #                 if hasattr(self, 'ws') and self.is_ws_connected:
+    #                     self.ws.close()
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self, '_initialized') or not self._initialized:
@@ -47,6 +71,7 @@ class Cat(CatClient):
             self._chat_queues: Dict[str, Queue] = {}
             self._message_contents: Dict[str, ChatContent] = {}
             self._stream_active: Dict[str, bool] = {}
+            self._is_startup = False
             self.AUDIO_MAX_SIZE = 25 * 1024 * 1024  # 25MB in bytes
             
             super().__init__(on_message=self.on_message, *args, **kwargs)
@@ -54,6 +79,9 @@ class Cat(CatClient):
             self._groq = Groq(api_key=config("GROQ_API_KEY"))
             self.startup()
             
+            self._notification_handlers: Dict[str, callable] = {}
+            self._notifications: Deque[Notification] = deque()
+            self._notification_ttl = 60  # 1 minuto in secondi
             self._initialized = True
 
     def _check_ws_connection(self):
@@ -66,15 +94,19 @@ class Cat(CatClient):
 
     def startup(self):
         ic(self.is_ws_connected)
-        if self.is_ws_connected:
+        if self.is_ws_connected or self._is_startup:
             return self
         
         self.connect_ws()
+        self._is_startup = True
 
         counter = 0
         while not self.is_ws_connected:
             time.sleep(0.2)
             counter += 1
+
+            if self._is_startup:
+                break
 
             if counter == 100:
                 raise TimeoutError("Cannot connect to the websocket")
@@ -106,16 +138,34 @@ class Cat(CatClient):
         """Handle messages for specific chats"""
         msg_type = message.get("type", None)
         chat_id = message.get("chat_id", "default")
-
+        
         if msg_type == "chat_token":
             chat_message = ChatToken(**message)
             
             if chat_id in self._stream_active:
                 self._chat_queues[chat_id].put(chat_message)
         
-        if msg_type == "chat":
+        elif msg_type == "chat":
             self._message_contents[chat_id] = ChatContent(**message)
             self.end_stream(chat_id)
+        
+        elif msg_type == "notification":
+            notification = Notification(**message)
+            self._add_notification(notification)
+
+            ic(f"notification: {notification.content}")
+
+            # Crea una lista dei valori per evitare il RuntimeError durante l'iterazione
+            handlers = list(self._notification_handlers.values())
+            for handler in handlers:
+                ic("ora sto eseguendo handler")
+                handler(notification)
+        
+        else:
+            # Handle generic messages
+            generic_message = GenericMessage(**message)
+            # You can add specific handling for other message types here
+            ic(f"Received generic message: {generic_message}")
 
     def end_stream(self, chat_id: str = "default"):
         """End stream for specific chat"""
@@ -237,6 +287,84 @@ class Cat(CatClient):
 
     def get_chat_list(self):
         return self.memory.get_working_memories_list()
+
+    def register_notification_handler(self, handler, *args, **kwargs) -> str:
+        """
+        Registra un handler per le notifiche e restituisce il suo ID
+        
+        Args:
+            handler: Funzione che riceve una notifica
+            
+        Returns:
+            str: ID univoco dell'handler registrato
+        """
+        handler_id = str(uuid.uuid4())
+        self._notification_handlers[handler_id] = handler
+        return handler_id
+
+    def unregister_notification_handler(self, handler_id: str):
+        """
+        Rimuove un handler dato il suo ID
+        
+        Args:
+            handler_id: ID dell'handler da rimuovere
+        """
+        if handler_id in self._notification_handlers:
+            del self._notification_handlers[handler_id]
+
+    def unregister_all_notification_handlers(self):
+        """Rimuove tutti gli handler registrati"""
+        self._notification_handlers.clear()
+
+    def _cleanup_old_notifications(self):
+        """Rimuove le notifiche più vecchie di TTL secondi"""
+        current_time = time.time()
+        while self._notifications and (current_time - self._notifications[0].received_at) > self._notification_ttl:
+            self._notifications.popleft()
+
+    def _add_notification(self, notification: Notification):
+        """Aggiunge una nuova notifica e pulisce quelle vecchie"""
+        self._cleanup_old_notifications()
+        self._notifications.append(notification)
+
+    def get_recent_notifications(self):
+        """Restituisce le notifiche recenti dopo aver pulito quelle vecchie"""
+        self._cleanup_old_notifications()
+        return list(self._notifications)
+    
+    def upload_file(self, file, metadata: Dict, chunk_size=None, chunk_overlap=None):
+        url =  f"http://{HOST}:{PORT}/rabbithole/"
+        
+        with open(file.file.path.absolute(), "rb") as f:
+            ic(f, file.file.path.absolute(), mimetypes.guess_type(file.file.path.absolute())[0])
+            files = {"file": (
+                f"{file.file_id}{file.file.path.suffix}",  # Usa il file_id con l'estensione
+                f,
+                mimetypes.guess_type(file.file.path.absolute())[0]
+            )}
+
+            payload = {
+                "metadata": json.dumps(metadata),
+                "chunk_overlap": chunk_overlap,
+                "chunk_size": chunk_size,
+            }
+
+            return requests.post(
+                url=url,
+                files=files,
+                data=payload,
+                headers={
+                    "user_id": file.userprofile.cheschire_id  # Aggiungi l'user_id nell'header
+                },
+            ).json()
+    
+    def delete_file(self, file):
+        return self.memory.wipe_memory_points_by_metadata(
+            collection_id="declarative",
+            body={
+                "file_id": str(file.file_id),
+            }
+        )
 
 @wait_cat
 def get_user_id(username: str):

@@ -149,3 +149,21 @@ class ChatHistoryMessage(BaseModel):
 
 class ChatHistory(BaseModel):
     messages: List[ChatHistoryMessage] = []
+
+class GenericMessage(BaseModel):
+    type: str
+    content: Union[str, dict, None] = None
+
+    model_config = ConfigDict(
+        extra="allow",
+        protected_namespaces=()
+    )
+
+class Notification(BaseModel):
+    type: str = "notification"
+    content: str
+    received_at: float = Field(default_factory=lambda: time.time())
+
+    @property
+    def message(self):
+        return self.content

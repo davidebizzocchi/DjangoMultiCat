@@ -109,7 +109,8 @@ INSTALLED_APPS = [
     # your app
     "users",
     "chat",
-    "library"
+    "library",
+    "user_upload",
 ]
 
 MIDDLEWARE = [
@@ -239,3 +240,6 @@ MESSAGE_TAGS = {
 }
 
 MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
+
+UPLOADS_ROOT = MEDIA_ROOT / "uploads"

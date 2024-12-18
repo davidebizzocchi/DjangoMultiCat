@@ -1,20 +1,12 @@
 from django.db import models
 from users.models import User, UserProfile
 import uuid
+from app.utils import BaseUserModel
 
 
-class Chat(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chats')
+class Chat(BaseUserModel):
     chat_id = models.CharField(max_length=255, unique=True, default=uuid.uuid4)
 
-    @property
-    def userprofile(self) -> UserProfile:
-        return self.user.userprofile
-    
-    @property
-    def client(self):
-        return self.userprofile.client
-    
     def send_message(self, message):
         """Send message to cat"""
         return self.client.send(message, chat_id=self.chat_id)
@@ -46,14 +38,14 @@ class Chat(models.Model):
         return self.client.get_chat_history(self.chat_id)
 
     class Meta:
-        ordering = ['user']
+        verbose_name = "chat"
+        verbose_name_plural = "chats"
 
 class Message(models.Model):
     class Sender(models.TextChoices):
         USER = 'user', 'User'
         ASSISTANT = 'assistant', 'Assistant'
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages')
     text = models.TextField()
     sender = models.CharField(
         max_length=10,

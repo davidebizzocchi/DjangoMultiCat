@@ -1,0 +1,14 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Superlearn{% endblock %}
+
+{% block contenuto %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+    <button type="submit">Upload</button>
+</form>
+
+<a href="{% url 'user_upload:list' %}" class="btn btn-success btn-sm">Torna ai files</a>
+{% endblock %}

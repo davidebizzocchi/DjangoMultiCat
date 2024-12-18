@@ -1,7 +1,8 @@
 import cheshire_cat_api as ccat
 from typing import Dict, List, Optional, Tuple, Union, Any
 from typing_extensions import Annotated
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
+from pydantic import StrictBytes, validate_call, Field, StrictFloat, StrictStr, StrictInt
+import io
 
 from cheshire_cat_api.configuration import Configuration
 from cheshire_cat_api.api import (
@@ -11,7 +12,129 @@ from cheshire_cat_api.api import (
 from cheshire_cat_api.api_client import ApiClient
 from cheshire_cat_api.api_response import ApiResponse
 from cheshire_cat_api.rest import RESTResponseType
+import json
 
+class CatRabbitHoleApi(RabbitHoleApi):
+    @validate_call
+    def upload_file(
+        self,
+        file: Union[StrictBytes, StrictStr],  # Remove BufferedReader
+        chunk_size: Optional[StrictInt] = None,
+        chunk_overlap: Optional[StrictInt] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        """Upload File
+
+        Upload a file containing text (.txt, .md, .pdf, etc.). File content will be extracted and segmented into chunks.
+        Chunks will be then vectorized and stored into documents memory.
+
+        :param file: File content as bytes or string
+        :type file: Union[bytes, str]
+        :param chunk_size: Maximum length of each chunk after the document is split (in tokens)
+        :type chunk_size: int, optional
+        :param chunk_overlap: Chunk overlap (in tokens)
+        :type chunk_overlap: int, optional
+        :param metadata: Metadata to be stored with each chunk
+        :type metadata: dict, optional
+        :param _request_timeout: timeout setting for this request
+        :type _request_timeout: int, tuple(int, int), optional
+        """
+        # Handle file-like objects
+        if hasattr(file, 'read'):
+            file = file.read()
+
+        _param = self._upload_file_serialize(
+            file=file,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            metadata=metadata,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "object",
+            '422': "HTTPValidationError"
+        }
+        
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    def _upload_file_serialize(
+        self,
+        file,
+        chunk_size,
+        chunk_overlap,
+        metadata,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> Tuple:
+        _host = None
+        _collection_formats: Dict[str, str] = {}
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, str] = {}
+        _body_params: Optional[bytes] = None
+
+        # Add file to files
+        if file is not None:
+            _files['file'] = file
+
+        # Add form parameters
+        if chunk_size is not None:
+            _form_params.append(('chunk_size', chunk_size))
+        if chunk_overlap is not None:
+            _form_params.append(('chunk_overlap', chunk_overlap))
+        if metadata is not None:
+            _form_params.append(('metadata', json.dumps(metadata)))
+
+        # set the HTTP header `Accept`
+        _header_params['Accept'] = self.api_client.select_header_accept([
+            'application/json'
+        ])
+
+        # authentication setting
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/rabbithole/',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
 
 class CatMemoryApi(MemoryApi):
     @validate_call
@@ -420,7 +543,7 @@ class CatClient(ccat.CatClient):
 
         self.memory = CatMemoryApi(client)
         self.plugins = PluginsApi(client)
-        self.rabbit_hole = RabbitHoleApi(client)
+        self.rabbit_hole = CatRabbitHoleApi(client)
         self.status = StatusApi(client)
         self.embedder = EmbedderApi(client)
         self.settings = SettingsApi(client)

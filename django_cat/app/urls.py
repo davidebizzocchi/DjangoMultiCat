@@ -35,6 +35,7 @@ urlpatterns = [
     path("users/", include("users.urls", namespace="users")),
     path("chat/", include("chat.urls", namespace="chat")),
     path("library/", include("library.urls", namespace="library")),
+    path("file/", include("user_upload.urls", namespace="file")),
     path("api/", api.urls),
 ]
 
