@@ -110,7 +110,7 @@ class File(BaseUserModel):
         file_id = str(self.file_id)
         metadata = {
             "author": self.userprofile.cheschire_id,
-            "source": file_id
+            "file_id": file_id
         }
 
         ic(self.client.upload_file(self, metadata))

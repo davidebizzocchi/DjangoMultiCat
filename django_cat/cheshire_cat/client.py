@@ -51,6 +51,7 @@ class Cat(CatClient):
             self._chat_queues: Dict[str, Queue] = {}
             self._message_contents: Dict[str, ChatContent] = {}
             self._stream_active: Dict[str, bool] = {}
+            self._is_startup = False
             self.AUDIO_MAX_SIZE = 25 * 1024 * 1024  # 25MB in bytes
             
             super().__init__(on_message=self.on_message, *args, **kwargs)
@@ -73,15 +74,19 @@ class Cat(CatClient):
 
     def startup(self):
         ic(self.is_ws_connected)
-        if self.is_ws_connected:
+        if self.is_ws_connected or self._is_startup:
             return self
         
         self.connect_ws()
+        self._is_startup = True
 
         counter = 0
         while not self.is_ws_connected:
             time.sleep(0.2)
             counter += 1
+
+            if self._is_startup:
+                break
 
             if counter == 100:
                 raise TimeoutError("Cannot connect to the websocket")
@@ -113,7 +118,8 @@ class Cat(CatClient):
         """Handle messages for specific chats"""
         msg_type = message.get("type", None)
         chat_id = message.get("chat_id", "default")
-
+        
+        ic(msg_type)
         if msg_type == "chat_token":
             chat_message = ChatToken(**message)
             
@@ -127,6 +133,7 @@ class Cat(CatClient):
         elif msg_type == "notification":
             notification = Notification(**message)
             self._add_notification(notification)
+            ic(notification)
             # Chiamare tutti gli handler registrati
             for handler in self._notification_handlers.values():
                 handler(notification)
@@ -305,7 +312,7 @@ class Cat(CatClient):
     def upload_file(self, file, metadata: Dict, chunk_size=None, chunk_overlap=None):
         url =  f"http://{HOST}:{PORT}/rabbithole/"
         files = {"file": (
-            str(file.file_id),
+            str(file.title),
             open(file.file.path.absolute(), "rb"),
             mimetypes.guess_type(file.file.path.absolute())[0]
         )}
