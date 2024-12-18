@@ -7,7 +7,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 from app.utils import BaseUserModel
-from django_cat.cheshire_cat.types import Notification
+from cheshire_cat.types import Notification
 from user_upload.fields import FileObject, FileObjectDecoder, FileObjectEncoder
 from decouple import config
 from library.models import Library
