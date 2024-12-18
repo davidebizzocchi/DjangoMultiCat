@@ -9,8 +9,11 @@ import json
 from queue import Queue
 from decouple import config
 import io
+from collections import deque
+from typing import NamedTuple, Deque
+import uuid
 
-from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory
+from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification
 from groq import Groq
 
 import cheshire_cat_api as ccat
@@ -54,6 +57,9 @@ class Cat(CatClient):
             self._groq = Groq(api_key=config("GROQ_API_KEY"))
             self.startup()
             
+            self._notification_handlers: Dict[str, callable] = {}
+            self._notifications: Deque[Notification] = deque()
+            self._notification_ttl = 60  # 1 minuto in secondi
             self._initialized = True
 
     def _check_ws_connection(self):
@@ -113,9 +119,22 @@ class Cat(CatClient):
             if chat_id in self._stream_active:
                 self._chat_queues[chat_id].put(chat_message)
         
-        if msg_type == "chat":
+        elif msg_type == "chat":
             self._message_contents[chat_id] = ChatContent(**message)
             self.end_stream(chat_id)
+        
+        elif msg_type == "notification":
+            notification = Notification(**message)
+            self._add_notification(notification)
+            # Chiamare tutti gli handler registrati
+            for handler in self._notification_handlers.values():
+                handler(notification)
+        
+        else:
+            # Handle generic messages
+            generic_message = GenericMessage(**message)
+            # You can add specific handling for other message types here
+            ic(f"Received generic message: {generic_message}")
 
     def end_stream(self, chat_id: str = "default"):
         """End stream for specific chat"""
@@ -237,6 +256,50 @@ class Cat(CatClient):
 
     def get_chat_list(self):
         return self.memory.get_working_memories_list()
+
+    def register_notification_handler(self, handler) -> str:
+        """
+        Registra un handler per le notifiche e restituisce il suo ID
+        
+        Args:
+            handler: Funzione che riceve una notifica
+            
+        Returns:
+            str: ID univoco dell'handler registrato
+        """
+        handler_id = str(uuid.uuid4())
+        self._notification_handlers[handler_id] = handler
+        return handler_id
+
+    def unregister_notification_handler(self, handler_id: str):
+        """
+        Rimuove un handler dato il suo ID
+        
+        Args:
+            handler_id: ID dell'handler da rimuovere
+        """
+        if handler_id in self._notification_handlers:
+            del self._notification_handlers[handler_id]
+
+    def unregister_all_notification_handlers(self):
+        """Rimuove tutti gli handler registrati"""
+        self._notification_handlers.clear()
+
+    def _cleanup_old_notifications(self):
+        """Rimuove le notifiche più vecchie di TTL secondi"""
+        current_time = time.time()
+        while self._notifications and (current_time - self._notifications[0].received_at) > self._notification_ttl:
+            self._notifications.popleft()
+
+    def _add_notification(self, notification: Notification):
+        """Aggiunge una nuova notifica e pulisce quelle vecchie"""
+        self._cleanup_old_notifications()
+        self._notifications.append(notification)
+
+    def get_recent_notifications(self):
+        """Restituisce le notifiche recenti dopo aver pulito quelle vecchie"""
+        self._cleanup_old_notifications()
+        return list(self._notifications)
 
 @wait_cat
 def get_user_id(username: str):

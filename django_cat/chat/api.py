@@ -38,7 +38,6 @@ def message_generator(message, chat_id, usr):
     
     # Save assistant response
     Message.objects.create(
-        user=usr,
         text=chat.wait_message_content().content,
         sender=Message.Sender.ASSISTANT,
         chat=chat
@@ -51,7 +50,6 @@ def stream(request, data: MessageIn):
     # Save user message
     chat = get_object_or_404(Chat, chat_id=data.chat_id, user=request.user)
     Message.objects.create(
-        user=request.user,
         text=data.message,
         sender=Message.Sender.USER,
         chat=chat
