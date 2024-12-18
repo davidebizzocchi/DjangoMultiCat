@@ -73,44 +73,48 @@ class File(BaseUserModel):
         if self.ingested:
             return True
         
-    def wait_ingest(self):
+    def wait_ingest(self, callback_on_step=None, callback_on_complete=None):
         file_id = str(self.file_id)
+        handler_refs = {'id': None}  # Dizionario per mantenere il riferimento
 
         def handle_notification(notification: Notification):
             message = notification.message
+
+            ic(f"Notification received: {message}")
+            ic(callback_on_step, callback_on_complete)
             
             # Match per il progresso di lettura
             if match := re.match(r"Read (\d+)% of (.+)", message):
                 percentage, source = match.groups()
+                ic(percentage, source)
                 if file_id in source:  # Verifichiamo che la notifica sia per questo file
-                    return {
-                        "type": "progress",
-                        "percentage": int(percentage),
-                        "filename": self.title,
-                    }
+                    if callback_on_step is not None:
+                        callback_on_step(int(percentage))
                 
             # Match per il completamento
             elif match := re.match(r"Finished reading (.+), I made (\d+) thoughts on it\.", message):
                 source, thoughts = match.groups()
+                ic(source, thoughts)
                 if file_id in source:  # Verifichiamo che la notifica sia per questo file
                     self.ingested = True
                     self.save()
-                    return {
-                        "type": "complete", 
-                        "thoughts": int(thoughts),
-                        "filename": self.title
-                    }
+                    if callback_on_complete is not None:
+                        callback_on_complete(int(thoughts))
+                    
+                    # Usa il riferimento dal dizionario
+                    ic(handler_refs['id'])
+                    self.client.unregister_notification_handler(handler_refs['id'])
 
-        return self.client.register_notification_handler(handle_notification)
+        # Salva l'ID nel dizionario di riferimento
+        handler_refs['id'] = self.client.register_notification_handler(handle_notification, callback_on_step, callback_on_complete)
+        return handler_refs['id']
 
     def upload(self):
         """
         Store file in the cat with metadata including author and file_id
         """
-        file_id = str(self.file_id)
         metadata = {
-            "author": self.userprofile.cheschire_id,
-            "file_id": file_id
+            "file_id": str(self.file_id)
         }
 
         ic(self.client.upload_file(self, metadata))
