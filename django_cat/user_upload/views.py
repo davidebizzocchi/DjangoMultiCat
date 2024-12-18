@@ -3,6 +3,7 @@ from django.views.generic import CreateView, ListView, DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
+from django.contrib import messages
 from user_upload.models import File, FileLibraryAssociation
 from user_upload.forms import FileUploadForm
 
@@ -22,6 +23,24 @@ class FileUploadView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         saved_files = form.save()
+        
+        for created, file, uploaded, deleted in saved_files:
+            if created:
+                messages.success(
+                    self.request,
+                    f'File "{file.title}" caricato con successo.'
+                )
+                if uploaded:
+                    messages.info(
+                        self.request,
+                        f'File aggiunto alle librerie: {", ".join(lib.name for lib in uploaded)}'
+                    )
+            else:
+                messages.warning(
+                    self.request,
+                    f'Il file "{file.title}" esiste già nel sistema.'
+                )
+        
         return super().form_valid(form)
 
 
@@ -44,6 +63,11 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         return File.objects.filter(user=self.request.user)
 
+    def post(self, request, *args, **kwargs):
+        file = self.get_object()
+        messages.error(request, f'File "{file.title}" eliminato con successo.')
+        return super().post(request, *args, **kwargs)
+
 class FileAssociationView(LoginRequiredMixin, UpdateView):
     model = File
     form_class = FileUploadForm
@@ -57,3 +81,21 @@ class FileAssociationView(LoginRequiredMixin, UpdateView):
         kwargs['user'] = self.request.user
         kwargs['instance'] = self.get_object()
         return kwargs
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        saved_files = form.save()
+        
+        for _, file, uploaded, deleted in saved_files:
+            if uploaded:
+                messages.error(
+                    self.request,
+                    f'File aggiunto alle librerie: {", ".join(lib.name for lib in uploaded)}'
+                )
+            if deleted:
+                messages.success(
+                    self.request,
+                    f'File rimosso dalle librerie: {", ".join(lib.name for lib in deleted)}'
+                )
+        
+        return response
