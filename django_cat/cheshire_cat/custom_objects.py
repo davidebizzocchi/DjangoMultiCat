@@ -2,6 +2,7 @@ import cheshire_cat_api as ccat
 from typing import Dict, List, Optional, Tuple, Union, Any
 from typing_extensions import Annotated
 from pydantic import StrictBytes, validate_call, Field, StrictFloat, StrictStr, StrictInt
+import io
 
 from cheshire_cat_api.configuration import Configuration
 from cheshire_cat_api.api import (
@@ -17,7 +18,7 @@ class CatRabbitHoleApi(RabbitHoleApi):
     @validate_call
     def upload_file(
         self,
-        file: Union[StrictBytes, StrictStr],
+        file: Union[StrictBytes, StrictStr],  # Remove BufferedReader
         chunk_size: Optional[StrictInt] = None,
         chunk_overlap: Optional[StrictInt] = None,
         metadata: Optional[Dict[str, Any]] = None,
@@ -39,7 +40,7 @@ class CatRabbitHoleApi(RabbitHoleApi):
         Upload a file containing text (.txt, .md, .pdf, etc.). File content will be extracted and segmented into chunks.
         Chunks will be then vectorized and stored into documents memory.
 
-        :param file: File to upload (required)
+        :param file: File content as bytes or string
         :type file: Union[bytes, str]
         :param chunk_size: Maximum length of each chunk after the document is split (in tokens)
         :type chunk_size: int, optional
@@ -49,16 +50,10 @@ class CatRabbitHoleApi(RabbitHoleApi):
         :type metadata: dict, optional
         :param _request_timeout: timeout setting for this request
         :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: override auth settings for request
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request
-        :type _content_type: str, Optional
-        :param _headers: override headers for request
-        :type _headers: dict, optional
-        :param _host_index: override host_index for request
-        :type _host_index: int, optional
-        :return: Returns the result object
         """
+        # Handle file-like objects
+        if hasattr(file, 'read'):
+            file = file.read()
 
         _param = self._upload_file_serialize(
             file=file,
