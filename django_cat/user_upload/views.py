@@ -95,6 +95,9 @@ class FileAssociationView(LoginRequiredMixin, UpdateView):
     slug_field = 'file_id'
     slug_url_kwarg = 'file_id'
 
+    def get_success_url(self):
+        return self.success_url
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
@@ -102,19 +105,19 @@ class FileAssociationView(LoginRequiredMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        saved_files = form.save()
+        _, file, uploaded, deleted = form.save()
+
+        if uploaded:
+            ic(uploaded)
+            messages.success(
+                self.request,
+                f'File "{file}" aggiunto alle librerie: {", ".join(lib.name for lib in uploaded)}'
+            )
+        if deleted:
+            ic(deleted)
+            messages.error(
+                self.request,
+                f'File "{file}" rimosso dalle librerie: {", ".join(lib.name for lib in deleted)}'
+            )
         
-        for _, file, uploaded, deleted in saved_files:
-            if uploaded:
-                messages.error(
-                    self.request,
-                    f'File aggiunto alle librerie: {", ".join(lib.name for lib in uploaded)}'
-                )
-            if deleted:
-                messages.success(
-                    self.request,
-                    f'File rimosso dalle librerie: {", ".join(lib.name for lib in deleted)}'
-                )
-        
-        return response
+        return super().form_valid(form)

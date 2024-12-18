@@ -62,12 +62,26 @@ class File(BaseUserModel):
         if not self.check_assoc(library):
             return FileLibraryAssociation.objects.create(file=self, library=library)
         
+    def delete_library(self, library: Union[str, Library]):
+        if isinstance(library, str):
+            library = self._get_library_from_id(library)
+
+        if self.check_assoc(library):
+            return FileLibraryAssociation.objects.filter(file=self, library=library).delete()
+        
     def assoc_library_list(self, libraries: list):
         for library in libraries:
             if isinstance(library, str):
                 library = self._get_library_from_id(library)
 
             self.assoc_library(library)
+
+    def delete_in_library_list(self, libraries: list):
+        for library in libraries:
+            if isinstance(library, str):
+                library = self._get_library_from_id(library)
+
+            self.delete_library(library)
 
     def is_ingested(self):
         if self.ingested:

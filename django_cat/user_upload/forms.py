@@ -73,8 +73,8 @@ class FileUploadForm(forms.Form):
     def _is_instanced(self):
         return self.instance and self.instance.pk
 
-    def clean_vects(self):
-        libraries_id = self.data.getlist("vects")
+    def clean_libraries(self):
+        libraries_id = self.data.getlist("libraries")
         if not libraries_id:
             return Library.objects.none()
         
@@ -104,8 +104,7 @@ class FileUploadForm(forms.Form):
 
         if self._is_instanced:
             uploaded, deleted = self.add_to_libraries(self.instance)
-            saved.append([True, self.instance, uploaded, deleted])
-            return saved
+            return True, self.instance, uploaded, deleted
 
         files: List[InMemoryUploadedFile] = self.cleaned_data["file"]
         
@@ -162,8 +161,8 @@ class FileUploadForm(forms.Form):
 
         libraries_to_upload = [
             library
-            for library in library_assoc
-            if library not in library_utente
+            for library in library_utente
+            if library not in library_assoc
                 and library in library_select  # Non associato, ma selezionato -> upload
         ]
 
@@ -175,6 +174,6 @@ class FileUploadForm(forms.Form):
         ]
 
         instance.assoc_library_list(libraries_to_upload)
-        # instance.delete_in_library_list(libraries_to_delete)
+        instance.delete_in_library_list(libraries_to_delete)
 
         return libraries_to_upload, libraries_to_delete
