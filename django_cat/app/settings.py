@@ -108,7 +108,8 @@ INSTALLED_APPS = [
     "cheshire_cat",
     # your app
     "users",
-    "chat"
+    "chat",
+    "library"
 ]
 
 MIDDLEWARE = [
