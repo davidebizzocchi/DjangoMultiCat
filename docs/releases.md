@@ -11,6 +11,62 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+1e16539 - Merge branch '20-issue-caricamento-file' into dev
+8649636 - core
+b072833 - file upload
+c2d4e86 - notification
+f69450c - file upload
+f6b9576 - add callbacks
+2ea5d63 - changed file_id
+12d18bf - removed ic
+57a37de - send messages about ingestion
+63318e7 - view send message upload about ingest
+8100d03 - file_id in file upload
+2a7800a - messages
+bda54f3 - file delete
+99f61c7 - file delete
+a06184d - little error
+83db62e - docs cat settings
+cb17c2a - fix view
+bceb12e - upload from models
+f9ab1b7 - fix upload form
+5a69f70 - upload file
+135b46f - fix queryset
+ffc3a82 - view
+2a11bd0 - file admin
+579bfb7 - fix view
+7d91679 - fix template
+321286b - migration
+4189b19 - migrations
+e68b47c - fix form
+13aec82 - libraries
+d64488e - files
+6c29cb6 - fix view
+58ae702 - file viwe
+9aef90a - file urls
+b644da1 - fix
+26bc35e - form file
+42e183a - admin file and file assoc
+fe9a26a - admin library
+5bc3ae9 - admin library
+f0c53cf - file template
+09ceeaf - source = file_id
+c9cd1d4 - file
+77653d6 - UPLOADS_ROOT
+ebc2848 - user upload
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 ad23faa - Merge branch '19-feauture-libreria' into dev
 9e9e7a9 - core
 1324c58 - add library
