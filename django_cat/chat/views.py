@@ -4,8 +4,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.urls import reverse_lazy
+from django.views.generic.edit import FormView
 
 from chat.models import Message, Chat
+from chat.forms import ChatCreateForm
 
 def home(request):
     return render(request, 'chat/home.html')
@@ -45,12 +47,28 @@ class ChatView(LoginRequiredMixin, TemplateView):
         context['chat_id'] = chat.chat_id  # Add this line
         return context
 
-@login_required
-def create_chat(request):
-    if request.method == 'POST':
-        chat = Chat.objects.create(user=request.user)
+class ChatCreateView(LoginRequiredMixin, FormView):
+    template_name = 'chat/new.html'
+    form_class = ChatCreateForm
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
+    def form_valid(self, form):
+        chat = Chat.objects.create(user=self.request.user)
+        # Here you can handle the selected libraries
+        # This will be used later for chat context
+        libraries = form.cleaned_data['libraries']
+        if libraries:
+            chat.libraries.set(libraries)
         return redirect('chat:chat', chat_id=chat.chat_id)
-    return redirect('chat:list')
+
+# Remove or comment out the old create_chat function
+# @login_required
+# def create_chat(request):
+#     ...
 
 class ChatDeleteView(LoginRequiredMixin, DeleteView):
     model = Chat
