@@ -73,7 +73,7 @@ class FileUploadForm(forms.Form):
     def _is_instanced(self):
         return self.instance and self.instance.pk
 
-    def clean_vects(self):
+    def clean_libraries(self):
         libraries_id = self.data.getlist("vects")
         if not libraries_id:
             return Library.objects.none()
