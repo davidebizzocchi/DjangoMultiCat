@@ -11,6 +11,26 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+015f0a0 - Merge branch '22-issue-associare-una-libreria-ad-una-chat' into dev
+3bf6661 - nuova chat button
+96dae0d - add library to chat
+8ca6cf2 - view new chat
+287d141 - form new chat
+aeaad11 - urls new chat endpoint
+6eac446 - teamplate new chat
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 79398cf - Merge branch '21-issue-check-library-file-association' into dev
 30dc1b2 - upgrade assoc in form
 9331740 - remake form_valid in assoc file
