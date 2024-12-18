@@ -10,7 +10,7 @@ class FileUploadView(LoginRequiredMixin, CreateView):
     model = File
     form_class = FileUploadForm
     template_name = 'user_upload/file_upload.html'
-    success_url = reverse_lazy('chat:file_list')
+    success_url = reverse_lazy('file:list')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -32,7 +32,7 @@ class FileListView(LoginRequiredMixin, ListView):
 class FileDeleteView(LoginRequiredMixin, DeleteView):
     model = File
     template_name = 'user_upload/file_delete.html'
-    success_url = reverse_lazy('chat:file_list')
+    success_url = reverse_lazy('file:list')
     context_object_name = 'file'
     slug_field = 'file_id'
     slug_url_kwarg = 'file_id'
@@ -44,7 +44,7 @@ class FileAssociationView(LoginRequiredMixin, UpdateView):
     model = File
     form_class = FileUploadForm
     template_name = 'user_upload/file_assoc.html'
-    success_url = reverse_lazy('chat:file_list')
+    success_url = reverse_lazy('file:list')
     slug_field = 'file_id'
     slug_url_kwarg = 'file_id'
 
