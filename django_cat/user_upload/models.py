@@ -118,12 +118,14 @@ class File(BaseUserModel):
             "author": self.userprofile.cheschire_id,
             "source": file_id
         }
+
+        self.client.upload_file(self, metadata)
         
-        with open(self.file.path, 'rb') as f:
-            self.client.rabbit_hole.upload_file(
-                file=f,
-                metadata=metadata
-            )
+        # with open(self.file.path, 'rb') as f:
+        #     self.client.rabbit_hole.upload_file(
+        #         file=f.read(),  # Pass bytes directly
+        #         metadata=metadata
+        #     )
 
     def wait_upload(self):
         """
@@ -182,6 +184,15 @@ class File(BaseUserModel):
             self.title = self.file.path.name
 
         super().save(*args, **kwargs)
+
+    def delete(self):
+        """
+        Esegue azioni alla cancellazione del modello
+
+        Cancella il file dal filesystem
+        """
+        self.file.path.unlink()
+        super().delete()
 
     def __str__(self):
         return self.title
