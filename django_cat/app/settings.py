@@ -240,3 +240,6 @@ MESSAGE_TAGS = {
 }
 
 MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
+
+UPLOADS_ROOT = MEDIA_ROOT / "uploads"
