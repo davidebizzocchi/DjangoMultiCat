@@ -30,6 +30,7 @@ CatConfig = ccat.Config
 
 class Cat(CatClient):
     _instances = {}
+    # _ref_counts = {}  # Nuovo: contatore dei riferimenti
 
     def __new__(cls, *args, **kwargs):
         config = kwargs.get('config')
@@ -41,9 +42,28 @@ class Cat(CatClient):
         if user_id not in cls._instances:
             wait_for_cat()
             instance = super().__new__(cls)
-            instance._initialized = False  # Flag per evitare reinizializzazione
+            instance._initialized = False
             cls._instances[user_id] = instance
+            # cls._ref_counts[user_id] = 0  # Inizializza il contatore
+        
+        # cls._ref_counts[user_id] += 1  # Incrementa il contatore
         return cls._instances[user_id]
+
+    # def __del__(self):
+    #     """Gestisce la chiusura del websocket solo quando non ci sono più riferimenti"""
+    #     if hasattr(self, 'config'):  # Verifica che l'istanza sia stata inizializzata
+    #         user_id = self.config.user_id
+    #         if user_id in self._ref_counts:
+    #             self._ref_counts[user_id] -= 1
+                
+    #             # Chiudi il websocket solo se non ci sono più riferimenti
+    #             if self._ref_counts[user_id] <= 0:
+    #                 if user_id in self._instances:
+    #                     del self._instances[user_id]
+    #                 if user_id in self._ref_counts:
+    #                     del self._ref_counts[user_id]
+    #                 if hasattr(self, 'ws') and self.is_ws_connected:
+    #                     self.ws.close()
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self, '_initialized') or not self._initialized:
@@ -119,7 +139,6 @@ class Cat(CatClient):
         msg_type = message.get("type", None)
         chat_id = message.get("chat_id", "default")
         
-        ic(msg_type)
         if msg_type == "chat_token":
             chat_message = ChatToken(**message)
             
@@ -133,9 +152,13 @@ class Cat(CatClient):
         elif msg_type == "notification":
             notification = Notification(**message)
             self._add_notification(notification)
-            ic(notification)
-            # Chiamare tutti gli handler registrati
-            for handler in self._notification_handlers.values():
+
+            ic(f"notification: {notification.content}")
+
+            # Crea una lista dei valori per evitare il RuntimeError durante l'iterazione
+            handlers = list(self._notification_handlers.values())
+            for handler in handlers:
+                ic("ora sto eseguendo handler")
                 handler(notification)
         
         else:
@@ -265,7 +288,7 @@ class Cat(CatClient):
     def get_chat_list(self):
         return self.memory.get_working_memories_list()
 
-    def register_notification_handler(self, handler) -> str:
+    def register_notification_handler(self, handler, *args, **kwargs) -> str:
         """
         Registra un handler per le notifiche e restituisce il suo ID
         
@@ -311,29 +334,35 @@ class Cat(CatClient):
     
     def upload_file(self, file, metadata: Dict, chunk_size=None, chunk_overlap=None):
         url =  f"http://{HOST}:{PORT}/rabbithole/"
-        files = {"file": (
-            str(file.title),
-            open(file.file.path.absolute(), "rb"),
-            mimetypes.guess_type(file.file.path.absolute())[0]
-        )}
+        
+        with open(file.file.path.absolute(), "rb") as f:
+            ic(f, file.file.path.absolute(), mimetypes.guess_type(file.file.path.absolute())[0])
+            files = {"file": (
+                f"{file.file_id}{file.file.path.suffix}",  # Usa il file_id con l'estensione
+                f,
+                mimetypes.guess_type(file.file.path.absolute())[0]
+            )}
 
-        payload = {
-            "metadata": json.dumps(metadata),
-            "chunk_overlap": chunk_overlap,
-            "chunk_size": chunk_size,
-        }
+            payload = {
+                "metadata": json.dumps(metadata),
+                "chunk_overlap": chunk_overlap,
+                "chunk_size": chunk_size,
+            }
 
-        return requests.post(
-            url=url,
-            files=files,
-            data=payload
-        ).json()
+            return requests.post(
+                url=url,
+                files=files,
+                data=payload,
+                headers={
+                    "user_id": file.userprofile.cheschire_id  # Aggiungi l'user_id nell'header
+                },
+            ).json()
     
     def delete_file(self, file):
         return self.memory.wipe_memory_points_by_metadata(
             collection_id="declarative",
             body={
-                "file_id": str(file.file_id)
+                "file_id": str(file.file_id),
             }
         )
 
