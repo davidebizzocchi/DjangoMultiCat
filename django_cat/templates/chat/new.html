@@ -1,0 +1,35 @@
+{% extends "base/base.html" %}
+{% block title %}Nuova Chat{% endblock %}
+
+{% block contenuto %}
+<h2>Crea nuova chat</h2>
+<p>Seleziona le librerie da utilizzare in questa chat:</p>
+
+<form method="post" class="mb-4">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+        <div class="d-flex justify-content-between mb-2">
+            <button type="button" class="btn btn-secondary btn-sm" id="selectNone">Deseleziona tutto</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="selectAll">Seleziona tutto</button>
+        </div>
+        
+        <div class="list-group">
+            {{ form.libraries }}
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Crea Chat</button>
+    <a href="{% url 'chat:list' %}" class="btn btn-secondary">Annulla</a>
+</form>
+
+<script>
+document.getElementById('selectAll').addEventListener('click', function() {
+    document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = true);
+});
+
+document.getElementById('selectNone').addEventListener('click', function() {
+    document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);
+});
+</script>
+{% endblock %}
