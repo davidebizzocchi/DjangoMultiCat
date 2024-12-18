@@ -1,5 +1,6 @@
 from django import template
 from decouple import config
+from app.pre_utils import get_version_from_file
 
 register = template.Library()
 
@@ -19,3 +20,7 @@ def messages_lifetime():
 @register.filter
 def has_perm(user, perm):
     return user.has_perm(perm)
+
+@register.simple_tag
+def current_version():
+    return get_version_from_file()
