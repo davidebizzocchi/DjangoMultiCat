@@ -31,29 +31,6 @@ class MultipleFileField(forms.FileField):
         return result
 
 
-class FileUploadForm(forms.ModelForm):
-    class Meta:
-        model = File
-        fields = ['file', 'library']
-
-
-class FileAssociationForm(forms.ModelForm):
-    libraries = forms.ModelMultipleChoiceField(
-        queryset=Library.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
-    )
-
-    class Meta:
-        model = File
-        fields = ['libraries']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.instance:
-            self.fields['libraries'].initial = self.instance.libraries.all()
-
-
 class FileUploadForm(forms.Form):
     file = MultipleFileField()
     libraries = forms.MultipleChoiceField(
