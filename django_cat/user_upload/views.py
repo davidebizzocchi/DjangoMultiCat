@@ -27,7 +27,7 @@ class FileListView(LoginRequiredMixin, ListView):
     context_object_name = 'files'
 
     def get_queryset(self):
-        return File.objects.filter(userprofile=self.request.user.userprofile)
+        return File.objects.filter(user=self.request.user)
 
 class FileDeleteView(LoginRequiredMixin, DeleteView):
     model = File
@@ -38,7 +38,7 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
     slug_url_kwarg = 'file_id'
 
     def get_queryset(self):
-        return File.objects.filter(userprofile=self.request.user.userprofile)
+        return File.objects.filter(user=self.request.user)
 
 class FileAssociationView(LoginRequiredMixin, UpdateView):
     model = File
