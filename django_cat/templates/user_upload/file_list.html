@@ -1,0 +1,22 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Uploaded Files{% endblock %}
+
+{% block contenuto %}
+<h1>Uploaded Files</h1>
+<ul>
+    {% for file in files %}
+        <li><b>{{ file.title }} ({{ file.file.size }} bytes)</b><br>
+            <a href="{% url 'chat:file-assoc' file.file_id %}" class="btn btn-primary btn-sm">Vedi Associazioni</a> 
+            <a href="{% url 'chat:file-delete' file.file_id %}" class="btn btn-danger btn-sm">Cancella</a> 
+            <a href="{{ file.link }}" target="_blank" class="btn btn-info btn-sm">Anteprima</a> 
+            <br><br>
+        </li>
+    {% empty %}
+        <li>No files uploaded.</li>
+    {% endfor %}
+    <br>
+    <a href="{% url 'chat:upload_file' %}" class="btn btn-success btn-sm">Upload a file</a>
+</ul>
+{% endblock %}
+

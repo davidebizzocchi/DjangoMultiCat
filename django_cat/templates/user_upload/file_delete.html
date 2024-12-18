@@ -1,0 +1,18 @@
+<!-- file_confirm_delete.html -->
+
+{% extends 'base/base.html' %}
+
+{% block title %}Elimina File{% endblock %}
+
+{% block contenuto %}
+    <h1>Conferma Eliminazione</h1>
+    <p>Sei sicuro di voler eliminare il file "{{ file.title }}"?</p>
+    <p>I vector store contenti questo file non saranno eliminati</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Conferma Eliminazione</button>
+        <a href="{% url 'chat:file_list' %}">Torna ai files</a>
+    </form>
+
+{% endblock %}
