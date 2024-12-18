@@ -13,6 +13,7 @@ from decouple import config
 from library.models import Library
 import re
 from threading import Event
+from icecream import ic
 
 
 class FileLibraryAssociation(models.Model):
@@ -119,7 +120,7 @@ class File(BaseUserModel):
             "source": file_id
         }
 
-        self.client.upload_file(self, metadata)
+        ic(self.client.upload_file(self, metadata))
         
         # with open(self.file.path, 'rb') as f:
         #     self.client.rabbit_hole.upload_file(
@@ -191,6 +192,9 @@ class File(BaseUserModel):
 
         Cancella il file dal filesystem
         """
+
+        ic(self.client.delete_file(self))
+
         self.file.path.unlink()
         super().delete()
 
