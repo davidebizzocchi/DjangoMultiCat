@@ -22,8 +22,7 @@ class FileLibraryAssociation(models.Model):
 
 
     def save(self, *args, **kwargs):
-        self.library.add_file_to_existing_chats(str(self.file.file_id))
-
+        self.file.wait_until_ingested(self.library.add_file_to_existing_chats, str(self.file.file_id))
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -166,6 +165,21 @@ class File(BaseUserModel):
                 return
             
         self.upload()
+
+    def wait_until_ingested(self, callback=None, *callback_args, wait_time=0.5):
+        """
+        Wait until the file is ingested
+        Args:
+            callback: function to call after ingestion is complete
+            *callback_args: arguments to pass to the callback function
+            wait_time: time to wait between checks (default: 0.5 seconds)
+        """
+        while not self.ingested:
+            time.sleep(wait_time)
+            self.refresh_from_db()
+        
+        if callback is not None:
+            callback(*callback_args)
     
     @property
     def link(self):
