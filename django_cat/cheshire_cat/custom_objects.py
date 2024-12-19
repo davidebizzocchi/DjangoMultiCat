@@ -805,7 +805,7 @@ class CatMemoryApi(MemoryApi):
         _files: Dict[str, str] = {}
         _body_params = {
             'search_metadata': search_metadata,
-            'chat_ids': chat_ids,
+            'chats_id': chat_ids,
             'mode': mode
         }
 
