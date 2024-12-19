@@ -21,7 +21,7 @@ class Library(BaseUserModel):
             'file_id',
             'ingested',
             'user__username',
-            'user__userprofile__cheschire_id'
+            'user__userprofile__cheschire_id',
         )
     
     def __str__(self):
