@@ -63,11 +63,13 @@ class Chat(BaseUserModel):
         if not self.pk:
             first_save = True
         
-        super().save(*args, **kwargs)
+        result = super().save(*args, **kwargs)
 
         if first_save:
             for file in self.files:
                 self.client.update_file_chats(file)
+
+        return result
 
     class Meta:
         verbose_name = "chat"
