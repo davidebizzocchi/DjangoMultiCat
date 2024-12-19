@@ -739,6 +739,99 @@ class CatMemoryApi(MemoryApi):
             _request_auth=_request_auth
         )
 
+    @validate_call
+    def edit_chat_to_points(
+        self,
+        collection_id: StrictStr,
+        search_metadata: Dict[StrictStr, Any],
+        chat_ids: List[StrictStr],
+        mode: StrictStr,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> object:
+        _param = self._param_edit_chat_to_points(
+            collection_id=collection_id,
+            search_metadata=search_metadata,
+            chat_ids=chat_ids,
+            mode=mode,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "object",
+            '400': "object"
+        }
+        
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    def _param_edit_chat_to_points(
+        self,
+        collection_id: str,
+        search_metadata: Dict[str, Any],
+        chat_ids: List[str],
+        mode: str,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> Tuple:
+        _host = None
+        _collection_formats: Dict[str, str] = {}
+        _path_params: Dict[str, str] = {'collection_id': collection_id}
+        _query_params: List[Tuple[str, str]] = [('mode', mode)]
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, str] = {}
+        _body_params = {
+            'search_metadata': search_metadata,
+            'chats_id': chat_ids
+        }
+
+        _header_params['Accept'] = self.api_client.select_header_accept([
+            'application/json'
+        ])
+        _header_params['Content-Type'] = self.api_client.select_header_content_type([
+            'application/json'
+        ])
+
+        _auth_settings: List[str] = []
+
+        return self.api_client.param_serialize(
+            method='PATCH',
+            resource_path='/memory/collections/{collection_id}/points/edit_chat_ids',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
 class CatClient(ccat.CatClient):
     def _connect_api(self):
         protocol = "https" if self._conn_settings.secure_connection else "http"
