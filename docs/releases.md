@@ -11,6 +11,27 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+0d4e3b3 - Merge branch '26-issue-controllare-i-file-allegati-ad-una-libreria-e-le-chat' into dev
+e47c32b - file list restyle
+8566ffb - library see file and chat
+afdd50f - library detail view
+ce61f55 - update files library
+177f005 - modified files proprierty of library
+4261efc - include file and chat in view context
+a23c78a - detail see files and chat
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 ceaeddc - Merge branch '24-issue-search-declarative-memory-linked-to-chat' into dev
 28bc4a7 - core
 86dea90 - endpoint api
