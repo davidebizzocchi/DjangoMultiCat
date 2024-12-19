@@ -423,7 +423,7 @@ class Cat(CatClient):
             metadata={"file_id": str(file.file_id)}
         )
 
-    def update_file_chats(self, file, chat_ids: List[str], mode: str = "add", collection_id: str = "declarative"):
+    def edit_file_chats(self, file, chat_ids: List[str], mode: str = "add", collection_id: str = "declarative"):
         """
         Update chat_ids in file memories metadata
         :param file: File instance to update
@@ -435,7 +435,7 @@ class Cat(CatClient):
             chat_ids = [chat_ids]
 
         search_metadata = {"file_id": str(file.file_id)}
-        return self.memory.update_chat_to_points(
+        return self.memory.edit_chat_to_points(
             collection_id=collection_id,
             search_metadata=search_metadata,
             chat_ids=chat_ids,
@@ -456,7 +456,7 @@ class Cat(CatClient):
         if isinstance(chat_ids, str):
             chat_ids = [chat_ids]
 
-        return self.update_file_chats(
+        return self.edit_file_chats(
             file, chat_ids, "add", "declarative"
         )
     
@@ -474,7 +474,7 @@ class Cat(CatClient):
         if isinstance(chat_ids, str):
             chat_ids = [chat_ids]
 
-        return self.update_file_chats(
+        return self.edit_file_chats(
             file, chat_ids, "remove", "declarative"
         )
 

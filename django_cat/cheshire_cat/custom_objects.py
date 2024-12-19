@@ -740,7 +740,7 @@ class CatMemoryApi(MemoryApi):
         )
 
     @validate_call
-    def update_chat_to_points(
+    def edit_chat_to_points(
         self,
         collection_id: StrictStr,
         search_metadata: Dict[StrictStr, Any] = {},
@@ -759,7 +759,7 @@ class CatMemoryApi(MemoryApi):
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
-        _param = self._update_chat_to_points_serialize(
+        _param = self._edit_chat_to_points_serialize(
             collection_id=collection_id,
             search_metadata=search_metadata,
             chat_ids=chat_ids,
@@ -785,7 +785,7 @@ class CatMemoryApi(MemoryApi):
             response_types_map=_response_types_map,
         ).data
 
-    def _update_chat_to_points_serialize(
+    def _edit_chat_to_points_serialize(
         self,
         collection_id: str,
         search_metadata: Dict[str, Any],
@@ -820,7 +820,7 @@ class CatMemoryApi(MemoryApi):
 
         return self.api_client.param_serialize(
             method='PATCH',
-            resource_path='/memory/collections/{collection_id}/points/update_chat_ids',
+            resource_path='/memory/collections/{collection_id}/points/edit_chat_ids',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
