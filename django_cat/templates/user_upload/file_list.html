@@ -3,20 +3,43 @@
 {% block title %}Uploaded Files{% endblock %}
 
 {% block contenuto %}
-<h1>Uploaded Files</h1>
-<ul>
-    {% for file in files %}
-        <li><b>{{ file.title }} ({{ file.file.size }} bytes)</b><br>
-            <a href="{% url 'user_upload:assoc' file.file_id %}" class="btn btn-primary btn-sm">Vedi Associazioni</a> 
-            <a href="{% url 'user_upload:delete' file.file_id %}" class="btn btn-danger btn-sm">Cancella</a> 
-            <a href="{{ file.link }}" target="_blank" class="btn btn-info btn-sm">Anteprima</a> 
-            <br><br>
-        </li>
-    {% empty %}
-        <li>No files uploaded.</li>
-    {% endfor %}
-    <br>
-    <a href="{% url 'user_upload:upload' %}" class="btn btn-success btn-sm">Upload a file</a>
-</ul>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>I tuoi File</h2>
+            <a href="{% url 'user_upload:upload' %}" class="btn btn-success">Upload nuovo file</a>
+        </div>
+        <div class="card-body">
+            {% if files %}
+            <ul class="list-group">
+                {% for file in files %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center mb-2">
+                                <h5 class="mb-0">{{ file.title }}</h5>
+                                <span class="badge {% if file.ingested %}bg-success{% else %}bg-warning{% endif %} ms-2">
+                                    {% if file.ingested %}Ingested{% else %}Pending{% endif %}
+                                </span>
+                            </div>
+                            <small class="text-muted d-block mb-2">{{ file.file.size|filesizeformat }}</small>
+                            <div class="btn-group">
+                                <a href="{% url 'user_upload:assoc' file.file_id %}" class="btn btn-primary btn-sm">Associazioni</a>
+                                <a href="{{ file.link }}" target="_blank" class="btn btn-info btn-sm">Anteprima</a>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="{% url 'user_upload:delete' file.file_id %}" class="btn btn-danger btn-sm">Elimina</a>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-center my-4">Non ci sono file caricati.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}
 
