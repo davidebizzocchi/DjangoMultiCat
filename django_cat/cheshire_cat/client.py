@@ -366,6 +366,63 @@ class Cat(CatClient):
             }
         )
 
+    def get_file_chats(self, file) -> List[str]:
+        """Get all chats using a specific file through its libraries
+        
+        Args:
+            file: File instance to check
+            
+        Returns:
+            List[str]: List of chat IDs using this file
+        """
+        from chat.models import Chat
+
+        return list(
+            Chat.objects.filter(
+                libraries__associations__file=file  # Naviga attraverso le relazioni
+            ).values_list(
+                'chat_id', flat=True
+            ).distinct()
+        )
+
+    def update_file_chats(self, file) -> dict:
+        """Update the chats associated with a file in the memory
+        
+        Args:
+            file: File instance to update
+            
+        Returns:
+            dict: Response from the API with update status
+        """
+        chat_ids = self.get_file_chats(file)
+        
+        ic(chat_ids)
+        
+        metadata = {
+            "search": {"file_id": str(file.file_id)},
+            "update": {"chats_id": chat_ids}
+        }
+        
+        return self.memory.update_points_metadata(
+            collection_id="declarative",
+            search=metadata["search"], 
+            update=metadata["update"]
+        )
+
+    def get_file_metadata(self, file) -> dict:
+        """Get all memory points for a specific file
+        
+        Args:
+            file_id: ID of the file to search for
+            
+        Returns:
+            dict: Memory points containing the file metadata
+        """
+        return self.memory.get_points_by_metadata(
+            collection_id="declarative",
+            metadata={"file_id": str(file.file_id)}
+        )
+
 @wait_cat
 def get_user_id(username: str):
     url = f"http://{HOST}:{PORT}/users/"
@@ -380,7 +437,7 @@ def get_user_id(username: str):
 def connect_as_admin() -> Cat:
     
     admin_id = get_user_id("admin")
-    if admin_id is None:
+    if (admin_id is None):
         raise ValueError("Admin user not found")
     
     config = CatConfig(user_id=admin_id, base_url=HOST, port=PORT)
