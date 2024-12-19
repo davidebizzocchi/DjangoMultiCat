@@ -63,6 +63,9 @@ class ChatCreateView(LoginRequiredMixin, FormView):
         libraries = form.cleaned_data['libraries']
         if libraries:
             chat.libraries.set(libraries)
+
+            for library in chat.libraries.all():
+                library.add_new_chat(str(chat.chat_id))
         return redirect('chat:chat', chat_id=chat.chat_id)
 
 # Remove or comment out the old create_chat function
