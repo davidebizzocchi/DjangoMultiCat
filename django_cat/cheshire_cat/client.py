@@ -409,6 +409,20 @@ class Cat(CatClient):
             update=metadata["update"]
         )
 
+    def get_file_metadata(self, file) -> dict:
+        """Get all memory points for a specific file
+        
+        Args:
+            file_id: ID of the file to search for
+            
+        Returns:
+            dict: Memory points containing the file metadata
+        """
+        return self.memory.get_points_by_metadata(
+            collection_id="declarative",
+            metadata={"file_id": str(file.file_id)}
+        )
+
 @wait_cat
 def get_user_id(username: str):
     url = f"http://{HOST}:{PORT}/users/"
