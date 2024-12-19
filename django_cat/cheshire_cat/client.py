@@ -423,6 +423,61 @@ class Cat(CatClient):
             metadata={"file_id": str(file.file_id)}
         )
 
+    def update_file_chats(self, file, chat_ids: List[str], mode: str = "add", collection_id: str = "declarative"):
+        """
+        Update chat_ids in file memories metadata
+        :param file: File instance to update
+        :param chat_ids: List of chat IDs to add/remove
+        :param mode: 'add' to add chat_ids, 'remove' to remove them
+        """
+
+        if isinstance(chat_ids, str):
+            chat_ids = [chat_ids]
+
+        search_metadata = {"file_id": str(file.file_id)}
+        return self.memory.update_chat_to_points(
+            collection_id=collection_id,
+            search_metadata=search_metadata,
+            chat_ids=chat_ids,
+            mode=mode
+        )
+    
+    def add_file_to_chats(self, file, chat_ids: List[str]):
+        """Add a file to a chat in the memory
+        
+        Args:
+            file: File instance to add
+            chat_id: Chat ID to add the file to
+            
+        Returns:
+            dict: Response from the API with update status
+        """
+
+        if isinstance(chat_ids, str):
+            chat_ids = [chat_ids]
+
+        return self.update_file_chats(
+            file, chat_ids, "add", "declarative"
+        )
+    
+    def remove_file_to_chats(self, file, chat_ids: List[str]):
+        """Remove a file to a chat in the memory
+        
+        Args:
+            file: File instance to remove
+            chat_id: Chat ID to remove the file to
+            
+        Returns:
+            dict: Response from the API with update status
+        """
+
+        if isinstance(chat_ids, str):
+            chat_ids = [chat_ids]
+
+        return self.update_file_chats(
+            file, chat_ids, "remove", "declarative"
+        )
+
 @wait_cat
 def get_user_id(username: str):
     url = f"http://{HOST}:{PORT}/users/"
