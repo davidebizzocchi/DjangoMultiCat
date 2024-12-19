@@ -59,11 +59,15 @@ class Chat(BaseUserModel):
         """Save chat and create chat on cat"""
         from user_upload.models import File
 
+        first_save = False
         if not self.pk:
+            first_save = True
+        
+        super().save(*args, **kwargs)
+
+        if first_save:
             for file in self.files:
                 self.client.update_file_chats(file)
-        
-        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "chat"
