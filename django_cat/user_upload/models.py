@@ -22,7 +22,7 @@ class FileLibraryAssociation(models.Model):
 
 
     def save(self, *args, **kwargs):
-        self.file.wait_until_ingested(self.library.add_file_to_existing_chats, str(self.file.file_id))
+        threading.Thread(self.file.wait_until_ingested(self.library.add_file_to_existing_chats, str(self.file.file_id))).start()
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
