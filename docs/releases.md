@@ -11,6 +11,27 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+ceaeddc - Merge branch '24-issue-search-declarative-memory-linked-to-chat' into dev
+28bc4a7 - core
+86dea90 - endpoint api
+f60fdc6 - return metadata of memories
+b4dd063 - saving chat_id in memories
+c6c7eaf - update file metadata api endpoint
+fe0f438 - file update chat
+31d28ae - files metadata upload
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 dc53ea1 - Merge branch '23-issue-add-footer-version' into dev
 b2ba2eb - beautiful
 bb798ba - wrong name
