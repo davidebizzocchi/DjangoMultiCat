@@ -20,6 +20,18 @@ class FileLibraryAssociation(models.Model):
     file = models.ForeignKey('File', on_delete=models.CASCADE, related_name='associations')
     library = models.ForeignKey(Library, on_delete=models.CASCADE, related_name='associations')
 
+
+    def save(self, *args, **kwargs):
+        self.library.add_file_to_existing_chats(str(self.file.file_id))
+
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.library.remove_file_from_existing_chats(str(self.file.file_id))
+
+        super().delete(*args, **kwargs)
+    
+
     def __str__(self):
         return f"{self.file} in {self.library}"
     
