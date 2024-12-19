@@ -743,9 +743,9 @@ class CatMemoryApi(MemoryApi):
     def edit_chat_to_points(
         self,
         collection_id: StrictStr,
-        search_metadata: Dict[StrictStr, Any] = {},
-        chat_ids: List[StrictStr] = [],
-        mode: StrictStr = "add",
+        search_metadata: Dict[StrictStr, Any],
+        chat_ids: List[StrictStr],
+        mode: StrictStr,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -759,7 +759,7 @@ class CatMemoryApi(MemoryApi):
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
-        _param = self._edit_chat_to_points_serialize(
+        _param = self._param_edit_chat_to_points(
             collection_id=collection_id,
             search_metadata=search_metadata,
             chat_ids=chat_ids,
@@ -785,7 +785,7 @@ class CatMemoryApi(MemoryApi):
             response_types_map=_response_types_map,
         ).data
 
-    def _edit_chat_to_points_serialize(
+    def _param_edit_chat_to_points(
         self,
         collection_id: str,
         search_metadata: Dict[str, Any],
@@ -799,14 +799,13 @@ class CatMemoryApi(MemoryApi):
         _host = None
         _collection_formats: Dict[str, str] = {}
         _path_params: Dict[str, str] = {'collection_id': collection_id}
-        _query_params: List[Tuple[str, str]] = []
+        _query_params: List[Tuple[str, str]] = [('mode', mode)]
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
         _files: Dict[str, str] = {}
         _body_params = {
             'search_metadata': search_metadata,
-            'chats_id': chat_ids,
-            'mode': mode
+            'chats_id': chat_ids
         }
 
         _header_params['Accept'] = self.api_client.select_header_accept([
