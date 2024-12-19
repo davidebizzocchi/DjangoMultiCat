@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from users.models import User, UserProfile
 from app.utils import BaseUserModel
+from icecream import ic
 
 
 class Library(BaseUserModel):
@@ -24,6 +25,39 @@ class Library(BaseUserModel):
             'user__userprofile__cheschire_id',
         )
     
+    @property
+    def files_id(self):
+        from user_upload.models import File
+        return File.objects.filter(
+            associations__library=self
+        ).values_list('file_id', flat=True)
+    
+    def add_new_chat(self, chat_id: str):
+        """Client add chat to client"""
+        
+        for file_id in self.files_id:
+            ic("chat add", chat_id, file_id)
+            self.client.add_file_to_chats(str(file_id), chat_id)
+
+    def remove_chat(self, chat_id: str):
+        """Client remove chat from client"""
+        
+        for file_id in self.files_id:
+            ic("chat delete", chat_id, file_id)
+            self.client.remove_file_to_chats(str(file_id), chat_id)
+
+    def add_file_to_existing_chats(self, file_id: str):
+        """Invoked by FileLibraryAssociation"""
+        for chat_id in self.chats.values_list("chat_id", flat=True):
+            ic("file add", chat_id, file_id)
+            self.client.add_file_to_chats(file_id, str(chat_id))
+
+    def remove_file_from_existing_chats(self, file_id: str):
+        """Invoked by FileLibraryAssociation"""
+        for chat_id in self.chats.values_list("chat_id", flat=True):
+            ic("file delete", chat_id, file_id)
+            self.client.remove_file_to_chats(file_id, str(chat_id))
+
     def __str__(self):
         return f"Library {self.name} of {self.user.username}, id: {self.library_id}"
     
