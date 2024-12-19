@@ -3,7 +3,7 @@ from users.models import User, UserProfile
 import uuid
 from app.utils import BaseUserModel
 from library.models import Library
-
+from icecream import ic
 
 class Chat(BaseUserModel):
     chat_id = models.CharField(max_length=255, unique=True, default=uuid.uuid4)
@@ -41,6 +41,25 @@ class Chat(BaseUserModel):
     def __str__(self):
         return f"Chat with {self.user.username}, id: {self.chat_id}"
     
+    def save(self, *args, **kwargs):
+        """Save chat and create chat on cat"""
+        from user_upload.models import File
+
+        first_save = False
+        ic(self.pk)
+        if not self.pk:
+            first_save = True
+        
+        result = super().save(*args, **kwargs)
+
+        ic(first_save)
+        if first_save and self.libraries:
+            for library in self.libraries.all():
+                ic("chat create", library)
+                library.add_new_chat(str(self.chat_id))
+
+        return result
+    
     def delete(self, *args, **kwargs):
         """Delete chat and all related messages"""
 
@@ -48,26 +67,11 @@ class Chat(BaseUserModel):
         
         result = self.client.delete_chat(self.chat_id)
 
-        super().delete(*args, **kwargs)
-
         for file in files:
-            self.client.update_file_chats(file)
+            ic("chat delete", file.file_id)
+            self.client.remove_file_to_chats(file, str(self.chat_id))
 
-        return result
-    
-    def save(self, *args, **kwargs):
-        """Save chat and create chat on cat"""
-        from user_upload.models import File
-
-        first_save = False
-        if not self.pk:
-            first_save = True
-        
-        result = super().save(*args, **kwargs)
-
-        if first_save:
-            for file in self.files:
-                self.client.update_file_chats(file)
+        super().delete(*args, **kwargs)
 
         return result
 
