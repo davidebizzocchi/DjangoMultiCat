@@ -431,10 +431,15 @@ class Cat(CatClient):
         :param mode: 'add' to add chat_ids, 'remove' to remove them
         """
 
+        if isinstance(file, str):
+            file_id = file
+        else:
+            file_id = str(file.file_id)
+
         if isinstance(chat_ids, str):
             chat_ids = [chat_ids]
 
-        search_metadata = {"file_id": str(file.file_id)}
+        search_metadata = {"file_id": file_id}
         return self.memory.edit_chat_to_points(
             collection_id=collection_id,
             search_metadata=search_metadata,
@@ -453,11 +458,16 @@ class Cat(CatClient):
             dict: Response from the API with update status
         """
 
+        if isinstance(file, str):
+            file_id = file
+        else:
+            file_id = str(file.file_id)
+
         if isinstance(chat_ids, str):
             chat_ids = [chat_ids]
 
         return self.edit_file_chats(
-            file, chat_ids, "add", "declarative"
+            file_id, chat_ids, "add", "declarative"
         )
     
     def remove_file_to_chats(self, file, chat_ids: List[str]):
@@ -471,11 +481,16 @@ class Cat(CatClient):
             dict: Response from the API with update status
         """
 
+        if isinstance(file, str):
+            file_id = file
+        else:
+            file_id = str(file.file_id)
+
         if isinstance(chat_ids, str):
             chat_ids = [chat_ids]
 
         return self.edit_file_chats(
-            file, chat_ids, "remove", "declarative"
+            file_id, chat_ids, "remove", "declarative"
         )
 
 @wait_cat
