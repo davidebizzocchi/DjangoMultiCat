@@ -38,10 +38,8 @@ class LibraryDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Otteniamo i file con solo i campi necessari
-        context['files'] = self.object.files.only(
-            'title', 'file_id', 'ingested'
-        )
+        # I file sono già ottimizzati dal property method
+        context['files'] = self.object.files
         # Otteniamo le chat con solo i campi necessari
         context['chats'] = self.object.chats.only(
             'chat_id'
