@@ -11,6 +11,27 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+d20128a - Merge branch '27-issue-scrivere-due-endpoint-che-dato-un-file_id-permetta-di-aggiungeretogliere-la-chat-dai-metadati' into dev
+ee473d8 - core
+016c48a - fix edit_chat_to_memories_from_metadata
+5b403d5 - chats_id
+bae068b - library result save
+bb0336d - edit_chat_to_points
+a33aee4 - update_chat_ids api endpont
+02e1102 - update file chats
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 0d4e3b3 - Merge branch '26-issue-controllare-i-file-allegati-ad-una-libreria-e-le-chat' into dev
 e47c32b - file list restyle
 8566ffb - library see file and chat
