@@ -19,12 +19,11 @@
             <ul class="list-group">
                 {% for file in files %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>{{ file.title }}</span>
+                    <a href="{% url 'file:assoc' file_id=file.file_id %}" target="_blank">{{ file.title }}</a>
                     <div>
                         <span class="badge {% if file.ingested %}bg-success{% else %}bg-warning{% endif %}">
                             {% if file.ingested %}Ingested{% else %}Pending{% endif %}
                         </span>
-                        <a href="{% url 'user_upload:delete' file_id=file.file_id %}" class="btn btn-sm btn-danger ms-2">Delete</a>
                     </div>
                 </li>
                 {% endfor %}
@@ -39,7 +38,6 @@
                 {% for chat in chats %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <a href="{% url 'chat:chat' chat_id=chat.chat_id %}">Chat #{{ forloop.counter }}</a>
-                    <a href="{% url 'chat:delete' chat_id=chat.chat_id %}" class="btn btn-sm btn-danger">Delete</a>
                 </li>
                 {% endfor %}
             </ul>
