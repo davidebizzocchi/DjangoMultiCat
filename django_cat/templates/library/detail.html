@@ -13,6 +13,39 @@
         <div class="card-body">
             <p><strong>Library ID:</strong> {{ library.library_id }}</p>
             <p><strong>Owner:</strong> {{ library.user.username }}</p>
+            
+            <h3 class="mt-4">Files</h3>
+            {% if files %}
+            <ul class="list-group">
+                {% for file in files %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ file.title }}</span>
+                    <div>
+                        <span class="badge {% if file.ingested %}bg-success{% else %}bg-warning{% endif %}">
+                            {% if file.ingested %}Ingested{% else %}Pending{% endif %}
+                        </span>
+                        <a href="{% url 'user_upload:delete' file_id=file.file_id %}" class="btn btn-sm btn-danger ms-2">Delete</a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>No files in this library.</p>
+            {% endif %}
+
+            <h3 class="mt-4">Chats</h3>
+            {% if chats %}
+            <ul class="list-group">
+                {% for chat in chats %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% url 'chat:chat' chat_id=chat.chat_id %}">Chat #{{ forloop.counter }}</a>
+                    <a href="{% url 'chat:delete' chat_id=chat.chat_id %}" class="btn btn-sm btn-danger">Delete</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>No chats associated with this library.</p>
+            {% endif %}
         </div>
     </div>
 </div>
