@@ -15,13 +15,13 @@ class Library(BaseUserModel):
         from user_upload.models import File  # Import here to avoid circular imports
         return File.objects.filter(
             associations__library=self
-        ).select_related('userprofile').only(
+        ).values(
             'id',
-            'title',
+            'title', 
             'file_id',
-            'hash',
             'ingested',
-            'userprofile__cheschire_id'
+            'user__username',
+            'user__userprofile__cheschire_id',
         )
     
     def __str__(self):
