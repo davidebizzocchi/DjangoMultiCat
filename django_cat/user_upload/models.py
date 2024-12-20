@@ -7,7 +7,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 from app.utils import BaseUserModel
-from cheshire_cat.types import Notification
+from cheshire_cat.types import DocReadingProgress
 from user_upload.fields import FileObject, FileObjectDecoder, FileObjectEncoder
 from decouple import config
 from library.models import Library
@@ -102,36 +102,33 @@ class File(BaseUserModel):
         file_id = str(self.file_id)
         handler_refs = {'id': None}  # Dizionario per mantenere il riferimento
 
-        def handle_notification(notification: Notification):
-            message = notification.message
-
-            ic(f"Notification received: {message}")
-            ic(callback_on_step, callback_on_complete)
+        def handle_notification(notification: DocReadingProgress):
+            ic(f"Notification received: {notification}")
+            ic("callbacks", callback_on_step, callback_on_complete)
             
-            # Match per il progresso di lettura
-            if match := re.match(r"Read (\d+)% of (.+)", message):
-                percentage, source = match.groups()
-                ic(percentage, source)
-                if file_id in source:  # Verifichiamo che la notifica sia per questo file
-                    if callback_on_step is not None:
-                        callback_on_step(int(percentage))
-                
-            # Match per il completamento
-            elif match := re.match(r"Finished reading (.+), I made (\d+) thoughts on it\.", message):
-                source, thoughts = match.groups()
-                ic(source, thoughts)
-                if file_id in source:  # Verifichiamo che la notifica sia per questo file
-                    self.ingested = True
-                    self.save()
-                    if callback_on_complete is not None:
-                        callback_on_complete(int(thoughts))
-                    
-                    # Usa il riferimento dal dizionario
-                    ic(handler_refs['id'])
-                    self.client.unregister_notification_handler(handler_refs['id'])
+            ic(notification.type, (notification.type == "doc-reading-progress"))
+            if notification.type == "doc-reading-progress":
+                # Estrae la parte prima del primo punto
+                source_id = notification.source.split('.', 1)[0] if '.' in notification.source else notification.source
+                ic(source_id, (file_id == source_id))
+                if file_id == source_id:
+                    ic(notification.status, file_id, (notification.status == "progress"), (notification.status == "done"))
+                    if notification.status == "progress":
+                        if callback_on_step is not None:
+                            callback_on_step(int(notification.perc_read))
+
+                    elif notification.status == "done":
+                        self.ingested = True
+                        self.save()
+
+                        if callback_on_complete is not None:
+                            callback_on_complete()
+
+                        self.client.unregister_notification_handler(handler_refs['id'])
 
         # Salva l'ID nel dizionario di riferimento
-        handler_refs['id'] = self.client.register_notification_handler(handle_notification, callback_on_step, callback_on_complete)
+        handler_refs['id'] = self.client.register_notification_handler(handle_notification)
+        ic(handler_refs)
         return handler_refs['id']
 
     def upload(self):
@@ -177,6 +174,8 @@ class File(BaseUserModel):
         while not self.ingested:
             time.sleep(wait_time)
             self.refresh_from_db()
+
+            ic(self.ingested)
         
         if callback is not None:
             callback(*callback_args)
@@ -212,6 +211,7 @@ class File(BaseUserModel):
         Imposta come titolo il nome del file (inclusa estensione)
         """
         if not self.pk:
+            self.wait_ingest()
             threading.Thread(target=self.wait_upload).start()
 
         if not self.pk:
