@@ -157,8 +157,9 @@ class Cat(CatClient):
                 ic(progress)
                 # Notifica gli handler registrati con i loro argomenti
                 handlers = list(self._notification_handlers.values())
-                for handler, args, kwargs in handlers:
-                    handler(progress, *args, **kwargs)
+                for handler in handlers:
+                    ic(handler)
+                    handler(progress)
         
         else:
             # Handle generic messages
@@ -300,7 +301,8 @@ class Cat(CatClient):
             str: ID univoco dell'handler registrato
         """
         handler_id = str(uuid.uuid4())
-        self._notification_handlers[handler_id] = (handler, handler_args, handler_kwargs)
+        ic("registration", handler_id, handler)
+        self._notification_handlers[handler_id] = handler
         return handler_id
 
     def unregister_notification_handler(self, handler_id: str):
