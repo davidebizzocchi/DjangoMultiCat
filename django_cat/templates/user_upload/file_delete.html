@@ -5,14 +5,18 @@
 {% block title %}Elimina File{% endblock %}
 
 {% block contenuto %}
-    <h1>Conferma Eliminazione</h1>
-    <p>Sei sicuro di voler eliminare il file "{{ file.title }}"?</p>
-    <p>I vector store contenti questo file non saranno eliminati</p>
-
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit">Conferma Eliminazione</button>
-        <a href="{% url 'user_upload:list' %}">Torna ai files</a>
-    </form>
-
+<div class="card w-96 bg-base-100 shadow-xl mx-auto mt-10">
+    <div class="card-body">
+        <h2 class="card-title text-error">Conferma Eliminazione</h2>
+        <p>Sei sicuro di voler eliminare il file "{{ file.title }}"?</p>
+        <p class="text-sm opacity-70">I vector store contenti questo file non saranno eliminati</p>
+        <div class="card-actions justify-end mt-4">
+            <a href="{% url 'user_upload:list' %}" class="btn btn-secondary">Annulla</a>
+            <form method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Elimina</button>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
