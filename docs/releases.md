@@ -11,6 +11,42 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+5ef4894 - Merge branch '28-issue-migliorare-richieste-di-associazione' into dev
+4502971 - core
+738c3cc - reuse file name in upload source
+e2a88d5 - fix chat history delete
+b470486 - removed ic
+5717801 - core
+c1aee56 - removed invoke wait_ingest
+9c6ff8d - wait ingest fix
+3ac41f1 - removed args
+5ba8ceb - removed odoo
+64e93cb - removed odoo
+a16a778 - modified file list endpoint
+e786fde - handler params
+98faecb - ingest progress notification type
+e0ed1cc - json-notification
+03d1fa8 - wait ingest async
+c3eaffd - core
+7959b78 - wait ingest before assoc chat_id to file in client
+e137ea7 - pass a file or file_id in client
+09f0800 - file-library relation call library for client update
+88415a0 - library manage chat and file
+b484c87 - chat libraries view
+4cfa57e - save and delete client requests
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 d20128a - Merge branch '27-issue-scrivere-due-endpoint-che-dato-un-file_id-permetta-di-aggiungeretogliere-la-chat-dai-metadati' into dev
 ee473d8 - core
 016c48a - fix edit_chat_to_memories_from_metadata
