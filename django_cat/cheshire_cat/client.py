@@ -155,10 +155,10 @@ class Cat(CatClient):
                 progress = DocReadingProgress(**content)
                 
                 ic(progress)
-                # Notifica gli handler registrati
+                # Notifica gli handler registrati con i loro argomenti
                 handlers = list(self._notification_handlers.values())
-                for handler in handlers:
-                    handler(progress)
+                for handler, args, kwargs in handlers:
+                    handler(progress, *args, **kwargs)
         
         else:
             # Handle generic messages
@@ -287,18 +287,20 @@ class Cat(CatClient):
     def get_chat_list(self):
         return self.memory.get_working_memories_list()
 
-    def register_notification_handler(self, handler, *args, **kwargs) -> str:
+    def register_notification_handler(self, handler, *handler_args, **handler_kwargs) -> str:
         """
         Registra un handler per le notifiche e restituisce il suo ID
         
         Args:
             handler: Funzione che riceve una notifica
+            *handler_args: Argomenti posizionali da passare all'handler
+            **handler_kwargs: Argomenti nominali da passare all'handler
             
         Returns:
             str: ID univoco dell'handler registrato
         """
         handler_id = str(uuid.uuid4())
-        self._notification_handlers[handler_id] = handler
+        self._notification_handlers[handler_id] = (handler, handler_args, handler_kwargs)
         return handler_id
 
     def unregister_notification_handler(self, handler_id: str):
