@@ -167,3 +167,10 @@ class Notification(BaseModel):
     @property
     def message(self):
         return self.content
+
+class DocReadingProgress(BaseModel):
+    type: Literal["doc-reading-progress"]
+    status: Literal["done", "progress"]
+    perc_read: int 
+    source: str
+    received_at: float = Field(default_factory=lambda: time.time())
