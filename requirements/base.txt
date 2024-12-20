@@ -65,12 +65,12 @@ markdown2==2.5.2
     # via -r requirements/base.in
 psycopg2-binary==2.9.10
     # via -r requirements/base.in
-pydantic==2.10.3
+pydantic==2.10.4
     # via
     #   cheshire-cat-api
     #   django-ninja
     #   groq
-pydantic-core==2.27.1
+pydantic-core==2.27.2
     # via pydantic
 pygments==2.18.0
     # via icecream
