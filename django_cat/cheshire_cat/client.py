@@ -341,7 +341,7 @@ class Cat(CatClient):
         with open(file.file.path.absolute(), "rb") as f:
             # ic(f, file.file.path.absolute(), mimetypes.guess_type(file.file.path.absolute())[0])
             files = {"file": (
-                f"{file.file_id}{file.file.path.suffix}",  # Usa il file_id con l'estensione
+                str(file.file.path.name),  # Usa il file_id con l'estensione
                 f,
                 mimetypes.guess_type(file.file.path.absolute())[0]
             )}
