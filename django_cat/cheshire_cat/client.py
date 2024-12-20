@@ -14,7 +14,7 @@ from collections import deque
 from typing import NamedTuple, Deque
 import uuid
 
-from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification
+from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification, DocReadingProgress
 from groq import Groq
 
 import cheshire_cat_api as ccat
@@ -80,8 +80,6 @@ class Cat(CatClient):
             self.startup()
             
             self._notification_handlers: Dict[str, callable] = {}
-            self._notifications: Deque[Notification] = deque()
-            self._notification_ttl = 60  # 1 minuto in secondi
             self._initialized = True
 
     def _check_ws_connection(self):
@@ -139,6 +137,7 @@ class Cat(CatClient):
         msg_type = message.get("type", None)
         chat_id = message.get("chat_id", "default")
         
+        ic(message)
         if msg_type == "chat_token":
             chat_message = ChatToken(**message)
             
@@ -149,17 +148,17 @@ class Cat(CatClient):
             self._message_contents[chat_id] = ChatContent(**message)
             self.end_stream(chat_id)
         
-        elif msg_type == "notification":
-            notification = Notification(**message)
-            self._add_notification(notification)
-
-            ic(f"notification: {notification.content}")
-
-            # Crea una lista dei valori per evitare il RuntimeError durante l'iterazione
-            handlers = list(self._notification_handlers.values())
-            for handler in handlers:
-                ic("ora sto eseguendo handler")
-                handler(notification)
+        elif msg_type == "json-notification":
+            content = message.get("content", {})
+            ic("json-notification", content)
+            if content.get("type") == "doc-reading-progress":
+                progress = DocReadingProgress(**content)
+                
+                ic(progress)
+                # Notifica gli handler registrati
+                handlers = list(self._notification_handlers.values())
+                for handler in handlers:
+                    handler(progress)
         
         else:
             # Handle generic messages
