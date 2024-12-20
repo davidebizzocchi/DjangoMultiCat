@@ -137,7 +137,6 @@ class Cat(CatClient):
         msg_type = message.get("type", None)
         chat_id = message.get("chat_id", "default")
         
-        ic(message)
         if msg_type == "chat_token":
             chat_message = ChatToken(**message)
             
@@ -150,15 +149,12 @@ class Cat(CatClient):
         
         elif msg_type == "json-notification":
             content = message.get("content", {})
-            ic("json-notification", content)
             if content.get("type") == "doc-reading-progress":
                 progress = DocReadingProgress(**content)
                 
-                ic(progress)
                 # Notifica gli handler registrati con i loro argomenti
                 handlers = list(self._notification_handlers.values())
                 for handler in handlers:
-                    ic(handler)
                     handler(progress)
         
         else:
@@ -301,7 +297,6 @@ class Cat(CatClient):
             str: ID univoco dell'handler registrato
         """
         handler_id = str(uuid.uuid4())
-        ic("registration", handler_id, handler)
         self._notification_handlers[handler_id] = handler
         return handler_id
 
@@ -339,7 +334,7 @@ class Cat(CatClient):
         url =  f"http://{HOST}:{PORT}/rabbithole/"
         
         with open(file.file.path.absolute(), "rb") as f:
-            ic(f, file.file.path.absolute(), mimetypes.guess_type(file.file.path.absolute())[0])
+            # ic(f, file.file.path.absolute(), mimetypes.guess_type(file.file.path.absolute())[0])
             files = {"file": (
                 f"{file.file_id}{file.file.path.suffix}",  # Usa il file_id con l'estensione
                 f,

@@ -103,16 +103,11 @@ class File(BaseUserModel):
         handler_refs = {'id': None}  # Dizionario per mantenere il riferimento
 
         def handle_notification(notification: DocReadingProgress):
-            ic(f"Notification received: {notification}")
-            ic("callbacks", callback_on_step, callback_on_complete)
             
-            ic(notification.type, (notification.type == "doc-reading-progress"))
             if notification.type == "doc-reading-progress":
                 # Estrae la parte prima del primo punto
                 source_id = notification.source.split('.', 1)[0] if '.' in notification.source else notification.source
-                ic(source_id, (file_id == source_id))
                 if file_id == source_id:
-                    ic(notification.status, file_id, (notification.status == "progress"), (notification.status == "done"))
                     if notification.status == "progress":
                         if callback_on_step is not None:
                             callback_on_step(int(notification.perc_read))
@@ -128,7 +123,6 @@ class File(BaseUserModel):
 
         # Salva l'ID nel dizionario di riferimento
         handler_refs['id'] = self.client.register_notification_handler(handle_notification)
-        ic(handler_refs)
         return handler_refs['id']
 
     def upload(self):
@@ -174,8 +168,6 @@ class File(BaseUserModel):
         while not self.ingested:
             time.sleep(wait_time)
             self.refresh_from_db()
-
-            ic(self.ingested)
         
         if callback is not None:
             callback(*callback_args)
