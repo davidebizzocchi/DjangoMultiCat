@@ -263,17 +263,22 @@ class Cat(CatClient):
         for collection in self.memory.get_collections()["collections"]:
             yield collection["name"]
 
-    def delete_chat(self, chat_id):
-        self.memory.wipe_memory_points_by_metadata(
+    def wipe_chat_episodic(self, chat_id: str):
+        # è corretto che la chiave sia "chat"!
+        return self.memory.wipe_memory_points_by_metadata(
             collection_id="episodic",
-            body={"chat_id": chat_id}
+            body={"chat": chat_id}
         )
+
+    def delete_chat(self, chat_id: str):
+        self.wipe_chat_episodic(chat_id)
         return self.memory.delete_working_memory(chat_id)
     
-    def wipe_chat(self, chat_id):
+    def wipe_chat(self, chat_id: str):
+        self.wipe_chat_episodic(chat_id)
         return self.memory.wipe_conversation_history_by_chat(chat_id)
     
-    def get_chat_history(self, chat_id):
+    def get_chat_history(self, chat_id: str):
         response = self.memory.get_working_memory(chat_id)
         if "history" in response:
             return ChatHistory(messages=[
