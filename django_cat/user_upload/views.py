@@ -37,23 +37,6 @@ class FileUploadView(LoginRequiredMixin, CreateView):
                         self.request,
                         f'File aggiunto alle librerie: {", ".join(lib.name for lib in uploaded)}'
                     )
-                
-                def _on_step(perc):
-                    ic(f'Lettura {file.title}: {perc}%')
-                    messages.info(
-                        self.request,
-                        f'Lettura {file.title}: {perc}%'
-                    )
-                
-                def _on_complete(thoughts):
-                    ic(f'Completata lettura di {file.title} con {thoughts} thoughts')
-                    messages.success(
-                        self.request,
-                        f'Completata lettura di {file.title} con {thoughts} thoughts'
-                    )
-
-                handler_id = file.wait_ingest(_on_step, _on_complete)
-                
             else:
                 messages.warning(
                     self.request,
