@@ -19,7 +19,7 @@ class NewLibraryView(LoginRequiredMixin, CreateView):
 class DeleteLibraryView(LoginRequiredMixin, DeleteView):
     model = Library
     template_name = 'library/delete_confirm.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('library:list')
     slug_field = 'library_id'
     slug_url_kwarg = 'library_id'
 

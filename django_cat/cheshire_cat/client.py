@@ -14,7 +14,7 @@ from collections import deque
 from typing import NamedTuple, Deque
 import uuid
 
-from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification
+from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification, DocReadingProgress
 from groq import Groq
 
 import cheshire_cat_api as ccat
@@ -80,8 +80,6 @@ class Cat(CatClient):
             self.startup()
             
             self._notification_handlers: Dict[str, callable] = {}
-            self._notifications: Deque[Notification] = deque()
-            self._notification_ttl = 60  # 1 minuto in secondi
             self._initialized = True
 
     def _check_ws_connection(self):
@@ -149,17 +147,15 @@ class Cat(CatClient):
             self._message_contents[chat_id] = ChatContent(**message)
             self.end_stream(chat_id)
         
-        elif msg_type == "notification":
-            notification = Notification(**message)
-            self._add_notification(notification)
-
-            ic(f"notification: {notification.content}")
-
-            # Crea una lista dei valori per evitare il RuntimeError durante l'iterazione
-            handlers = list(self._notification_handlers.values())
-            for handler in handlers:
-                ic("ora sto eseguendo handler")
-                handler(notification)
+        elif msg_type == "json-notification":
+            content = message.get("content", {})
+            if content.get("type") == "doc-reading-progress":
+                progress = DocReadingProgress(**content)
+                
+                # Notifica gli handler registrati con i loro argomenti
+                handlers = list(self._notification_handlers.values())
+                for handler in handlers:
+                    handler(progress)
         
         else:
             # Handle generic messages
@@ -267,17 +263,22 @@ class Cat(CatClient):
         for collection in self.memory.get_collections()["collections"]:
             yield collection["name"]
 
-    def delete_chat(self, chat_id):
-        self.memory.wipe_memory_points_by_metadata(
+    def wipe_chat_episodic(self, chat_id: str):
+        # è corretto che la chiave sia "chat"!
+        return self.memory.wipe_memory_points_by_metadata(
             collection_id="episodic",
-            body={"chat_id": chat_id}
+            body={"chat": chat_id}
         )
+
+    def delete_chat(self, chat_id: str):
+        self.wipe_chat_episodic(chat_id)
         return self.memory.delete_working_memory(chat_id)
     
-    def wipe_chat(self, chat_id):
+    def wipe_chat(self, chat_id: str):
+        self.wipe_chat_episodic(chat_id)
         return self.memory.wipe_conversation_history_by_chat(chat_id)
     
-    def get_chat_history(self, chat_id):
+    def get_chat_history(self, chat_id: str):
         response = self.memory.get_working_memory(chat_id)
         if "history" in response:
             return ChatHistory(messages=[
@@ -288,12 +289,14 @@ class Cat(CatClient):
     def get_chat_list(self):
         return self.memory.get_working_memories_list()
 
-    def register_notification_handler(self, handler, *args, **kwargs) -> str:
+    def register_notification_handler(self, handler, *handler_args, **handler_kwargs) -> str:
         """
         Registra un handler per le notifiche e restituisce il suo ID
         
         Args:
             handler: Funzione che riceve una notifica
+            *handler_args: Argomenti posizionali da passare all'handler
+            **handler_kwargs: Argomenti nominali da passare all'handler
             
         Returns:
             str: ID univoco dell'handler registrato
@@ -336,9 +339,9 @@ class Cat(CatClient):
         url =  f"http://{HOST}:{PORT}/rabbithole/"
         
         with open(file.file.path.absolute(), "rb") as f:
-            ic(f, file.file.path.absolute(), mimetypes.guess_type(file.file.path.absolute())[0])
+            # ic(f, file.file.path.absolute(), mimetypes.guess_type(file.file.path.absolute())[0])
             files = {"file": (
-                f"{file.file_id}{file.file.path.suffix}",  # Usa il file_id con l'estensione
+                str(file.file.path.name),  # Usa il file_id con l'estensione
                 f,
                 mimetypes.guess_type(file.file.path.absolute())[0]
             )}
@@ -431,10 +434,15 @@ class Cat(CatClient):
         :param mode: 'add' to add chat_ids, 'remove' to remove them
         """
 
+        if isinstance(file, str):
+            file_id = file
+        else:
+            file_id = str(file.file_id)
+
         if isinstance(chat_ids, str):
             chat_ids = [chat_ids]
 
-        search_metadata = {"file_id": str(file.file_id)}
+        search_metadata = {"file_id": file_id}
         return self.memory.edit_chat_to_points(
             collection_id=collection_id,
             search_metadata=search_metadata,
@@ -453,11 +461,16 @@ class Cat(CatClient):
             dict: Response from the API with update status
         """
 
+        if isinstance(file, str):
+            file_id = file
+        else:
+            file_id = str(file.file_id)
+
         if isinstance(chat_ids, str):
             chat_ids = [chat_ids]
 
         return self.edit_file_chats(
-            file, chat_ids, "add", "declarative"
+            file_id, chat_ids, "add", "declarative"
         )
     
     def remove_file_to_chats(self, file, chat_ids: List[str]):
@@ -471,11 +484,16 @@ class Cat(CatClient):
             dict: Response from the API with update status
         """
 
+        if isinstance(file, str):
+            file_id = file
+        else:
+            file_id = str(file.file_id)
+
         if isinstance(chat_ids, str):
             chat_ids = [chat_ids]
 
         return self.edit_file_chats(
-            file, chat_ids, "remove", "declarative"
+            file_id, chat_ids, "remove", "declarative"
         )
 
 @wait_cat

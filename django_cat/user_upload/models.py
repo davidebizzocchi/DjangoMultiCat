@@ -7,7 +7,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 from app.utils import BaseUserModel
-from cheshire_cat.types import Notification
+from cheshire_cat.types import DocReadingProgress
 from user_upload.fields import FileObject, FileObjectDecoder, FileObjectEncoder
 from decouple import config
 from library.models import Library
@@ -19,6 +19,17 @@ from icecream import ic
 class FileLibraryAssociation(models.Model):
     file = models.ForeignKey('File', on_delete=models.CASCADE, related_name='associations')
     library = models.ForeignKey(Library, on_delete=models.CASCADE, related_name='associations')
+
+
+    def save(self, *args, **kwargs):
+        threading.Thread(self.file.wait_until_ingested(self.library.add_file_to_existing_chats, str(self.file.file_id))).start()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.library.remove_file_from_existing_chats(str(self.file.file_id))
+
+        super().delete(*args, **kwargs)
+    
 
     def __str__(self):
         return f"{self.file} in {self.library}"
@@ -91,36 +102,27 @@ class File(BaseUserModel):
         file_id = str(self.file_id)
         handler_refs = {'id': None}  # Dizionario per mantenere il riferimento
 
-        def handle_notification(notification: Notification):
-            message = notification.message
-
-            ic(f"Notification received: {message}")
-            ic(callback_on_step, callback_on_complete)
+        def handle_notification(notification: DocReadingProgress):
             
-            # Match per il progresso di lettura
-            if match := re.match(r"Read (\d+)% of (.+)", message):
-                percentage, source = match.groups()
-                ic(percentage, source)
-                if file_id in source:  # Verifichiamo che la notifica sia per questo file
-                    if callback_on_step is not None:
-                        callback_on_step(int(percentage))
-                
-            # Match per il completamento
-            elif match := re.match(r"Finished reading (.+), I made (\d+) thoughts on it\.", message):
-                source, thoughts = match.groups()
-                ic(source, thoughts)
-                if file_id in source:  # Verifichiamo che la notifica sia per questo file
-                    self.ingested = True
-                    self.save()
-                    if callback_on_complete is not None:
-                        callback_on_complete(int(thoughts))
-                    
-                    # Usa il riferimento dal dizionario
-                    ic(handler_refs['id'])
-                    self.client.unregister_notification_handler(handler_refs['id'])
+            if notification.type == "doc-reading-progress":
+                # Estrae la parte prima del primo punto
+                source_id = notification.source.split('.', 1)[0] if '.' in notification.source else notification.source
+                if file_id == source_id:
+                    if notification.status == "progress":
+                        if callback_on_step is not None:
+                            callback_on_step(int(notification.perc_read))
+
+                    elif notification.status == "done":
+                        self.ingested = True
+                        self.save()
+
+                        if callback_on_complete is not None:
+                            callback_on_complete()
+
+                        self.client.unregister_notification_handler(handler_refs['id'])
 
         # Salva l'ID nel dizionario di riferimento
-        handler_refs['id'] = self.client.register_notification_handler(handle_notification, callback_on_step, callback_on_complete)
+        handler_refs['id'] = self.client.register_notification_handler(handle_notification)
         return handler_refs['id']
 
     def upload(self):
@@ -154,6 +156,21 @@ class File(BaseUserModel):
                 return
             
         self.upload()
+
+    def wait_until_ingested(self, callback=None, *callback_args, wait_time=0.5):
+        """
+        Wait until the file is ingested
+        Args:
+            callback: function to call after ingestion is complete
+            *callback_args: arguments to pass to the callback function
+            wait_time: time to wait between checks (default: 0.5 seconds)
+        """
+        while not self.ingested:
+            time.sleep(wait_time)
+            self.refresh_from_db()
+        
+        if callback is not None:
+            callback(*callback_args)
     
     @property
     def link(self):
@@ -186,6 +203,7 @@ class File(BaseUserModel):
         Imposta come titolo il nome del file (inclusa estensione)
         """
         if not self.pk:
+            self.wait_ingest()
             threading.Thread(target=self.wait_upload).start()
 
         if not self.pk:
