@@ -11,6 +11,21 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+bbad195 - Merge branch '29-issue-adeguare-stile-cancella-file' into dev
+9bee8b6 - file delete cool
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 5ef4894 - Merge branch '28-issue-migliorare-richieste-di-associazione' into dev
 4502971 - core
 738c3cc - reuse file name in upload source
