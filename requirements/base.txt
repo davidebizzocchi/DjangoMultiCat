@@ -22,7 +22,7 @@ charset-normalizer==3.4.0
     # via requests
 cheshire-cat-api==1.4.8
     # via -r requirements/base.in
-click==8.1.7
+click==8.1.8
     # via gtts
 colorama==0.4.6
     # via icecream
@@ -63,6 +63,12 @@ idna==3.10
     #   requests
 markdown2==2.5.2
     # via -r requirements/base.in
+packaging==24.2
+    # via pytesseract
+pillow==11.0.0
+    # via
+    #   -r requirements/base.in
+    #   pytesseract
 psycopg2-binary==2.9.10
     # via -r requirements/base.in
 pydantic==2.10.4
@@ -74,6 +80,8 @@ pydantic-core==2.27.2
     # via pydantic
 pygments==2.18.0
     # via icecream
+pytesseract==0.3.13
+    # via -r requirements/base.in
 python-dateutil==2.9.0.post0
     # via cheshire-cat-api
 python-decouple==3.8
