@@ -12,3 +12,6 @@ gTTS
 markdown2
 beautifulsoup4
 sentry-sdk[django]
+pytesseract
+pdf2image
+Pillow
