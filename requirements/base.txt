@@ -65,9 +65,12 @@ markdown2==2.5.2
     # via -r requirements/base.in
 packaging==24.2
     # via pytesseract
+pdf2image==1.17.0
+    # via -r requirements/base.in
 pillow==11.0.0
     # via
     #   -r requirements/base.in
+    #   pdf2image
     #   pytesseract
 psycopg2-binary==2.9.10
     # via -r requirements/base.in
