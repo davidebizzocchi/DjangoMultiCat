@@ -53,10 +53,12 @@ class File(BaseUserModel):
         default=IngestionConfig,
     )
     PENDING_CONFIG = 'pending_config'
+    PENDING_PROCESS = 'pending_process'  # Nuovo stato
     PENDING_UPLOAD = 'pending_upload'
     READY = 'ready'
     STATUS_CHOICES = [
         (PENDING_CONFIG, 'In configurazione'),
+        (PENDING_PROCESS, 'Post processing'),  # Nuovo stato
         (PENDING_UPLOAD, 'In caricamento'),
         (READY, 'Pronto'),
     ]
@@ -79,6 +81,10 @@ class File(BaseUserModel):
     @property 
     def is_ready(self):
         return self.status == self.READY
+
+    @property
+    def is_processing(self):
+        return self.status == self.PENDING_PROCESS
 
     @property 
     def libraries(self):
@@ -143,13 +149,22 @@ class File(BaseUserModel):
                 # Estrae la parte prima del primo punto
                 source_id = notification.source.split('.', 1)[0] if '.' in notification.source else notification.source
                 if file_id == source_id:
+                    ic(notification.status)
                     if notification.status == "progress":
+                        self.config_progress = notification.perc_read
+                        self.save(update_fields=['config_progress'])
+                        
+                        ic(self.config_progress, notification.perc_read)
+
                         if callback_on_step is not None:
                             callback_on_step(int(notification.perc_read))
 
                     elif notification.status == "done":
                         self.ingested = True
-                        self.save()
+                        self.status = self.READY
+
+
+                        self.save(update_fields=['status', "ingested"])
 
                         if callback_on_complete is not None:
                             callback_on_complete()
@@ -191,15 +206,14 @@ class File(BaseUserModel):
                 return
             
         self.status = self.PENDING_CONFIG
-        self.save(update_fields=['status'])
+        self.config_progress = 0
+        self.save(update_fields=['status', 'config_progress'])
         self.apply_config_file()
 
-        self.status = self.PENDING_UPLOAD
-        self.save(update_fields=['status'])
+        # Aggiungi il post-processing
+        self.post_process()
         
-        # self.upload()
-        self.status = self.READY
-        self.save(update_fields=['status'])
+        self.upload()
 
     def wait_until_ingested(self, callback=None, *callback_args, wait_time=0.5):
         """
@@ -244,8 +258,9 @@ class File(BaseUserModel):
         Processa il file in base alla configurazione di ingestione e salva il risultato
         """
         if not self.ingestion_config.is_ocr:
-            self.status = self.PENDING_UPLOAD
-            self.save(update_fields=['status'])
+            self.status = self.PENDING_PROCESS
+            self.config_progress = 0
+            self.save(update_fields=['status', 'config_progress'])
             return
         
         try:
@@ -277,12 +292,23 @@ class File(BaseUserModel):
             # Salva il risultato
             new_path = save_processed_text(processed_text, self.file.path.absolute())
             self.file = FileObject(path=new_path)
-            self.config_progress = 100
-            self.status = self.PENDING_UPLOAD
+
+            self.status = self.PENDING_PROCESS  # Cambiato da PENDING_UPLOAD a PENDING_PROCESS
+            self.config_progress = 0
             self.save(update_fields=['file', 'config_progress', 'status'])
                 
         except Exception as e:
             raise ValueError(f"Errore nel processing del file: {str(e)}")
+
+    def post_process(self):
+        """
+        Esegue eventuali elaborazioni post-configurazione prima dell'upload
+        """
+        # Qui puoi aggiungere qualsiasi logica di post-processing
+        # Per ora semplicemente passiamo allo stato successivo
+        self.status = self.PENDING_UPLOAD
+        self.config_progress = 0
+        self.save(update_fields=['status', 'config_progress'])
 
     def save(self, *args, **kwargs):
         """

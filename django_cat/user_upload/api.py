@@ -10,6 +10,7 @@ class FileStatusSchema(Schema):
     progress: int
     is_ocr: bool
     is_ingested: bool
+    is_processing: bool
 
 @router.get("/{file_id}/status", response=FileStatusSchema, url_name="config_status")
 def get_file_status(request, file_id: str):
@@ -18,5 +19,6 @@ def get_file_status(request, file_id: str):
         "status": file.status,
         "progress": file.config_progress,
         "is_ocr": file.ingestion_config.is_ocr,
-        "is_ingested": file.ingested
+        "is_ingested": file.ingested,
+        "is_processing": file.is_processing
     }
