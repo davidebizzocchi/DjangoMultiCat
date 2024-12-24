@@ -26,6 +26,8 @@ import markdown2
 from cheshire_cat.custom_objects import CatClient
 import tiktoken
 
+from django.conf import settings
+
 
 CatConfig = ccat.Config
 
@@ -77,7 +79,7 @@ class Cat(CatClient):
             
             super().__init__(on_message=self.on_message, *args, **kwargs)
 
-            self._groq = Groq(api_key=config("GROQ_API_KEY"))
+            self._groq = Groq(api_key=settings.GROQ_API_KEY)
             self.startup()
             
             self._notification_handlers: Dict[str, callable] = {}

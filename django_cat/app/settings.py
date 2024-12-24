@@ -34,6 +34,7 @@ sentry_sdk.init(
     release=get_version_from_file()
 )
 
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')  # '' è il valore di default se non trovato
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
