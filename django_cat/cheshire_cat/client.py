@@ -24,6 +24,7 @@ from bs4 import BeautifulSoup
 import markdown2
 
 from cheshire_cat.custom_objects import CatClient
+import tiktoken
 
 
 CatConfig = ccat.Config
@@ -110,6 +111,16 @@ class Cat(CatClient):
                 raise TimeoutError("Cannot connect to the websocket")
 
         return self
+    
+    def count_token(self, message: str):
+        encoding = tiktoken.get_encoding("cl100k_base")
+        return len(encoding.encode(message))
+    
+    def chat_completition(self, message: str):
+        """Send a message to the completition chat"""
+        self.send(message=message, chat_id="completition")
+
+        return "completition"
 
     def send(self, message, chat_id="default", *args, **kwargs):
         """Send prompt to ws with specific chat_id"""
