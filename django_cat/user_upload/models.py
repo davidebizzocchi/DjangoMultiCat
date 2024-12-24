@@ -8,12 +8,14 @@ from django.conf import settings
 from django.db import models
 from app.utils import BaseUserModel
 from cheshire_cat.types import DocReadingProgress
-from user_upload.fields import FileObject, FileObjectDecoder, FileObjectEncoder
+from user_upload.fields import FileObject, FileObjectDecoder, FileObjectEncoder, IngestionConfig, IngestionConfigEncoder, IngestionConfigDecoder, IngestionType, PageMode
 from decouple import config
 from library.models import Library
 import re
 from threading import Event
 from icecream import ic
+from PIL import Image
+from user_upload.utils import process_image_ocr, get_image_from_file, save_processed_text
 
 
 class FileLibraryAssociation(models.Model):
@@ -39,11 +41,44 @@ class FileLibraryAssociation(models.Model):
         verbose_name_plural = 'file library associations'
 
 class File(BaseUserModel):
+    # Rimuovi la vecchia classe IngestionFlags
     title = models.CharField(max_length=255, default="")
     file: FileObject = models.JSONField(encoder=FileObjectEncoder, decoder=FileObjectDecoder)
     file_id = models.CharField(max_length=255, unique=True, default=uuid.uuid4)
     hash = models.CharField(null=True, blank=True)
     ingested = models.BooleanField(default=False)
+    ingestion_config: IngestionConfig = models.JSONField(
+        encoder=IngestionConfigEncoder,
+        decoder=IngestionConfigDecoder,
+        default=IngestionConfig,
+    )
+    PENDING_CONFIG = 'pending_config'
+    PENDING_UPLOAD = 'pending_upload'
+    READY = 'ready'
+    STATUS_CHOICES = [
+        (PENDING_CONFIG, 'In configurazione'),
+        (PENDING_UPLOAD, 'In caricamento'),
+        (READY, 'Pronto'),
+    ]
+    
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES,
+        default=PENDING_CONFIG
+    )
+    config_progress = models.IntegerField(default=0)  # Percentuale di completamento OCR
+    
+    @property
+    def is_configuring(self):
+        return self.status == self.PENDING_CONFIG
+        
+    @property
+    def is_uploading(self):
+        return self.status == self.PENDING_UPLOAD
+        
+    @property 
+    def is_ready(self):
+        return self.status == self.READY
 
     @property 
     def libraries(self):
@@ -155,7 +190,13 @@ class File(BaseUserModel):
             if time.time() - start > timeout_seconds:
                 return
             
+        self.status = self.PENDING_CONFIG
+        self.save(update_fields=['status'])
+        self.apply_config_file()
+        
         self.upload()
+        self.status = self.READY
+        self.save(update_fields=['status'])
 
     def wait_until_ingested(self, callback=None, *callback_args, wait_time=0.5):
         """
@@ -195,6 +236,46 @@ class File(BaseUserModel):
 
         return hasher.hexdigest()
     
+    def apply_config_file(self):
+        """
+        Processa il file in base alla configurazione di ingestione e salva il risultato
+        """
+        if not self.ingestion_config.is_ocr:
+            self.status = self.PENDING_UPLOAD
+            self.save(update_fields=['status'])
+            return
+        
+        try:
+            # Ottieni immagine/i dal file
+            images = get_image_from_file(self.file.path)
+            
+            ic(images, type(images))
+            # Processa le immagini e ottieni il testo
+            if isinstance(images, list):  # PDF multi-pagina
+                texts = []
+                total_images = len(images)
+                for idx, img in enumerate(images, 1):
+                    texts.append(process_image_ocr(img, is_double_page=self.ingestion_config.is_double_page))
+                    self.config_progress = int((idx / total_images) * 100)
+                    self.save(update_fields=['config_progress'])
+                processed_text = "\n\n=== NUOVA PAGINA ===\n\n".join(texts)
+            else:  # Singola immagine
+                self.config_progress = 50
+                self.save(update_fields=['config_progress'])
+                processed_text = process_image_ocr(images, is_double_page=self.ingestion_config.is_double_page)
+
+            # Salva il nuovo file
+            new_path = save_processed_text(processed_text, self.file.path.absolute())
+
+            # Aggiorna il riferimento al file
+            self.file = FileObject(path=new_path)
+            self.config_progress = 100
+            self.status = self.PENDING_UPLOAD
+            self.save(update_fields=['file', 'config_progress', 'status'])
+                
+        except Exception as e:
+            raise ValueError(f"Errore nel processing del file: {str(e)}")
+
     def save(self, *args, **kwargs):
         """
         Esegue azioni al salvataggio del modello
@@ -217,14 +298,29 @@ class File(BaseUserModel):
 
     def delete(self):
         """
-        Esegue azioni alla cancellazione del modello
-
-        Cancella il file dal filesystem
+        Esegue azioni alla cancellazione del modello.
+        Cancella il file principale e tutti i file processati associati.
         """
-
+        # Elimina il file dal cat
         ic(self.client.delete_file(self))
+        
+        # Trova e elimina tutti i file associati
+        base_path = self.file.path.parent
+        base_name = self.hash
+        
+        # Cerca file con pattern nome_1.txt, nome_2.txt, ecc
+        for file_path in base_path.glob(f"{base_name}*.*"):
+            try:
+                file_path.unlink()
+            except FileNotFoundError:
+                continue
+                
+        # Elimina il file originale
+        try:
+            self.file.path.unlink()
+        except FileNotFoundError:
+            pass
 
-        self.file.path.unlink()
         super().delete()
 
     def __str__(self):
