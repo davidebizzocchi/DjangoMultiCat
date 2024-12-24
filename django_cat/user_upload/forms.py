@@ -7,7 +7,7 @@ from django import forms
 from icecream import ic
 
 from library.models import Library
-from user_upload.fields import FileObject
+from user_upload.fields import FileObject, IngestionConfig, IngestionType, PageMode
 from user_upload.models import File
 
 
@@ -32,16 +32,28 @@ class MultipleFileField(forms.FileField):
 
 class FileUploadForm(forms.Form):
     file = MultipleFileField()
+    ingestion_type = forms.ChoiceField(
+        choices=[
+            (IngestionType.NORMAL.value, 'Normale'),
+            (IngestionType.OCR.value, 'OCR'),
+        ],
+        initial=IngestionType.NORMAL.value,
+        label="Tipo di ingestione",
+    )
+    page_mode = forms.ChoiceField(
+        choices=[
+            (PageMode.SINGLE.value, 'Pagina Singola'),
+            (PageMode.DOUBLE.value, 'Doppia Pagina'),
+        ],
+        initial=PageMode.SINGLE.value,
+        label="Modalità pagina",
+    )
     libraries = forms.MultipleChoiceField(
         choices=[],
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label="Seleziona dove aggiungere i tuoi file",
     )
-
-    # class Meta:
-    #     model = FileUpload
-    #     fields = ("file",)
 
     model = File
     instance = None
@@ -97,10 +109,23 @@ class FileUploadForm(forms.Form):
                 raise forms.ValidationError(f"{f} is not a valid.")
             
         return file
+
+    def clean_ingestion_config(self):
+        data = self.cleaned_data['ingestion_config']
+        return IngestionConfig(**data)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # Crea il modello Pydantic dalle selezioni separate
+        cleaned_data['ingestion_config'] = IngestionConfig(
+            type=cleaned_data.get('ingestion_type', IngestionType.NORMAL),
+            mode=cleaned_data.get('page_mode', PageMode.SINGLE)
+        )
+        return cleaned_data
         
 
     def save(self, commit=True):
-        saved: List[List[bool, File, List[Library], List[Library]]] = []  # bool = True -> created / False -> not created, first VectorStore add / secondo Vectorstore delete
+        saved: List[List[bool, File, List[Library], List[Library]]] = []
 
         if self._is_instanced:
             uploaded, deleted = self.add_to_libraries(self.instance)
@@ -114,7 +139,6 @@ class FileUploadForm(forms.Form):
             if not possible_files.exists():
                 
                 file_hash_norm = file_hash + os.path.splitext(f.name)[1]
-
                 file_path: Path = settings.UPLOADS_ROOT / file_hash_norm
 
                 counter = 1
@@ -125,7 +149,11 @@ class FileUploadForm(forms.Form):
                 self.save_file(f, file_path)
             
                 instance = File.objects.create(
-                    file=FileObject(path=file_path), user=self.user, hash=file_hash, title=f.name
+                    file=FileObject(path=file_path), 
+                    user=self.user, 
+                    hash=file_hash, 
+                    title=f.name,
+                    ingestion_config=self.cleaned_data['ingestion_config']
                 )
 
                 if commit:
@@ -133,7 +161,6 @@ class FileUploadForm(forms.Form):
 
                 uploaded, deleted = self.add_to_libraries(instance)
                 saved.append([True, instance, uploaded, deleted])
-
             else:
                 saved.append([False, possible_files.first(), [], []])
 
