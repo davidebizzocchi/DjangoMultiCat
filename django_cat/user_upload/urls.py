@@ -11,5 +11,5 @@ urlpatterns = [
     path('files/<str:file_id>/delete/', views.FileDeleteView.as_view(), name='delete'),
     path('files/<str:file_id>/associate/', views.FileAssociationView.as_view(), name='assoc'),
 
-    path("api/", include((list(router.urls_paths("")), "api"))),
+    path("api/", include((list(router.urls_paths("")), "api"), namespace="api")),
 ]
