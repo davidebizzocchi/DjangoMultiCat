@@ -184,7 +184,7 @@ class File(BaseUserModel):
         timeout_seconds = config("WAIT_UPLOAD", cast=int, default=30)  # timeout in seconds
         start = time.time()
         
-        while not self.file.path.exists():
+        while not self.file.path.exists() or not self.pk:
             time.sleep(0.2)  # check every 200ms
             
             if time.time() - start > timeout_seconds:
@@ -193,8 +193,11 @@ class File(BaseUserModel):
         self.status = self.PENDING_CONFIG
         self.save(update_fields=['status'])
         self.apply_config_file()
+
+        self.status = self.PENDING_UPLOAD
+        self.save(update_fields=['status'])
         
-        self.upload()
+        # self.upload()
         self.status = self.READY
         self.save(update_fields=['status'])
 
@@ -249,7 +252,7 @@ class File(BaseUserModel):
             # Ottieni immagine/i dal file
             images = get_image_from_file(self.file.path)
             
-            ic(images, type(images))
+            # ic(images, type(images))
             # Processa le immagini e ottieni il testo
             if isinstance(images, list):  # PDF multi-pagina
                 texts = []
