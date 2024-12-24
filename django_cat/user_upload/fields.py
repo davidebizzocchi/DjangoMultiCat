@@ -58,9 +58,69 @@ class PageMode(str, Enum):
     SINGLE = "single"
     DOUBLE = "double"
 
+# System prompt di base per tutti i tipi di elaborazione
+SYSTEM_PROMPT = """Sei un assistente esperto in analisi e elaborazione di testi.
+Il tuo compito è aiutare a processare documenti seguendo le istruzioni specifiche fornite.
+Mantieni un tono professionale e fornisci output strutturati e ben organizzati.
+Non aggiungere commenti personali o informazioni non richieste.
+Concentrati esclusivamente sul compito assegnato.
+Evita di inserire commenti, informazioni personali o contenuti non richiesti!"""
+
+class PostProcessType(str, Enum):
+    NONE = "none"
+    SUMMARY = "summary"
+    FIX_OCR = "fix_ocr"
+    KEYWORDS = "keywords"
+    BOTH = "both"
+
+    @property
+    def prompt(self) -> str:
+        """Restituisce il prompt completo includendo il system prompt"""
+        task_prompt = PROCESS_PROMPTS.get(self, "")
+        if (task_prompt):
+            return f"{SYSTEM_PROMPT}\n\n{task_prompt}"
+        return ""
+
+# Dizionario dei prompt per ogni tipo di post-processing
+PROCESS_PROMPTS = {
+    PostProcessType.SUMMARY: (
+        "Genera un riassunto conciso del seguente testo, evidenziando i punti chiave "
+        "e mantenendo il significato essenziale. Il riassunto dovrebbe essere circa "
+        "il 30% della lunghezza originale.\n\nTesto:\n"
+    ),
+    PostProcessType.FIX_OCR: (
+        "Il seguente testo è stato generato tramite OCR e potrebbe contenere errori. "
+        "Correggilo mantenendo il significato originale e migliorando la leggibilità. "
+        "Correggi errori di spelling, punteggiatura e formattazione.\n\nTesto:\n"
+    ),
+    PostProcessType.KEYWORDS: (
+        "Analizza il seguente testo ed estrai le parole chiave e i concetti principali. "
+        "Organizza le keywords in ordine di rilevanza e raggruppa quelle correlate. "
+        "Aggiungi una breve spiegazione per ogni gruppo di keywords.\n\nTesto:\n"
+    ),
+    PostProcessType.BOTH: (
+        "Analizza il seguente testo ed esegui queste operazioni:\n"
+        "1. Genera un riassunto conciso (circa 30% della lunghezza originale)\n"
+        "2. Estrai e organizza le parole chiave in ordine di rilevanza\n"
+        "3. Per ogni gruppo di keywords, fornisci una breve spiegazione\n\n"
+        "Testo:\n"
+    )
+}
+
 class IngestionConfig(BaseModel):
     type: IngestionType = IngestionType.NORMAL
     mode: PageMode = PageMode.SINGLE
+    post_process: PostProcessType = PostProcessType.NONE
+    post_process_context: Optional[str] = None
+
+    def get_prompt(self) -> str:
+        """Ottiene il prompt formattato con system prompt e eventuale contesto"""
+        task_prompt = self.post_process.prompt
+        if task_prompt:
+            if self.post_process_context:
+                return f"{task_prompt}\nContesto aggiuntivo: {self.post_process_context}\n\nTesto:\n"
+            return task_prompt
+        return ""
 
     @property
     def is_ocr(self) -> bool:
@@ -69,8 +129,10 @@ class IngestionConfig(BaseModel):
     @property
     def is_double_page(self) -> bool:
         return self.mode == PageMode.DOUBLE
-
-    # Rimuovi get_choices() visto che ora gestiamo le scelte nel form
+    
+    @property
+    def needs_post_process(self) -> bool:
+        return self.post_process != PostProcessType.NONE
 
 class IngestionConfigEncoder(json.JSONEncoder):
     def default(self, obj):

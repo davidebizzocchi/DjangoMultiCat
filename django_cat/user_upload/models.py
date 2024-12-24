@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import models
 from app.utils import BaseUserModel
 from cheshire_cat.types import DocReadingProgress
-from user_upload.fields import FileObject, FileObjectDecoder, FileObjectEncoder, IngestionConfig, IngestionConfigEncoder, IngestionConfigDecoder, IngestionType, PageMode
+from user_upload.fields import FileObject, FileObjectDecoder, FileObjectEncoder, IngestionConfig, IngestionConfigEncoder, IngestionConfigDecoder, IngestionType, PageMode, PostProcessType
 from decouple import config
 from library.models import Library
 import re
@@ -302,13 +302,36 @@ class File(BaseUserModel):
 
     def post_process(self):
         """
-        Esegue eventuali elaborazioni post-configurazione prima dell'upload
+        Esegue elaborazioni post-configurazione prima dell'upload in base al tipo selezionato
         """
-        # Qui puoi aggiungere qualsiasi logica di post-processing
-        # Per ora semplicemente passiamo allo stato successivo
-        self.status = self.PENDING_UPLOAD
-        self.config_progress = 0
-        self.save(update_fields=['status', 'config_progress'])
+        if not self.ingestion_config.needs_post_process:
+            self.status = self.PENDING_UPLOAD
+            self.save(update_fields=['status'])
+            return
+
+        try:
+            with open(self.file.path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # Usa il prompt formattato che include il contesto
+            prompt = self.ingestion_config.get_prompt()
+            if prompt:
+                # TODO: Implementa la chiamata all'LLM qui
+                processed_text = prompt + content
+                # processed_text = self.client.process_text(prompt + content)
+                
+                # Salva il risultato
+                new_path = save_processed_text(processed_text, self.file.path.absolute())
+                self.file = FileObject(path=new_path)
+                self.config_progress = 100
+                self.save(update_fields=['file', 'config_progress'])
+
+        except Exception as e:
+            raise ValueError(f"Errore nel post-processing del file: {str(e)}")
+        finally:
+            self.status = self.PENDING_UPLOAD
+            self.config_progress = 0
+            self.save(update_fields=['status', 'config_progress'])
 
     def save(self, *args, **kwargs):
         """

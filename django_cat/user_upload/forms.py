@@ -7,7 +7,7 @@ from django import forms
 from icecream import ic
 
 from library.models import Library
-from user_upload.fields import FileObject, IngestionConfig, IngestionType, PageMode
+from user_upload.fields import FileObject, IngestionConfig, IngestionType, PageMode, PostProcessType
 from user_upload.models import File
 
 
@@ -48,11 +48,23 @@ class FileUploadForm(forms.Form):
         initial=PageMode.SINGLE.value,
         label="Modalità pagina",
     )
-    libraries = forms.MultipleChoiceField(
-        choices=[],
-        widget=forms.CheckboxSelectMultiple,
+    post_process = forms.ChoiceField(
+        choices=[
+            (PostProcessType.NONE.value, 'Nessuno'),
+            (PostProcessType.SUMMARY.value, 'Riassunto'),
+            (PostProcessType.FIX_OCR.value, 'Correzione OCR'),
+            (PostProcessType.KEYWORDS.value, 'Parole chiave'),
+            (PostProcessType.BOTH.value, 'Entrambi'),
+        ],
+        initial=PostProcessType.NONE.value,
+        label="Post Processing",
+        help_text="Elaborazione aggiuntiva del testo"
+    )
+    post_process_context = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3}),
         required=False,
-        label="Seleziona dove aggiungere i tuoi file",
+        label="Contesto Post Processing",
+        help_text="Fornisci informazioni aggiuntive per guidare l'elaborazione (opzionale)"
     )
 
     model = File
@@ -119,7 +131,9 @@ class FileUploadForm(forms.Form):
         # Crea il modello Pydantic dalle selezioni separate
         cleaned_data['ingestion_config'] = IngestionConfig(
             type=cleaned_data.get('ingestion_type', IngestionType.NORMAL),
-            mode=cleaned_data.get('page_mode', PageMode.SINGLE)
+            mode=cleaned_data.get('page_mode', PageMode.SINGLE),
+            post_process=cleaned_data.get('post_process', PostProcessType.NONE),
+            post_process_context=cleaned_data.get('post_process_context')
         )
         return cleaned_data
         
