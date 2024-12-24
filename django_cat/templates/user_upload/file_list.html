@@ -13,15 +13,40 @@
             {% if files %}
             <ul class="list-group">
                 {% for file in files %}
-                <li class="list-group-item">
+                <li class="list-group-item" id="file-{{ file.file_id }}" data-file-id="{{ file.file_id }}" data-status="{{ file.status }}">
                     <div class="d-flex justify-content-between">
-                        <div>
+                        <div class="flex-grow-1">
                             <div class="d-flex align-items-center mb-2">
                                 <h5 class="mb-0">{{ file.title }}</h5>
-                                <span class="badge {% if file.ingested %}bg-success{% else %}bg-warning{% endif %} ms-2">
-                                    {% if file.ingested %}Ingested{% else %}Pending{% endif %}
-                                </span>
+                                
+                                <!-- Status badges -->
+                                {% if file.is_configuring %}
+                                    <span class="badge bg-warning ms-2 status-badge">Configurazione</span>
+                                {% elif file.is_processing %}
+                                    <span class="badge bg-info ms-2 status-badge">Post Processing</span>
+                                {% elif file.is_uploading %}
+                                    <span class="badge bg-primary ms-2 status-badge">Caricamento</span>
+                                {% elif file.is_ready %}
+                                    <span class="badge bg-success ms-2 status-badge">Pronto</span>
+                                {% endif %}
+
+                                {% if file.ingested %}
+                                    <span class="badge bg-success ms-2 ingested-badge">Ingested</span>
+                                {% endif %}
                             </div>
+
+                            <!-- Progress bar for OCR -->
+                            <div id="progress-bar" class="progress mb-2" style="height: 15px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" 
+                                     style="width: {{ file.config_progress }}%"
+                                     aria-valuenow="{{ file.config_progress }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ file.config_progress }}%
+                                </div>
+                            </div>
+
                             <small class="text-muted d-block mb-2">{{ file.file.size|filesizeformat }}</small>
                             <div class="btn-group">
                                 <a href="{% url 'user_upload:assoc' file.file_id %}" class="btn btn-primary btn-sm">Associazioni</a>
@@ -41,5 +66,86 @@
         </div>
     </div>
 </div>
+
+
+
+<script>
+    const URLS = {
+        {% for file in files %}
+            '{{ file.file_id}}' : '{% url "file:api:config_status" file_id=file.file_id %}',
+        {% endfor %}
+    }
+
+const updateFileStatus = (fileId) => {
+    $.ajax({
+        url: URLS[fileId],
+        method: 'GET',
+        success: function(data) {
+            console.log('Status update for file', fileId, ':', data);
+            const $fileElement = $(`#file-${fileId}`);
+            if ($fileElement.length === 0) return;
+            
+            // Aggiorna badge di stato
+            const $statusBadge = $fileElement.find('.status-badge');
+            if ($statusBadge.length) {
+                $statusBadge.removeClass().addClass('badge ms-2 status-badge');
+                switch (data.status) {
+                    case 'pending_config':
+                        $statusBadge.addClass('bg-warning').text('Configurazione');
+                        break;
+                    case 'pending_process':
+                        $statusBadge.addClass('bg-info').text('Post Processing');
+                        break;
+                    case 'pending_upload':
+                        $statusBadge.addClass('bg-primary').text('Caricamento');
+                        break;
+                    case 'ready':
+                        $statusBadge.addClass('bg-success').text('Pronto');
+                        break;
+                }
+            }
+
+            // Aggiorna barra progresso
+            const $progressBar = $fileElement.find('.progress');
+            if ($progressBar.length && data.is_ocr && data.status !== 'ready') {
+                $progressBar.show();
+                const $bar = $progressBar.find('.progress-bar');
+                $bar.css('width', `${data.progress}%`)
+                    .attr('aria-valuenow', data.progress)
+                    .text(`${data.progress}%`);
+            } else if ($progressBar.length) {
+                $progressBar.hide();
+            }
+
+            // Aggiorna badge ingested
+            const $ingestedBadge = $fileElement.find('.ingested-badge');
+            if (data.is_ingested) {
+                $ingestedBadge.removeClass('d-none').addClass('d-inline');
+            } else {
+                $ingestedBadge.removeClass('d-inline').addClass('d-none');
+            }
+
+            // Continua il polling finché il file non è pronto E ingested
+            if (data.status !== 'ready' || !data.is_ingested) {
+                setTimeout(() => updateFileStatus(fileId), 2000);
+            } else {
+                $("#progress-bar").hide();
+            }
+        },
+        error: function(error) {
+            console.error('Error fetching status for file', fileId, ':', error);
+            setTimeout(() => updateFileStatus(fileId), 5000);
+        }
+    });
+};
+
+$(document).ready(function() {
+    // Avvia il controllo dello stato per tutti i file
+    $('[data-file-id]').each(function() {
+        const fileId = $(this).data('fileId');
+        updateFileStatus(fileId);
+    });
+});
+</script>
 {% endblock %}
 

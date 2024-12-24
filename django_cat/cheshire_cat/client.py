@@ -24,6 +24,7 @@ from bs4 import BeautifulSoup
 import markdown2
 
 from cheshire_cat.custom_objects import CatClient
+import tiktoken
 
 
 CatConfig = ccat.Config
@@ -110,6 +111,16 @@ class Cat(CatClient):
                 raise TimeoutError("Cannot connect to the websocket")
 
         return self
+    
+    def count_token(self, message: str):
+        encoding = tiktoken.get_encoding("cl100k_base")
+        return len(encoding.encode(message))
+    
+    def chat_completition(self, message: str):
+        """Send a message to the completition chat"""
+        self.send(message=message, chat_id="completition")
+
+        return "completition"
 
     def send(self, message, chat_id="default", *args, **kwargs):
         """Send prompt to ws with specific chat_id"""
@@ -163,6 +174,10 @@ class Cat(CatClient):
             # You can add specific handling for other message types here
             ic(f"Received generic message: {generic_message}")
 
+            # Ferma tutte le stream
+            if generic_message.type == "error":
+                self.end_stream(chat_id)
+
     def end_stream(self, chat_id: str = "default"):
         """End stream for specific chat"""
         if chat_id in self._stream_active:
@@ -200,6 +215,9 @@ class Cat(CatClient):
     def wait_message_content(self, chat_id: str = "default") -> ChatContent:
         while self._message_contents.get(chat_id) is None:
             time.sleep(0.1)
+
+            if not self._stream_active.get(chat_id):
+                return None
         return self._message_contents[chat_id]
     
     def _transcribe(self, audio_bytes):

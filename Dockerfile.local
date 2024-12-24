@@ -20,7 +20,7 @@ WORKDIR /code
 RUN apt-get update \
     && apt-get upgrade -y \
     && python -m pip install --upgrade pip \
-    && apt-get install -y netcat-openbsd curl \
+    && apt-get install -y netcat-openbsd curl poppler-utils tesseract-ocr tesseract-ocr-ita tesseract-ocr-eng \
     && rm -rf /var/lib/apt/lists/*
 
 
