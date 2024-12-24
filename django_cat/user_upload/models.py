@@ -15,7 +15,7 @@ import re
 from threading import Event
 from icecream import ic
 from PIL import Image
-from user_upload.utils import process_image_ocr, get_image_from_file, save_processed_text, extract_and_validate_json
+from user_upload.utils import process_image_ocr, get_image_from_file, save_processed_text, extract_and_validate_json, update_processed_text, next_file_path
 
 
 class FileLibraryAssociation(models.Model):
@@ -308,6 +308,22 @@ class File(BaseUserModel):
         except Exception as e:
             raise ValueError(f"Errore nel processing del file: {str(e)}")
 
+    def call_llm(self, prompt: str):
+        token = self.client.count_token(prompt)
+
+        # Calcola il tempo minimo necessario tra le richieste
+        max_tokens_per_minute = 6000
+
+        minutes_per_token = 1 / max_tokens_per_minute
+        wait_time = token * minutes_per_token * 60  # Converti in secondi
+
+        ic(token, minutes_per_token, wait_time)
+        # time.sleep(wait_time + 2)
+
+        chat_id = self.client.chat_completition(prompt)
+
+        return self.client.wait_message_content(chat_id).content
+
     def post_process(self):
         """
         Esegue elaborazioni post-configurazione prima dell'upload in base al tipo selezionato
@@ -317,64 +333,54 @@ class File(BaseUserModel):
 
         try:
             if self.ingestion_config.type == IngestionType.OCR:
-                content = getattr(self, "processed_text", None)
+                prompt = self.ingestion_config.get_prompt()
 
+                if not prompt:
+                    return
+                
+                content = getattr(self, "processed_text", None)
                 if content is None:
                     ic(self.file.path.absolute())
                     with open(self.file.path.absolute(), 'r') as f:
                         content = f.read()
 
-                # Divide il contenuto in pagine usando il delimitatore
-                pages = []
-                current_page = []
-                
-                for line in content.split('\n'):
-                    if line.strip().startswith('[Pagina ') and line.strip().endswith(']'):
-                        if current_page:
-                            pages.append('\n'.join(current_page))
-                        current_page = []
-                    else:
-                        current_page.append(line)
-                
-                # Aggiungi l'ultima pagina se presente
-                if current_page:
-                    pages.append('\n'.join(current_page))
 
-                # Processa ogni pagina separatamente
-                prompt = self.ingestion_config.get_prompt()
-                if prompt:
-                    processed_pages = []
-                    total_pages = len(pages)
-                    max_tokens_per_minute = 6000
-                    last_request_time = 0
-                    
-                    for i, page in enumerate(pages, 0):
-                        request = prompt + page
-                        tokens = self.client.count_token(request)
-                        
-                        # Calcola il tempo minimo necessario tra le richieste
-                        minutes_per_token = 1 / max_tokens_per_minute
-                        wait_time = tokens * minutes_per_token * 60  # Converti in secondi
-                                                
-                        time.sleep(wait_time + 2)
-                        
-                        processed_response = self.client.chat_completition(request)
-                        # Estrai JSON dalla risposta
-                        json_data = extract_and_validate_json(processed_response)
+                new_file_path = next_file_path(self.file.path).with_suffix('.txt')
+
+                # Divide il contenuto in pagine usando il delimitatore
+                pages = content.split("\n")
+                total_pages = len(pages)
+                previous_text = ""
+
+                for idx, line in enumerate(pages):
+                    if line.strip().startswith('[Pagina ') and line.strip().endswith(']'):
+                    #     if current_page:
+                    #         pages.append('\n'.join(current_page))
+                    #     current_page = []
+                    # else:
+                    #     current_page.append(line)
+
+                        if previous_text == "":
+                            continue
+
+                        request = prompt + previous_text
+                        result = self.call_llm(request)
+
+                        json_data = extract_and_validate_json(result)
+
                         processed_text = json_data["new_text"]
-                        processed_text += f"\n[Pagina {i+1}]\n"
-                        processed_pages.append(processed_text)
-                                                
-                        # Aggiorna il progresso
-                        self.config_progress = int((i / total_pages) * 100)
+                        processed_text += "\n" + line + "\n"
+
+                        update_processed_text(result, new_file_path)
+                        previous_text = ""
+
+                        self.config_progress = int(((idx +1) / total_pages) * 100)
                         self.save(update_fields=['config_progress'])
 
-                    # Unisci le pagine processate
-                    final_text = '\n\n'.join(processed_pages)
-                    
-                    # Salva il risultato
-                    new_path = save_processed_text(final_text, self.file.path.absolute())
-                    self.save_processed_file(new_path)
+                    previous_text += line + "\n"
+
+                self.save_processed_file(new_file_path)
+                
 
         except Exception as e:
             raise ValueError(f"Errore nel post-processing del file: {str(e)}")
