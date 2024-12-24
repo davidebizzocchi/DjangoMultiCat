@@ -174,6 +174,10 @@ class Cat(CatClient):
             # You can add specific handling for other message types here
             ic(f"Received generic message: {generic_message}")
 
+            # Ferma tutte le stream
+            if generic_message.type == "error":
+                self.end_stream(chat_id)
+
     def end_stream(self, chat_id: str = "default"):
         """End stream for specific chat"""
         if chat_id in self._stream_active:
@@ -211,6 +215,9 @@ class Cat(CatClient):
     def wait_message_content(self, chat_id: str = "default") -> ChatContent:
         while self._message_contents.get(chat_id) is None:
             time.sleep(0.1)
+
+            if not self._stream_active.get(chat_id):
+                return None
         return self._message_contents[chat_id]
     
     def _transcribe(self, audio_bytes):
