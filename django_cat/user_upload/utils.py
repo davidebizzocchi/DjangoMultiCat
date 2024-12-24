@@ -122,6 +122,39 @@ def save_processed_text(text: str, original_path: Path) -> Path:
         
     return output_path
 
+def next_file_path(file_path: Path) -> Path:
+    """
+    Genera un percorso univoco per un file in una directory.
+    Se il file esiste già, aggiunge un contatore.
+    
+    Args:
+        file_path: Percorso del file originale
+        
+    Returns:
+        Path: percorso nuovo file
+    """
+
+    counter = 1
+    while file_path.exists():
+        output_path = file_path.with_name(f"{file_path.stem}_{counter}")
+        counter += 1
+    
+def update_processed_text(text: str, original_path: Path) -> None:
+    """
+    Aggiorna il file di testo processato con il nuovo testo.
+    Se il file non esiste, lo crea.
+    
+    Args:
+        text: Testo da scrivere
+        original_path: Percorso del file originale
+        
+    Returns:
+        None
+    """
+
+    with open(original_path, 'w', encoding='utf-8') as f:
+        f.write(text + "\n")
+
 def extract_and_validate_json(text: str, retries=3) -> dict:
     """
     Estrae e valida JSON dal testo, gestendo più tentativi se necessario.
