@@ -13,7 +13,7 @@
             {% if files %}
             <ul class="list-group">
                 {% for file in files %}
-                <li class="list-group-item">
+                <li class="list-group-item" id="file-{{ file.file_id }}" data-file-id="{{ file.file_id }}" data-status="{{ file.status }}">
                     <div class="d-flex justify-content-between">
                         <div class="flex-grow-1">
                             <div class="d-flex align-items-center mb-2">
@@ -21,15 +21,15 @@
                                 
                                 <!-- Status badges -->
                                 {% if file.is_configuring %}
-                                    <span class="badge bg-warning ms-2">Configurazione</span>
+                                    <span class="badge bg-warning ms-2 status-badge">Configurazione</span>
                                 {% elif file.is_uploading %}
-                                    <span class="badge bg-info ms-2">Caricamento</span>
+                                    <span class="badge bg-info ms-2 status-badge">Caricamento</span>
                                 {% elif file.is_ready %}
-                                    <span class="badge bg-success ms-2">Pronto</span>
+                                    <span class="badge bg-success ms-2 status-badge">Pronto</span>
                                 {% endif %}
 
                                 {% if file.ingested %}
-                                    <span class="badge bg-success ms-2">Ingested</span>
+                                    <span class="badge bg-success ms-2 ingested-badge">Ingested</span>
                                 {% endif %}
                             </div>
 
@@ -66,5 +66,81 @@
         </div>
     </div>
 </div>
+
+
+
+<script>
+    const URLS = {
+        {% for file in files %}
+            '{{ file.file_id}}' : '{% url "file:api:config_status" file_id=file.file_id %}',
+        {% endfor %}
+    }
+
+const updateFileStatus = (fileId) => {
+    $.ajax({
+        url: URLS[fileId],
+        method: 'GET',
+        success: function(data) {
+            const $fileElement = $(`#file-${fileId}`);
+            if ($fileElement.length === 0) return;
+            
+            // Aggiorna badge di stato
+            const $statusBadge = $fileElement.find('.status-badge');
+            if ($statusBadge.length) {
+                $statusBadge.removeClass().addClass('badge ms-2 status-badge');
+                switch (data.status) {
+                    case 'pending_config':
+                        $statusBadge.addClass('bg-warning').text('Configurazione');
+                        break;
+                    case 'pending_upload':
+                        $statusBadge.addClass('bg-info').text('Caricamento');
+                        break;
+                    case 'ready':
+                        $statusBadge.addClass('bg-success').text('Pronto');
+                        break;
+                }
+            }
+
+            // Aggiorna barra progresso
+            const $progressBar = $fileElement.find('.progress');
+            if ($progressBar.length && data.is_ocr && data.status === 'pending_config') {
+                $progressBar.show();
+                const $bar = $progressBar.find('.progress-bar');
+                $bar.css('width', `${data.progress}%`)
+                    .attr('aria-valuenow', data.progress)
+                    .text(`${data.progress}%`);
+            } else if ($progressBar.length) {
+                $progressBar.hide();
+            }
+
+            // Aggiorna badge ingested
+            const $ingestedBadge = $fileElement.find('.ingested-badge');
+            if ($ingestedBadge.length) {
+                $ingestedBadge.toggle(data.is_ingested);
+            }
+
+            // Continua a polling se il file non è pronto
+            if (data.status !== 'ready') {
+                setTimeout(() => updateFileStatus(fileId), 2000);
+            }
+        },
+        error: function(error) {
+            console.error('Error fetching status:', error);
+            setTimeout(() => updateFileStatus(fileId), 5000);
+        }
+    });
+};
+
+$(document).ready(function() {
+    $('[data-file-id]').each(function() {
+        const fileId = $(this).data('fileId');
+        const status = $(this).data('status');
+        if (status !== 'ready') {
+            updateFileStatus(fileId);
+        }
+        console.log(fileId, status);
+    });
+});
+</script>
 {% endblock %}
 
