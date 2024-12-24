@@ -239,7 +239,7 @@ class File(BaseUserModel):
 
         return hasher.hexdigest()
     
-    def apply_config_file(self):
+    def apply_config_file(self, use_page_separator=False):
         """
         Processa il file in base alla configurazione di ingestione e salva il risultato
         """
@@ -249,28 +249,33 @@ class File(BaseUserModel):
             return
         
         try:
-            # Ottieni immagine/i dal file
             images = get_image_from_file(self.file.path)
+            texts = []
+            page_counter = 1
             
-            # ic(images, type(images))
-            # Processa le immagini e ottieni il testo
-            if isinstance(images, list):  # PDF multi-pagina
-                texts = []
-                total_images = len(images)
-                for idx, img in enumerate(images, 1):
-                    texts.append(process_image_ocr(img, is_double_page=self.ingestion_config.is_double_page))
-                    self.config_progress = int((idx / total_images) * 100)
-                    self.save(update_fields=['config_progress'])
-                processed_text = "\n\n=== NUOVA PAGINA ===\n\n".join(texts)
-            else:  # Singola immagine
-                self.config_progress = 50
+            # Gestione sia per lista di immagini (PDF) che singola immagine
+            image_list = images if isinstance(images, list) else [images]
+            total_images = len(image_list)
+            
+            for idx, img in enumerate(image_list, 1):
+                # Process OCR per l'immagine corrente
+                page_texts = process_image_ocr(img, is_double_page=self.ingestion_config.is_double_page)
+                
+                # Aggiungi numero pagina ad ogni testo estratto
+                for text in page_texts:
+                    texts.append(f"{text}\n[Pagina {page_counter}]\n")
+                    page_counter += 1
+                
+                # Aggiorna progresso
+                self.config_progress = int((idx / total_images) * 100)
                 self.save(update_fields=['config_progress'])
-                processed_text = process_image_ocr(images, is_double_page=self.ingestion_config.is_double_page)
-
-            # Salva il nuovo file
+            
+            # Unisci i testi con o senza separatore
+            separator = "\n\n=== NUOVA PAGINA ===\n\n" if use_page_separator else "\n"
+            processed_text = separator.join(texts)
+            
+            # Salva il risultato
             new_path = save_processed_text(processed_text, self.file.path.absolute())
-
-            # Aggiorna il riferimento al file
             self.file = FileObject(path=new_path)
             self.config_progress = 100
             self.status = self.PENDING_UPLOAD

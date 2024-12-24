@@ -81,16 +81,16 @@ def get_image_from_file(file_path: Path) -> Union[Image.Image, List[Image.Image]
     except Exception as e:
         raise ValueError(f"Errore nella conversione del file: {str(e)}")
 
-def process_image_ocr(img: Image.Image, is_double_page: bool = False) -> str:
+def process_image_ocr(img: Image.Image, is_double_page: bool = False) -> List[str]:
     """
-    Processa un'immagine con OCR
+    Processa un'immagine con OCR e ritorna una lista di testi estratti
     
     Args:
         img (Image.Image): Immagine da processare
-        is_double_page (bool): Se True, processa l'immagine come doppia pagina
+        is_double_page (bool): Se True, divide l'immagine in due pagine
         
     Returns:
-        str: Testo estratto dall'immagine
+        List[str]: Lista dei testi estratti (uno per pagina)
     """
     def clean_text(text: str) -> str:
         """Pulisce il testo OCR"""
@@ -98,11 +98,11 @@ def process_image_ocr(img: Image.Image, is_double_page: bool = False) -> str:
     
     if is_double_page:
         width = img.size[0]
-        left_text = pytesseract.image_to_string(img.crop((0, 0, width//2, img.size[1])))
-        right_text = pytesseract.image_to_string(img.crop((width//2, 0, width, img.size[1])))
-        return f"{clean_text(left_text)}\n\n{'='*50}\n\n{clean_text(right_text)}"
+        left_text = clean_text(pytesseract.image_to_string(img.crop((0, 0, width//2, img.size[1]))))
+        right_text = clean_text(pytesseract.image_to_string(img.crop((width//2, 0, width, img.size[1]))))
+        return [left_text, right_text]
     else:
-        return clean_text(pytesseract.image_to_string(img))
+        return [clean_text(pytesseract.image_to_string(img))]
 
 def save_processed_text(text: str, original_path: Path) -> Path:
     """
