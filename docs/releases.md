@@ -11,6 +11,54 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+7cd061c - Merge branch '31-issue-ocr-per-pdf' into dev
+de6e369 - next_file_path and update_processed_text in utisl
+4ed7480 - refacory of post_process (not tested)
+759f8a9 - error in client stream (don't work)
+5499508 - core
+64de020 - file status migrations
+2ff9e86 - validate json llm response
+22aa0b4 - post process
+afde6aa - fix
+8f17e3d - fields json prompt
+b1636aa - file list continue show progress also if closed
+5bcc113 - client chat_completition and count_token (openai tokenizer)
+e46e87a - automatic upgrade requirements
+ee56df4 - tiktoken
+47502b9 - prompts
+9986e1c - core
+2e19ac6 - Post precessing in file.models
+51a27c3 - add post_processing and uploading progress bar
+08433bf - changed process_jmage_ocr
+f7e5744 - urls add namespace api
+3e26fa2 - api file status
+7bcc7f5 - file list update
+3bef028 - router api user_upload
+66a9a73 - file list status
+07bdf95 - config status
+85f2335 - cat for all
+7da8604 - config file v1
+57fbcb6 - ingestion_config migration
+fe66058 - user file utisl
+9495f3d - ingestion config form
+6ae01ba - new field for pre config
+f61f840 - pytesseract e poppler
+a45aa29 - pdf ocr req
+4b15608 - automatic upgrade requirements
+cc99483 - automatic upgrade requirements
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 19ab90d - Merge branch '25-feature-migliorare-associazione-file-memorie-librerie' into dev
 87f294a - all perfect
 
