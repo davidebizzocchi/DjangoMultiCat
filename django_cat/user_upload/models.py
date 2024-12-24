@@ -15,7 +15,7 @@ import re
 from threading import Event
 from icecream import ic
 from PIL import Image
-from user_upload.utils import process_image_ocr, get_image_from_file, save_processed_text
+from user_upload.utils import process_image_ocr, get_image_from_file, save_processed_text, extract_and_validate_json
 
 
 class FileLibraryAssociation(models.Model):
@@ -211,8 +211,14 @@ class File(BaseUserModel):
         self.apply_config_file()
 
         # Aggiungi il post-processing
+        self.status = self.PENDING_PROCESS
+        self.config_progress = 0
+        self.save(update_fields=['status', 'config_progress'])
         self.post_process()
         
+        self.status = self.PENDING_UPLOAD
+        self.config_progress = 0
+        self.save(update_fields=['status', 'config_progress'])
         self.upload()
 
     def wait_until_ingested(self, callback=None, *callback_args, wait_time=0.5):
@@ -253,14 +259,18 @@ class File(BaseUserModel):
 
         return hasher.hexdigest()
     
+    def save_processed_file(self, new_path: Path | str):
+        """
+        Salva il file processato e aggiorna il percorso
+        """
+        self.file = FileObject(path=new_path, size=self.file.size)
+        self.save(update_fields=['file'])
+    
     def apply_config_file(self, use_page_separator=False):
         """
         Processa il file in base alla configurazione di ingestione e salva il risultato
         """
         if not self.ingestion_config.is_ocr:
-            self.status = self.PENDING_PROCESS
-            self.config_progress = 0
-            self.save(update_fields=['status', 'config_progress'])
             return
         
         try:
@@ -288,14 +298,12 @@ class File(BaseUserModel):
             # Unisci i testi con o senza separatore
             separator = "\n\n=== NUOVA PAGINA ===\n\n" if use_page_separator else "\n"
             processed_text = separator.join(texts)
+
+            self.processed_text = processed_text
             
             # Salva il risultato
             new_path = save_processed_text(processed_text, self.file.path.absolute())
-            self.file = FileObject(path=new_path)
-
-            self.status = self.PENDING_PROCESS  # Cambiato da PENDING_UPLOAD a PENDING_PROCESS
-            self.config_progress = 0
-            self.save(update_fields=['file', 'config_progress', 'status'])
+            self.save_processed_file(new_path)
                 
         except Exception as e:
             raise ValueError(f"Errore nel processing del file: {str(e)}")
@@ -305,33 +313,73 @@ class File(BaseUserModel):
         Esegue elaborazioni post-configurazione prima dell'upload in base al tipo selezionato
         """
         if not self.ingestion_config.needs_post_process:
-            self.status = self.PENDING_UPLOAD
-            self.save(update_fields=['status'])
             return
 
         try:
-            with open(self.file.path, 'r', encoding='utf-8') as f:
-                content = f.read()
+            if self.ingestion_config.type == IngestionType.OCR:
+                content = getattr(self, "processed_text", None)
 
-            # Usa il prompt formattato che include il contesto
-            prompt = self.ingestion_config.get_prompt()
-            if prompt:
-                # TODO: Implementa la chiamata all'LLM qui
-                processed_text = prompt + content
-                # processed_text = self.client.process_text(prompt + content)
+                if content is None:
+                    ic(self.file.path.absolute())
+                    with open(self.file.path.absolute(), 'r') as f:
+                        content = f.read()
+
+                # Divide il contenuto in pagine usando il delimitatore
+                pages = []
+                current_page = []
                 
-                # Salva il risultato
-                new_path = save_processed_text(processed_text, self.file.path.absolute())
-                self.file = FileObject(path=new_path)
-                self.config_progress = 100
-                self.save(update_fields=['file', 'config_progress'])
+                for line in content.split('\n'):
+                    if line.strip().startswith('[Pagina ') and line.strip().endswith(']'):
+                        if current_page:
+                            pages.append('\n'.join(current_page))
+                        current_page = []
+                    else:
+                        current_page.append(line)
+                
+                # Aggiungi l'ultima pagina se presente
+                if current_page:
+                    pages.append('\n'.join(current_page))
+
+                # Processa ogni pagina separatamente
+                prompt = self.ingestion_config.get_prompt()
+                if prompt:
+                    processed_pages = []
+                    total_pages = len(pages)
+                    max_tokens_per_minute = 6000
+                    last_request_time = 0
+                    
+                    for i, page in enumerate(pages, 0):
+                        request = prompt + page
+                        tokens = self.client.count_token(request)
+                        
+                        # Calcola il tempo minimo necessario tra le richieste
+                        minutes_per_token = 1 / max_tokens_per_minute
+                        wait_time = tokens * minutes_per_token * 60  # Converti in secondi
+                                                
+                        time.sleep(wait_time + 2)
+                        
+                        processed_response = self.client.chat_completition(request)
+                        # Estrai JSON dalla risposta
+                        json_data = extract_and_validate_json(processed_response)
+                        processed_text = json_data["new_text"]
+                        processed_text += f"\n[Pagina {i+1}]\n"
+                        processed_pages.append(processed_text)
+                                                
+                        # Aggiorna il progresso
+                        self.config_progress = int((i / total_pages) * 100)
+                        self.save(update_fields=['config_progress'])
+
+                    # Unisci le pagine processate
+                    final_text = '\n\n'.join(processed_pages)
+                    
+                    # Salva il risultato
+                    new_path = save_processed_text(final_text, self.file.path.absolute())
+                    self.save_processed_file(new_path)
 
         except Exception as e:
             raise ValueError(f"Errore nel post-processing del file: {str(e)}")
         finally:
-            self.status = self.PENDING_UPLOAD
-            self.config_progress = 0
-            self.save(update_fields=['status', 'config_progress'])
+            pass
 
     def save(self, *args, **kwargs):
         """
