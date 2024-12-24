@@ -89,10 +89,13 @@ python-dateutil==2.9.0.post0
     # via cheshire-cat-api
 python-decouple==3.8
     # via -r requirements/base.in
+regex==2024.11.6
+    # via tiktoken
 requests==2.32.3
     # via
     #   -r requirements/base.in
     #   gtts
+    #   tiktoken
 sentry-sdk==2.19.2
     # via -r requirements/base.in
 six==1.17.0
@@ -105,6 +108,8 @@ soupsieve==2.6
     # via beautifulsoup4
 sqlparse==0.5.3
     # via django
+tiktoken==0.8.0
+    # via -r requirements/base.in
 typing-extensions==4.12.2
     # via
     #   groq
