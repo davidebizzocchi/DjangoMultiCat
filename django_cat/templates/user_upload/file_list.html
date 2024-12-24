@@ -22,8 +22,10 @@
                                 <!-- Status badges -->
                                 {% if file.is_configuring %}
                                     <span class="badge bg-warning ms-2 status-badge">Configurazione</span>
+                                {% elif file.is_processing %}
+                                    <span class="badge bg-info ms-2 status-badge">Post Processing</span>
                                 {% elif file.is_uploading %}
-                                    <span class="badge bg-info ms-2 status-badge">Caricamento</span>
+                                    <span class="badge bg-primary ms-2 status-badge">Caricamento</span>
                                 {% elif file.is_ready %}
                                     <span class="badge bg-success ms-2 status-badge">Pronto</span>
                                 {% endif %}
@@ -34,7 +36,7 @@
                             </div>
 
                             <!-- Progress bar for OCR -->
-                            {% if file.is_configuring and file.ingestion_config.is_ocr %}
+                            {% if file.is_configuring or file.is_uploading and file.ingestion_config.is_ocr %}
                             <div class="progress mb-2" style="height: 15px;">
                                 <div class="progress-bar progress-bar-striped progress-bar-animated" 
                                      role="progressbar" 
@@ -81,6 +83,7 @@ const updateFileStatus = (fileId) => {
         url: URLS[fileId],
         method: 'GET',
         success: function(data) {
+            console.log(data);
             const $fileElement = $(`#file-${fileId}`);
             if ($fileElement.length === 0) return;
             
@@ -92,8 +95,11 @@ const updateFileStatus = (fileId) => {
                     case 'pending_config':
                         $statusBadge.addClass('bg-warning').text('Configurazione');
                         break;
+                    case 'pending_process':
+                        $statusBadge.addClass('bg-info').text('Post Processing');
+                        break;
                     case 'pending_upload':
-                        $statusBadge.addClass('bg-info').text('Caricamento');
+                        $statusBadge.addClass('bg-primary').text('Caricamento');
                         break;
                     case 'ready':
                         $statusBadge.addClass('bg-success').text('Pronto');
@@ -103,7 +109,8 @@ const updateFileStatus = (fileId) => {
 
             // Aggiorna barra progresso
             const $progressBar = $fileElement.find('.progress');
-            if ($progressBar.length && data.is_ocr && data.status === 'pending_config') {
+            if ($progressBar.length && data.is_ocr && 
+               (data.status === 'pending_config' || data.status === 'pending_process')) {
                 $progressBar.show();
                 const $bar = $progressBar.find('.progress-bar');
                 $bar.css('width', `${data.progress}%`)
@@ -116,11 +123,15 @@ const updateFileStatus = (fileId) => {
             // Aggiorna badge ingested
             const $ingestedBadge = $fileElement.find('.ingested-badge');
             if ($ingestedBadge.length) {
-                $ingestedBadge.toggle(data.is_ingested);
+                if (data.is_ingested) {
+                    $ingestedBadge.removeClass('d-none').addClass('d-inline');
+                } else {
+                    $ingestedBadge.removeClass('d-inline').addClass('d-none');
+                }
             }
 
-            // Continua a polling se il file non è pronto
-            if (data.status !== 'ready') {
+            // Continua a polling se il file non è pronto o non è ancora ingested
+            if (data.status !== 'ready' || !data.is_ingested) {
                 setTimeout(() => updateFileStatus(fileId), 2000);
             }
         },
