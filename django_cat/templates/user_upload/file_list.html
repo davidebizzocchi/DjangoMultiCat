@@ -15,13 +15,38 @@
                 {% for file in files %}
                 <li class="list-group-item">
                     <div class="d-flex justify-content-between">
-                        <div>
+                        <div class="flex-grow-1">
                             <div class="d-flex align-items-center mb-2">
                                 <h5 class="mb-0">{{ file.title }}</h5>
-                                <span class="badge {% if file.ingested %}bg-success{% else %}bg-warning{% endif %} ms-2">
-                                    {% if file.ingested %}Ingested{% else %}Pending{% endif %}
-                                </span>
+                                
+                                <!-- Status badges -->
+                                {% if file.is_configuring %}
+                                    <span class="badge bg-warning ms-2">Configurazione</span>
+                                {% elif file.is_uploading %}
+                                    <span class="badge bg-info ms-2">Caricamento</span>
+                                {% elif file.is_ready %}
+                                    <span class="badge bg-success ms-2">Pronto</span>
+                                {% endif %}
+
+                                {% if file.ingested %}
+                                    <span class="badge bg-success ms-2">Ingested</span>
+                                {% endif %}
                             </div>
+
+                            <!-- Progress bar for OCR -->
+                            {% if file.is_configuring and file.ingestion_config.is_ocr %}
+                            <div class="progress mb-2" style="height: 15px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" 
+                                     style="width: {{ file.config_progress }}%"
+                                     aria-valuenow="{{ file.config_progress }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ file.config_progress }}%
+                                </div>
+                            </div>
+                            {% endif %}
+
                             <small class="text-muted d-block mb-2">{{ file.file.size|filesizeformat }}</small>
                             <div class="btn-group">
                                 <a href="{% url 'user_upload:assoc' file.file_id %}" class="btn btn-primary btn-sm">Associazioni</a>
