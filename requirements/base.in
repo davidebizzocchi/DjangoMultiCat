@@ -15,3 +15,4 @@ sentry-sdk[django]
 pytesseract
 pdf2image
 Pillow
+tiktoken
