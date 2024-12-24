@@ -64,7 +64,7 @@ Il tuo compito è aiutare a processare documenti seguendo le istruzioni specific
 Mantieni un tono professionale e fornisci output strutturati e ben organizzati.
 Non aggiungere commenti personali o informazioni non richieste.
 Concentrati esclusivamente sul compito assegnato.
-Evita di inserire commenti, informazioni personali o contenuti non richiesti!"""
+Evita di inserire commenti, informazioni personali o spiegazioni, il risultato che fornisci verra utilizzato direttamente."""
 
 class PostProcessType(str, Enum):
     NONE = "none"
@@ -84,26 +84,58 @@ class PostProcessType(str, Enum):
 # Dizionario dei prompt per ogni tipo di post-processing
 PROCESS_PROMPTS = {
     PostProcessType.SUMMARY: (
-        "Genera un riassunto conciso del seguente testo, evidenziando i punti chiave "
-        "e mantenendo il significato essenziale. Il riassunto dovrebbe essere circa "
-        "il 30% della lunghezza originale.\n\nTesto:\n"
+        "Genera un riassunto conciso del seguente testo e formattalo come JSON nel seguente formato:\n"
+        "{\n"
+        '    "new_text": "il tuo riassunto qui"\n'
+        "}\n\n"
+        "Esempio di output:\n"
+        "{\n"
+        '    "new_text": "Questo è un esempio di riassunto che evidenzia i punti chiave."\n'
+        "}\n\n"
+        "Testo da elaborare:\n"
     ),
     PostProcessType.FIX_OCR: (
-        "Il seguente testo è stato generato tramite OCR e potrebbe contenere errori. "
-        "Correggilo mantenendo il significato originale e migliorando la leggibilità. "
-        "Correggi errori di spelling, punteggiatura e formattazione.\n\nTesto:\n"
+        "Correggi il seguente testo OCR e formatta il risultato come JSON nel seguente formato:\n"
+        "{\n"
+        '    "new_text": "il testo corretto qui"\n'
+        "}\n\n"
+        "Esempi di correzioni:\n\n"
+        "1. Input OCR con errori di riconoscimento:\n"
+        '"ll tt sa|tò sul tett0 de||a casa."\n'
+        "Output corretto:\n"
+        "{\n"
+        '    "new_text": "Il gatto saltò sul tetto della casa."\n'
+        "}\n\n"
+        "2. Input OCR con problemi di formattazione:\n"
+        '"Ne| |ibro si par|a di  ma te matica   e    fisica."\n'
+        "Output corretto:\n"
+        "{\n"
+        '    "new_text": "Nel libro si parla di matematica e fisica."\n'
+        "}\n\n"
+        "3. Input OCR con errori di punteggiatura:\n"
+        '"Disse Maria,vado a casa,sono stanca?"\n'
+        "Output corretto:\n"
+        "{\n"
+        '    "new_text": "Disse Maria: \"Vado a casa, sono stanca.\""\n'
+        "}\n\n"
+        "4. Input OCR con numeri e caratteri speciali:\n"
+        '"L\'anno l999 fu imp0rtante per |\'azienda N,V."\n'
+        "Output corretto:\n"
+        "{\n"
+        '    "new_text": "L\'anno 1999 fu importante per l\'azienda N.V."\n'
+        "}\n\n"
+        "Testo da elaborare:\n"
     ),
     PostProcessType.KEYWORDS: (
         "Analizza il seguente testo ed estrai le parole chiave e i concetti principali. "
         "Organizza le keywords in ordine di rilevanza e raggruppa quelle correlate. "
-        "Aggiungi una breve spiegazione per ogni gruppo di keywords.\n\nTesto:\n"
+        "Aggiungi una breve spiegazione per ogni gruppo di keywords.\n\n"
     ),
     PostProcessType.BOTH: (
         "Analizza il seguente testo ed esegui queste operazioni:\n"
         "1. Genera un riassunto conciso (circa 30% della lunghezza originale)\n"
         "2. Estrai e organizza le parole chiave in ordine di rilevanza\n"
         "3. Per ogni gruppo di keywords, fornisci una breve spiegazione\n\n"
-        "Testo:\n"
     )
 }
 
