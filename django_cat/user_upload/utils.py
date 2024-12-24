@@ -6,6 +6,7 @@ import pytesseract
 import re
 from pdf2image import convert_from_path
 from icecream import ic
+import json
 
 def open_file_by_type(file_path: Path) -> Union[BinaryIO, TextIO, Image.Image]:
     """
@@ -120,3 +121,30 @@ def save_processed_text(text: str, original_path: Path) -> Path:
         f.write(text)
         
     return output_path
+
+def extract_and_validate_json(text: str, retries=3) -> dict:
+    """
+    Estrae e valida JSON dal testo, gestendo più tentativi se necessario.
+    
+    Args:
+        text: Testo contenente JSON
+        retries: Numero di tentativi di parsing
+        
+    Returns:
+        dict: JSON validato
+    """
+    # Prova a trovare JSON tra graffe
+    json_pattern = r'\{[^{}]*\}'
+    matches = re.finditer(json_pattern, text)
+    
+    for match in matches:
+        try:
+            json_str = match.group()
+            data = json.loads(json_str)
+            if "new_text" in data:
+                return data
+        except json.JSONDecodeError:
+            continue
+            
+    # Se non trova JSON valido, ritorna dizionario con tutto il testo
+    return {"new_text": text}
