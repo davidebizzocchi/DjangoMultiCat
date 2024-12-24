@@ -67,6 +67,14 @@ class FileUploadForm(forms.Form):
         help_text="Fornisci informazioni aggiuntive per guidare l'elaborazione (opzionale)"
     )
 
+    libraries = forms.MultipleChoiceField(
+        choices=[],  # Will be populated in __init__
+        required=False,
+        label="Librerie",
+        help_text="Seleziona le librerie in cui salvare il file",
+        widget=forms.CheckboxSelectMultiple
+    )
+    
     model = File
     instance = None
 
