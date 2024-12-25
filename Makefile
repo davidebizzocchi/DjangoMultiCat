@@ -43,9 +43,9 @@ up-local:           ## Run the LOCAL stack via Docker on http://0.0.0.0:8000/
 				sleep 1; \
 			done; \
 		fi; \
-		(docker compose -p django_cat -f docker-compose.local.yml up || exit 1) & \
+		(docker compose -p django_cat -f docker/local/docker-compose.yml up || exit 1) & \
 		PID=$$!; \
-		trap 'docker compose -p django_cat -f docker-compose.local.yml down && exit 0' EXIT; \
+		trap 'docker compose -p django_cat -f docker/local/docker-compose.yml down && exit 0' EXIT; \
 		wait $$PID; \
 	}
 
