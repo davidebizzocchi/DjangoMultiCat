@@ -21,11 +21,11 @@ services:
 
   cheshire-cat-core:
     build:
-      context: ./core/core
+      context: ../../core/core
     container_name: cheshire_cat_core
 
     env_file:
-      - env/.env.local
+      - ../../env/.env.local
     depends_on:
       - cheshire-cat-vector-memory
     ports:
@@ -37,8 +37,8 @@ services:
       # Timezone
       - TZ=${CCAT_TIMEZONE:-UTC}
     volumes:
-      - ./core/core:/app
-      - ./plugins:/app/cat/plugins
+      - ../../core/core:/app
+      - ../../plugins:/app/cat/plugins
 
       - long_term_memory:/app/cat/data
       - cheschire_cat_models:/app/cat/models
@@ -63,15 +63,15 @@ services:
 
   app:
     build:
-      context: .
-      dockerfile: Dockerfile.local  # Use specific Dockerfiles for development 
+      context: ../../
+      dockerfile: docker/local/Dockerfile  # Use specific Dockerfiles for development 
     image: django_cat-app:local
     ports:
       - "8000:8000"
     env_file:
-      - env/.env.local
+      - ../../env/.env.local
     volumes:
-      - ./django_cat:/code
+      - ./../../django_cat:/code
     command: python manage.py runserver 0.0.0.0:8000
     depends_on:
       - db
@@ -89,7 +89,7 @@ services:
     volumes:
       - postgres_data-local:/var/lib/postgresql/data/
     env_file:
-      - ./env/db.local
+      - ../../env/db.local
     networks:
       - app_network
 
