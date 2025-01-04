@@ -47,7 +47,7 @@ up-local:           ## Run the LOCAL stack via Docker on http://0.0.0.0:8000/
 		wait $$PID; \
 	}
 
-shell-sh:			## Open a sh shell in LOCAL inside app
+shell-bash:			## Open a sh shell in LOCAL inside app
 	@docker exec -it django_cat-app-1 /bin/bash
 
 shell-django:		## Open a django shell in LOCAL
