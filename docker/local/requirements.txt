@@ -67,7 +67,7 @@ packaging==24.2
     # via pytesseract
 pdf2image==1.17.0
     # via -r requirements/base.in
-pillow==11.0.0
+pillow==11.1.0
     # via
     #   -r requirements/base.in
     #   pdf2image
