@@ -11,6 +11,26 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+798bd5d - Merge branch '33-feauture-enviroments-for-release' into dev
+79f69ea - local
+0684a8e - renamed local.in
+42fc207 - automatic upgrade requirements
+13fcba0 - version
+c18f6d0 - docker local
+e3eaea5 - docker local
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 7cd061c - Merge branch '31-issue-ocr-per-pdf' into dev
 de6e369 - next_file_path and update_processed_text in utisl
 4ed7480 - refacory of post_process (not tested)
