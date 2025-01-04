@@ -121,3 +121,7 @@ div#contenuto-container {
 .btn-search-action > span.grow {
     font-size: 0.8rem;
 }
+
+.tooltip {
+    opacity: 1 !important;
+}

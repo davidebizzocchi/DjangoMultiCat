@@ -81,7 +81,8 @@
 :root {
     --animate-duration: 1s;
     --animate-delay: 1s;
-    --animate-repeat: 1
+    --animate-repeat: 1;
+    --tooltip-offset: 1.78rem;
 }
 
 .animate__animated {
@@ -7475,7 +7476,7 @@ code {
 .tooltip {
     position: relative;
     display: inline-block;
-    --tooltip-offset: calc(100% + 1px + var(--tooltip-tail, 0px))
+    /* --tooltip-offset: calc(100% + 1px + var(--tooltip-tail, 0px)) */
 }
 
 .tooltip:before {
@@ -7497,7 +7498,7 @@ code {
 .tooltip-bottom:before {
     transform: translate(-50%);
     top: var(--tooltip-offset);
-    left: 50%;
+    left: 80%;
     right: auto;
     bottom: auto
 }
@@ -7687,7 +7688,7 @@ code {
     transform: translate(-50%);
     border-color: transparent transparent var(--tooltip-color) transparent;
     top: var(--tooltip-tail-offset);
-    left: 50%;
+    left: 80%;
     right: auto;
     bottom: auto
 }
