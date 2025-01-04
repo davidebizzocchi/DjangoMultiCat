@@ -3,7 +3,7 @@
 # Local Development Dockerfile
 
 # Use an official Python runtime as a parent image
-ARG BASE_IMAGE=python:3.13.0-slim-bookworm
+ARG BASE_IMAGE=python:3.12.0-slim-bookworm
 ARG ENVIROMENT=local
 
 # Usa l'argomento come immagine base
