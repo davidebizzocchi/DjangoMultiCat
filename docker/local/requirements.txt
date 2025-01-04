@@ -67,7 +67,7 @@ packaging==24.2
     # via pytesseract
 pdf2image==1.17.0
     # via -r requirements/base.in
-pillow==11.0.0
+pillow==11.1.0
     # via
     #   -r requirements/base.in
     #   pdf2image
@@ -112,6 +112,7 @@ tiktoken==0.8.0
     # via -r requirements/base.in
 typing-extensions==4.12.2
     # via
+    #   anyio
     #   groq
     #   pydantic
     #   pydantic-core
