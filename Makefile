@@ -12,15 +12,13 @@ activate:	## Acvtivate venv
 requirements:	## Create requirements.txt from requirements.in
 	# @git pull
 
-	@rm -f requirements/base.txt
-	@rm -f requirements/locale.txt
+	@rm -f docker/local/requirements.txt
 	
-	uv pip compile requirements/base.in -o requirements/base.txt
-	uv pip compile requirements/locale.in -o requirements/locale.txt
+	uv pip compile requirements/local.in -o docker/local/requirements.txt
 
-	source .venv/bin/activate && uv pip install -r requirements/locale.txt
+	source .venv/bin/activate && uv pip install -r docker/local/requirements.txt
 
-	git add requirements/*.txt
+	git add */requirements.txt
 	@git commit -m "automatic upgrade requirements"
 	@git push
 
@@ -43,9 +41,9 @@ up-local:           ## Run the LOCAL stack via Docker on http://0.0.0.0:8000/
 				sleep 1; \
 			done; \
 		fi; \
-		(docker compose -p django_cat -f docker-compose.local.yml up || exit 1) & \
+		(docker compose -p django_cat -f docker/local/docker-compose.yml up || exit 1) & \
 		PID=$$!; \
-		trap 'docker compose -p django_cat -f docker-compose.local.yml down && exit 0' EXIT; \
+		trap 'docker compose -p django_cat -f docker/local/docker-compose.yml down && exit 0' EXIT; \
 		wait $$PID; \
 	}
 
