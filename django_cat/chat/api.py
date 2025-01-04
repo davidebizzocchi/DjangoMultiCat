@@ -121,7 +121,6 @@ def speak_last(request, chat_id: str):
     # Get last assistant message for this specific chat
     last_message = Message.objects.filter(
         chat=chat,
-        user=request.user,
         sender=Message.Sender.ASSISTANT
     ).order_by('-timestamp').first()
     
