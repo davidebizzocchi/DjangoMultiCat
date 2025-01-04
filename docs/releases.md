@@ -11,6 +11,29 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+ce59972 - Merge branch '34-issue-docling' into dev
+686af04 - readme first refactory
+d487564 - reuse python 3.13
+fab1af6 - automatic upgrade requirements
+eda6115 - removed docling
+453ee98 - shell-bash
+d9590bd - use python 3.12 cause docling
+6e1cfd9 - automatic upgrade requirements
+215b2b3 - automatic upgrade requirements
+4e63746 - docling
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 798bd5d - Merge branch '33-feauture-enviroments-for-release' into dev
 79f69ea - local
 0684a8e - renamed local.in
