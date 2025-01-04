@@ -69,7 +69,7 @@ Integrating CheshireCat in Django
 > ⚠️ **Warning**: The following commands are potentially destructive and irreversible!
 
 - `make remove-migrations` - Remove all migration files
-  > Deletes all unapplied Django migrations. Development use only.
+  > Deletes all Django migrations. Development use only.
 
 - `make destroy-database` - Delete local database
   > Completely removes the Docker database volume. All data will be lost.
