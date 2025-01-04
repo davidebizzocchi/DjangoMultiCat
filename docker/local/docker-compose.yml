@@ -25,7 +25,7 @@ services:
     container_name: cheshire_cat_core
 
     env_file:
-      - ../../env/.env.local
+      - ../../env/local/.env
     depends_on:
       - cheshire-cat-vector-memory
     ports:
@@ -69,7 +69,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ../../env/.env.local
+      - ../../env/local/.env
     volumes:
       - ./../../django_cat:/code
     command: python manage.py runserver 0.0.0.0:8000
@@ -89,7 +89,7 @@ services:
     volumes:
       - postgres_data-local:/var/lib/postgresql/data/
     env_file:
-      - ../../env/db.local
+      - ../../env/local/.db
     networks:
       - app_network
 

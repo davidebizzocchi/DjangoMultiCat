@@ -31,8 +31,8 @@ RUN pip install uv
 RUN uv venv /home/packages/.venv
 
 # Copy the requirements file and install dependencies
-COPY docker/local/requirements.txt /code
-RUN uv pip install --system --no-cache  -r requirements.txt
+COPY ./requirements/*.txt /code/requirements/
+RUN uv pip install --system --no-cache  -r requirements/locale.txt
 
 # Create a non-root user and set permissions
 RUN useradd -m nonrootuser

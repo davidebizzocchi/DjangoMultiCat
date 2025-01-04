@@ -12,15 +12,13 @@ activate:	## Acvtivate venv
 requirements:	## Create requirements.txt from requirements.in
 	# @git pull
 
-	@rm -f requirements/base.txt
-	@rm -f requirements/locale.txt
+	@rm -f docker/local/requirements.txt
 	
-	uv pip compile requirements/base.in -o requirements/base.txt
-	uv pip compile requirements/locale.in -o requirements/locale.txt
+	uv pip compile requirements/local.in -o docker/local/requirements.txt
 
-	source .venv/bin/activate && uv pip install -r requirements/locale.txt
+	source .venv/bin/activate && uv pip install -r docker/local/requirements.txt
 
-	git add requirements/*.txt
+	git add */requirements.txt
 	@git commit -m "automatic upgrade requirements"
 	@git push
 
