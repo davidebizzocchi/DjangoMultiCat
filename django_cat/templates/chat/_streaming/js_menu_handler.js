@@ -1,3 +1,5 @@
+let currentAudioUrl = null;  // Aggiungi questa variabile all'inizio del file
+
 $(document).on("click", "div.tooltip.tooltip-bottom", async function(e) {
     try {
         let target = $(e.currentTarget);
@@ -8,6 +10,8 @@ $(document).on("click", "div.tooltip.tooltip-bottom", async function(e) {
             
             dialog.removeClass("hidden");
             recordButton.hide();
+            shouldContinue = true;
+            
             recordingStatus.text("Attendo la risposta dell'assistente...");
 
             let messageElement = target.closest('.chat-footer').prev('.chat-bubble').find('.message.markdown');
@@ -29,12 +33,17 @@ $(document).on("click", "div.tooltip.tooltip-bottom", async function(e) {
             }
             
             const audioBlob = await response.blob();
-            const audioUrl = URL.createObjectURL(audioBlob);
+            
+            // Revoca l'URL precedente se esiste
+            if (currentAudioUrl) {
+                URL.revokeObjectURL(currentAudioUrl);
+            }
+            currentAudioUrl = URL.createObjectURL(audioBlob);
 
             recordingStatus.text("Riproduco risposta...");
             isPlayingResponse = true;
             
-            responseAudio.src = audioUrl;
+            responseAudio.src = currentAudioUrl;
             
             // Controlliamo se il dialogo è stato chiuso prima di iniziare la riproduzione
             if (!shouldContinue) {
@@ -47,7 +56,13 @@ $(document).on("click", "div.tooltip.tooltip-bottom", async function(e) {
             // Aspetta che l'audio finisca, con possibilità di interruzione
             await new Promise((resolve, reject) => {
                 responseAudio.onended = () => {
+                    clearInterval(checkInterval);
                     isPlayingResponse = false;
+                    // Revoca l'URL quando l'audio termina
+                    if (currentAudioUrl) {
+                        URL.revokeObjectURL(currentAudioUrl);
+                        currentAudioUrl = null;
+                    }
                     resolve();
                 };
                 
@@ -69,6 +84,11 @@ $(document).on("click", "div.tooltip.tooltip-bottom", async function(e) {
 
                 responseAudio.onerror = () => {
                     clearInterval(checkInterval);
+                    // Revoca l'URL anche in caso di errore
+                    if (currentAudioUrl) {
+                        URL.revokeObjectURL(currentAudioUrl);
+                        currentAudioUrl = null;
+                    }
                     reject(new Error('Audio playback error'));
                 };
             });
@@ -78,6 +98,11 @@ $(document).on("click", "div.tooltip.tooltip-bottom", async function(e) {
             }
         }
     } catch (error) {
+        // Revoca l'URL in caso di errore nel try-catch
+        if (currentAudioUrl) {
+            URL.revokeObjectURL(currentAudioUrl);
+            currentAudioUrl = null;
+        }
         console.error('Error in tooltip click handler:', error);
         // Qui puoi aggiungere una notifica all'utente se necessario
     }
