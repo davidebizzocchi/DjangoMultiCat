@@ -11,6 +11,31 @@
 - **Nuova versione**: v0.0.10-6e49b2b
 
 ### Commit
+bb9ab22 - Merge branch '35-issue-chat-play-message-button' into dev
+d870fa9 - copy button
+1aa52c5 - created_at chat fiedl
+adde839 - fix audio dialog in volume
+278ab8b - menu volume
+b5d1ee1 - proto object volume assistant
+1728aaa - removed script tag
+a322f14 - include js in streaming
+947d6cd - volume data-tip
+5098ca9 - fix volume dim
+0ddb474 - volume button
+638a5e3 - add volume static file
+
+---
+## Release v0.0.10-6e49b2b
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.10-6e49b2b
+- **Nuova versione**: v0.0.10-6e49b2b
+
+### Commit
 ce59972 - Merge branch '34-issue-docling' into dev
 686af04 - readme first refactory
 d487564 - reuse python 3.13
