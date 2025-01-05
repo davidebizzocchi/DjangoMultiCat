@@ -100,6 +100,7 @@ bump-patch:
 	MINOR=$$(echo $$VERSION | cut -d. -f2); \
 	PATCH=$$(echo $$VERSION | cut -d. -f3); \
 	NEW_PATCH=$$((PATCH + 1)); \
+	echo "New patch version: v$$MAJOR.$$MINOR.$$NEW_PATCH"; \
 	echo "v$$MAJOR.$$MINOR.$$NEW_PATCH" > django_cat/VERSION; \
 	$(MAKE) update-version
 
@@ -131,6 +132,7 @@ create-release-note:
 	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
 	TYPE=$$(echo $$BRANCH_INFO | cut -d'|' -f3); \
 	OLD_VERSION=$$(cat django_cat/VERSION); \
+	echo "type: $$TYPE"; \
 	if [ "$$TYPE" = "issue" ]; then \
 		$(MAKE) bump-patch; \
 	elif [ "$$TYPE" = "feature" ]; then \
