@@ -122,7 +122,10 @@ get-branch-info:
 	echo "$(BRANCH)|$$ISSUE_NUM|$$TYPE"
 
 get-commits:
-	@git log --pretty=format:"%h - %s" origin/dev..HEAD
+	@git log --pretty=format:"%h - %s (%an)" origin/dev..HEAD
+
+get-diff-stats:
+	@git diff --stat origin/dev..HEAD | tail -n 1
 
 create-release-note:
 	@BRANCH_INFO=$$(make -s get-branch-info); \
@@ -130,6 +133,7 @@ create-release-note:
 	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
 	TYPE=$$(echo $$BRANCH_INFO | cut -d'|' -f3); \
 	OLD_VERSION=$$(cat django_cat/VERSION); \
+	DIFF_STATS=$$(make -s get-diff-stats); \
 	echo "\n\ntype: $$TYPE"; \
 	if [ "$$TYPE" = "issue" ]; then \
 		$(MAKE) bump-patch; \
@@ -140,7 +144,7 @@ create-release-note:
 	fi; \
 	NEW_VERSION=$$(cat django_cat/VERSION); \
 	COMMITS=$$(make -s get-commits); \
-	echo "## Release $$NEW_VERSION\n\n### Informazioni Release\n- **Branch di origine**: $$BRANCH\n- **Branch di destinazione**: dev\n- **Issue**: [#$$ISSUE_NUM](https://github.com/davidebizzocchi/DjangoCat/issues/$$ISSUE_NUM)\n- **Tipo**: $$TYPE\n- **Versione precedente**: $$OLD_VERSION\n- **Nuova versione**: $$NEW_VERSION\n\n### Commit\n$$COMMITS\n\n---\n"
+	echo "## Release $$NEW_VERSION\n\n### Informazioni Release\n- **Branch di origine**: $$BRANCH\n- **Branch di destinazione**: dev\n- **Issue**: [#$$ISSUE_NUM](https://github.com/davidebizzocchi/DjangoCat/issues/$$ISSUE_NUM)\n- **Tipo**: $$TYPE\n- **Versione precedente**: $$OLD_VERSION\n- **Nuova versione**: $$NEW_VERSION\n- **Statistiche modifiche**: $$DIFF_STATS\n\n### Commit\n$$COMMITS\n\n---\n"
 
 update-releases-md:
 	echo "update release md $(VERSION) $(BRANCH)"
