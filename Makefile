@@ -122,7 +122,7 @@ get-branch-info:
 	echo "$(BRANCH)|$$ISSUE_NUM|$$TYPE"
 
 get-commits:
-	@git log --pretty=format:"%h - %an: %s" origin/dev..HEAD
+	@git log --pretty=format:"%h - %s (%an)" origin/dev..HEAD
 
 create-release-note:
 	@BRANCH_INFO=$$(make -s get-branch-info); \
