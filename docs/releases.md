@@ -2,6 +2,27 @@
 
 
 
+type: dev
+## Release v0.0.43-2156cfa
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.43-2156cfa
+- **Nuova versione**: v0.0.43-2156cfa
+- **Statistiche modifiche**:  1 file changed, 2 insertions(+), 2 deletions(-)
+
+### Commit
+- 63ade0e - fix makefile (davidebizzocchi)
+- 83fccde - fix commits (davidebizzocchi)
+- 2005e0d - makefile version (davidebizzocchi)
+- 3b2283f - fix commits (davidebizzocchi)
+
+---
+
+
 type: issue
 New patch version: v0.0.43
 ## Release v0.0.43-2156cfa
