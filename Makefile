@@ -122,7 +122,7 @@ get-branch-info:
 	echo "$(BRANCH)|$$ISSUE_NUM|$$TYPE"
 
 get-commits:
-	@git log --pretty=format:"%h - %s (%an)" origin/dev..HEAD
+	@git log --pretty=format:"- %h - %s (%an)%n" origin/dev..HEAD
 
 get-diff-stats:
 	@git diff --stat origin/dev..HEAD | tail -n 1
