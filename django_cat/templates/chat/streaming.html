@@ -83,11 +83,15 @@
             alert("Errore durante la pulizia della chat");
         }
     });
-</script>
-
-    {% include 'chat/_streaming/js_sse.js' %}
-
+    
     {% include 'chat/_streaming/js_audio.js' %}
 
+    // Dopo js_audio!
+    {% include 'chat/_streaming/js_menu_handler.js' %}
+</script>
+
+<script type="module">
+    {% include 'chat/_streaming/js_sse.js' %}
+</script>
 
 {% endblock %}
