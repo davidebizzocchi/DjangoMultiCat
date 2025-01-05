@@ -1,5 +1,8 @@
 # v20-12-2024
 
+VERSION := $(shell cat django_cat/VERSION | cut -d'-' -f1 | cut -c2-)
+BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+
 .PHONY: help activate requirements
 
 help:	## Print this help 
@@ -90,38 +93,33 @@ get-version:
 	@cat django_cat/VERSION
 
 update-version:
-	@VERSION=$$(cat django_cat/VERSION | cut -c2-); \
-	COMMIT=$$(git rev-parse --short HEAD); \
-	echo "v$$VERSION-$$COMMIT" > django_cat/VERSION
+	@COMMIT=$$(git rev-parse --short HEAD); \
+	echo "v$(VERSION)-$$COMMIT" > django_cat/VERSION
 
 bump-patch:
-	@VERSION=$$(cat django_cat/VERSION | cut -d'-' -f1 | cut -c2-); \
-	MAJOR=$$(echo $$VERSION | cut -d. -f1); \
-	MINOR=$$(echo $$VERSION | cut -d. -f2); \
-	PATCH=$$(echo $$VERSION | cut -d. -f3); \
+	@MAJOR=$$(echo $(VERSION) | cut -d. -f1); \
+	MINOR=$$(echo $(VERSION) | cut -d. -f2); \
+	PATCH=$$(echo $(VERSION) | cut -d. -f3); \
 	NEW_PATCH=$$((PATCH + 1)); \
 	echo "New patch version: v$$MAJOR.$$MINOR.$$NEW_PATCH"; \
 	echo "v$$MAJOR.$$MINOR.$$NEW_PATCH" > django_cat/VERSION; \
 	$(MAKE) update-version
 
 bump-minor:
-	@VERSION=$$(cat django_cat/VERSION | cut -d'-' -f1 | cut -c2-); \
-	MAJOR=$$(echo $$VERSION | cut -d. -f1); \
-	MINOR=$$(echo $$VERSION | cut -d. -f2); \
+	@MAJOR=$$(echo $(VERSION) | cut -d. -f1); \
+	MINOR=$$(echo $(VERSION) | cut -d. -f2); \
 	echo "v$$MAJOR.$$((MINOR + 1)).0" > django_cat/VERSION; \
 	$(MAKE) update-version
 
 bump-major:
-	@VERSION=$$(cat django_cat/VERSION | cut -d'-' -f1 | cut -c2-); \
-	MAJOR=$$(echo $$VERSION | cut -d. -f1); \
+	@MAJOR=$$(echo $(VERSION) | cut -d. -f1); \
 	echo "v$$((MAJOR + 1)).0.0" > django_cat/VERSION; \
 	$(MAKE) update-version
 
 get-branch-info:
-	@BRANCH=$$(git rev-parse --abbrev-ref HEAD); \
-	ISSUE_NUM=$$(echo $$BRANCH | cut -d'-' -f1); \
-	TYPE=$$(echo $$BRANCH | cut -d'-' -f2); \
-	echo "$$BRANCH|$$ISSUE_NUM|$$TYPE"
+	@ISSUE_NUM=$$(echo $(BRANCH) | cut -d'-' -f1); \
+	TYPE=$$(echo $(BRANCH) | cut -d'-' -f2); \
+	echo "$(BRANCH)|$$ISSUE_NUM|$$TYPE"
 
 get-commits:
 	@git log --pretty=format:"%h - %s" origin/dev..HEAD
@@ -151,12 +149,12 @@ update-releases-md:
 
 merge-and-close:
 	@BRANCH_INFO=$$(make -s get-branch-info); \
-	VERSION=$$(cat django_cat/VERSION); \
 	BRANCH=$$(echo $$BRANCH_INFO | cut -d'|' -f1); \
 	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
 	git checkout dev; \
 	git merge --no-ff --no-edit $$BRANCH; \
 	make -s update-releases-md; \
+	VERSION=$$(cat django_cat/VERSION); \
 	echo "\nPremi INVIO per confermare le release notes e chiudere l'issue #$$ISSUE_NUM..."; \
 	read ans; \
 	git commit -m "Close #$$ISSUE_NUM, $$VERSION"; \
