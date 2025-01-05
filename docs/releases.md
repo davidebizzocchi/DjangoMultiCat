@@ -1,5 +1,23 @@
 # Releases
 
+
+
+type: dev
+## Release v0.0.11-d4bf367
+
+### Informazioni Release
+- **Branch di origine**: dev
+- **Branch di destinazione**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Tipo**: dev
+- **Versione precedente**: v0.0.11-d4bf367
+- **Nuova versione**: v0.0.11-d4bf367
+
+### Commit
+1824284 - Merge branch '36-issue-copy-button-not-send-django-message' into dev
+b080a90 - fix version
+
+---
 type: dev
 ## Release v0.0.11-d4bf367
 
