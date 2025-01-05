@@ -152,13 +152,14 @@ merge-and-close:
 	@BRANCH_INFO=$$(make -s get-branch-info); \
 	BRANCH=$$(echo $$BRANCH_INFO | cut -d'|' -f1); \
 	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
+	TYPE=$$(echo $$BRANCH_INFO | cut -d'|' -f3); \
+	make update-releases-md; \
+	RELEASE_VERSION=$$(cat django_cat/VERSION); \
+	git add django_cat/VERSION docs/releases.md; \
+	git commit -m "Update version to $$RELEASE_VERSION"; \
 	git checkout dev; \
 	git merge --no-ff --no-edit $$BRANCH; \
-	make update-releases-md; \
-	VERSION=$$(cat django_cat/VERSION); \
-	echo "\nPremi INVIO per confermare le release notes e chiudere l'issue #$$ISSUE_NUM..."; \
-	read ans; \
-	git commit -m "Close #$$ISSUE_NUM, $$VERSION"; \
+	git commit --amend -m "Close #$$ISSUE_NUM, $$RELEASE_VERSION"; \
 	git push origin dev; \
 	git push origin --delete $$BRANCH; \
 	$(MAKE) git-sync-branches

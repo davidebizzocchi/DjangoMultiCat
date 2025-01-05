@@ -2,6 +2,45 @@
 
 
 
+type: issue
+New patch version: v0.0.12
+## Release v0.0.12-8ce6165
+
+### Informazioni Release
+- **Branch di origine**: 36-issue-copy-button-not-send-django-message
+- **Branch di destinazione**: dev
+- **Issue**: [#36](https://github.com/davidebizzocchi/DjangoCat/issues/36)
+- **Tipo**: issue
+- **Versione precedente**: v0.0.11-4518c7a
+- **Nuova versione**: v0.0.12-8ce6165
+
+### Commit
+8ce6165 - fix merge
+0ff11a0 - Close #36, v0.0.11-4518c7a
+752e1da - fix version
+
+---
+
+
+type: issue
+New patch version: v0.0.11
+## Release v0.0.11-4518c7a
+
+### Informazioni Release
+- **Branch di origine**: 36-issue-copy-button-not-send-django-message
+- **Branch di destinazione**: dev
+- **Issue**: [#36](https://github.com/davidebizzocchi/DjangoCat/issues/36)
+- **Tipo**: issue
+- **Versione precedente**: v0.0.10-d4bf367
+- **Nuova versione**: v0.0.11-4518c7a
+
+### Commit
+4518c7a - version update
+752e1da - fix version
+
+---
+
+
 type: dev
 ## Release v0.0.11-d4bf367
 
