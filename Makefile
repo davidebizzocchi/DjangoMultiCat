@@ -154,7 +154,7 @@ merge-and-close:
 	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
 	git checkout dev; \
 	git merge --no-ff --no-edit $$BRANCH; \
-	make -s update-releases-md; \
+	make update-releases-md; \
 	VERSION=$$(cat django_cat/VERSION); \
 	echo "\nPremi INVIO per confermare le release notes e chiudere l'issue #$$ISSUE_NUM..."; \
 	read ans; \
