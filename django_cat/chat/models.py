@@ -4,10 +4,12 @@ import uuid
 from app.utils import BaseUserModel
 from library.models import Library
 from icecream import ic
+from django.utils import timezone
 
 class Chat(BaseUserModel):
     chat_id = models.CharField(max_length=255, unique=True, default=uuid.uuid4)
     libraries = models.ManyToManyField(Library, related_name='chats', blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     @property
     def files(self):
@@ -78,6 +80,8 @@ class Chat(BaseUserModel):
     class Meta:
         verbose_name = "chat"
         verbose_name_plural = "chats"
+
+        ordering = ['-created_at']
 
 class Message(models.Model):
     class Sender(models.TextChoices):
