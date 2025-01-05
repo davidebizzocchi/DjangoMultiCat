@@ -155,6 +155,8 @@ merge-and-close:
 	TYPE=$$(echo $$BRANCH_INFO | cut -d'|' -f3); \
 	make update-releases-md; \
 	RELEASE_VERSION=$$(cat django_cat/VERSION); \
+	git add django_cat/VERSION docs/releases.md; \
+	git commit -m "Update version to $$RELEASE_VERSION"; \
 	git checkout dev; \
 	git merge --no-ff --no-edit $$BRANCH; \
 	git commit --amend -m "Close #$$ISSUE_NUM, $$RELEASE_VERSION"; \
