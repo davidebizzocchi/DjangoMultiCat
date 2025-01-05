@@ -1,22 +1,33 @@
 let currentAudioUrl = null;  // Aggiungi questa variabile all'inizio del file
 
 $(document).on("click", "div.tooltip.tooltip-bottom", async function(e) {
-    try {
-        let target = $(e.currentTarget);
-        let type = target.data("tip").toLowerCase();
+    let target = $(e.currentTarget);
+    let type = target.data("tip").toLowerCase();
+    let messageElement = target.closest('.chat-footer').prev('.chat-bubble').find('.message.markdown');
+    let text_message = messageElement.text().trim();
+
+    if (type === "copy") {
+        try {
+            await navigator.clipboard.writeText(text_message);
+            
+            // Feedback opzionale all'utente
+            alert("Testo copiato negli appunti!");
+        } catch (error) {
+            console.error('Errore durante la copia:', error);
+            alert("Impossibile copiare il testo");
+        }
+    }
         
-        if (type === "volume") {
+    if (type === "volume") {
+        try {
             console.log("Pressed volume button");
             
             dialog.removeClass("hidden");
             recordButton.hide();
             shouldContinue = true;
-            
+
             recordingStatus.text("Attendo la risposta dell'assistente...");
 
-            let messageElement = target.closest('.chat-footer').prev('.chat-bubble').find('.message.markdown');
-            let text_message = messageElement.text().trim();
-            
             const response = await fetch(`{% url 'chat:speak-api' %}`, {
                 method: 'POST',
                 headers: {
@@ -96,14 +107,15 @@ $(document).on("click", "div.tooltip.tooltip-bottom", async function(e) {
             if (shouldContinue) {
                 closeModal();
             }
+
+        } catch (error) {
+            // Revoca l'URL in caso di errore nel try-catch
+            if (currentAudioUrl) {
+                URL.revokeObjectURL(currentAudioUrl);
+                currentAudioUrl = null;
+            }
+            console.error('Error in tooltip click handler:', error);
+            // Qui puoi aggiungere una notifica all'utente se necessario
         }
-    } catch (error) {
-        // Revoca l'URL in caso di errore nel try-catch
-        if (currentAudioUrl) {
-            URL.revokeObjectURL(currentAudioUrl);
-            currentAudioUrl = null;
-        }
-        console.error('Error in tooltip click handler:', error);
-        // Qui puoi aggiungere una notifica all'utente se necessario
     }
 });
