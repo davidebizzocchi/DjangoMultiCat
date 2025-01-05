@@ -130,7 +130,7 @@ create-release-note:
 	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
 	TYPE=$$(echo $$BRANCH_INFO | cut -d'|' -f3); \
 	OLD_VERSION=$$(cat django_cat/VERSION); \
-	echo "type: $$TYPE"; \
+	echo "\n\ntype: $$TYPE"; \
 	if [ "$$TYPE" = "issue" ]; then \
 		$(MAKE) bump-patch; \
 	elif [ "$$TYPE" = "feature" ]; then \
@@ -143,6 +143,7 @@ create-release-note:
 	echo "## Release $$NEW_VERSION\n\n### Informazioni Release\n- **Branch di origine**: $$BRANCH\n- **Branch di destinazione**: dev\n- **Issue**: [#$$ISSUE_NUM](https://github.com/davidebizzocchi/DjangoCat/issues/$$ISSUE_NUM)\n- **Tipo**: $$TYPE\n- **Versione precedente**: $$OLD_VERSION\n- **Nuova versione**: $$NEW_VERSION\n\n### Commit\n$$COMMITS\n\n---\n"
 
 update-releases-md:
+	echo "update release md $(VERSION) $(BRANCH)"
 	@RELEASE_NOTE=$$(make -s create-release-note); \
 	echo "# Releases\n\n$$RELEASE_NOTE$$(tail -n +2 docs/releases.md)" > docs/releases.md; \
 	git add django_cat/VERSION docs/releases.md;
