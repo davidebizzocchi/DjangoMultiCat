@@ -7,14 +7,14 @@ on:
 jobs:
   auto-assign:
     runs-on: ubuntu-latest
+
     permissions:
-      issues: write
+      issues: write  # Aggiungi i permessi per scrivere sulle issue
 
     steps:
       - name: Check if issue is unassigned
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const issue = context.payload.issue;
 
@@ -29,3 +29,5 @@ jobs:
             } else {
               core.info(`Issue #${issue.number} already has assignees.`);
             }
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTION_TOKEN }}  # Usa il GITHUB_TOKEN o un PAT
