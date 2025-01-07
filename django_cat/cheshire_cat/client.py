@@ -552,7 +552,7 @@ def create_user(user):
         "username": user.username,
         "permissions": {
             "CONVERSATION": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
-            "MEMORY": ["READ", "LIST"],
+            "MEMORY": ["READ", "LIST", "DELETE", "WRITE"],
             "STATIC": ["READ"],
             "STATUS": ["READ"]
         },
