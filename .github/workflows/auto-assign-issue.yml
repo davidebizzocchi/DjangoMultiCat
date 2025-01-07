@@ -30,4 +30,4 @@ jobs:
               core.info(`Issue #${issue.number} already has assignees.`);
             }
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Usa il GITHUB_TOKEN o un PAT
+          GITHUB_TOKEN: ${{ secrets.ACTION_TOKEN }}  # Usa il GITHUB_TOKEN o un PAT
