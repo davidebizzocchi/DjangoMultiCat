@@ -30,6 +30,7 @@ from django.conf import settings
 
 
 CatConfig = ccat.Config
+END_STREAM = object()
 
 class Cat(CatClient):
     _instances = {}
@@ -135,6 +136,10 @@ class Cat(CatClient):
         # ic(message)
 
         msg_json = json.loads(message)
+        # ic.enable()
+        # print("\n\n\n\n")
+        # ic(msg_json)
+        # print("\n\n\n\n")
         self._on_message(msg_json)
 
     def _reset_new_message(self, chat_id="default"):
@@ -151,9 +156,12 @@ class Cat(CatClient):
         chat_id = message.get("chat_id", "default")
         
         if msg_type == "chat_token":
+            message = message.get("content", {})
+            chat_id = message.get("chat_id", chat_id)
+
             chat_message = ChatToken(**message)
-            
-            if chat_id in self._stream_active:
+
+            if self._stream_active.get(chat_id, False):
                 self._chat_queues[chat_id].put(chat_message)
         
         elif msg_type == "chat":
@@ -162,9 +170,10 @@ class Cat(CatClient):
         
         elif msg_type == "json-notification":
             content = message.get("content", {})
+            ic("json-notification", message, content)
             if content.get("type") == "doc-reading-progress":
                 progress = DocReadingProgress(**content)
-                
+                ic(progress)
                 # Notifica gli handler registrati con i loro argomenti
                 handlers = list(self._notification_handlers.values())
                 for handler in handlers:
@@ -184,18 +193,19 @@ class Cat(CatClient):
         """End stream for specific chat"""
         if chat_id in self._stream_active:
             self._stream_active[chat_id] = False
-            self._chat_queues[chat_id].put(None)
+            self._chat_queues[chat_id].put(END_STREAM)
 
     def _stream(self, chat_id):
         """Stream messages for specific chat"""
-
-        while self._stream_active.get(chat_id):
+        
+        while self._stream_active.get(chat_id, False):
+            chat_queque = self._chat_queues[chat_id]
             try:
-                token = self._chat_queues[chat_id].get(block=True)
-                if token is None:  # segnale di terminazione
+                token = chat_queque.get(block=True)
+                ic(token is END_STREAM, self._stream_active.get(chat_id, False))
+                if token is END_STREAM:  # segnale di terminazione
                     break
                 yield token
-            except Queue.Empty:
                 continue  # Continuiamo ad ascoltare se la coda è vuota
             except Exception as e:
                 ic(f"Stream error for chat {chat_id}: {e}")
