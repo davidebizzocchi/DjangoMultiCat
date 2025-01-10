@@ -193,10 +193,10 @@ class FatherStrayCat(StrayCat):
         return self.get_son(chat_id)(message_dict)
     
     def __repr__(self):
-        return f"FatherStrayCat(user_id=)"
+        return f"FatherStrayCat(user_id={self.user_id})"
     
     def __str__(self) -> str:
-        return f"FatherStrayCat of "
+        return f"FatherStrayCat of {self.user_id}"
     
     @property
     def main_loop(self):
@@ -239,25 +239,23 @@ class MyVectorMemoryCollection(VectorMemoryCollection):
 class MyRabbitHole(RabbitHole):
     def _send_progress_notification(self, stray, perc_read, file_source):
         """Helper method to send progress notification"""
-        stray.send_ws_message({
-            "content": {
+        stray.send_ws_message(
+            content={
                 "status": "progress",
                 "perc_read": perc_read,
                 "source": file_source,
                 "type": "doc-reading-progress",
-            }
-        }, "json-notification")
+        }, msg_type="json-notification")
 
     def _send_completion_notification(self, stray, file_source):
         """Helper method to send completion notification"""
-        stray.send_ws_message({
-            "content": {
+        stray.send_ws_message(
+            content={
                 "status": "done",
                 "perc_read": 100,
                 "source": file_source,
                 "type": "doc-reading-progress",
-            }
-        }, "json-notification")
+            }, msg_type="json-notification")
 
     def store_documents(self, stray, docs, source, metadata):
         time_last_notification = time.time()
