@@ -2,6 +2,25 @@
 
 
 
+type: issue
+New patch version: v0.0.46
+## Release v0.0.46-c231ae7
+
+### Informazioni Release
+- **Branch di origine**: 41-issue-controllare-file_id
+- **Branch di destinazione**: dev
+- **Issue**: [#41](https://github.com/davidebizzocchi/DjangoCat/issues/41)
+- **Tipo**: issue
+- **Versione precedente**: v0.0.45-2156cfa
+- **Nuova versione**: v0.0.46-c231ae7
+- **Statistiche modifiche**:  1 file changed, 15 insertions(+)
+
+### Commit
+- c231ae7 - add user_id in declarative, Close #40 (davidebizzocchi)
+
+---
+
+
 type: dev
 ## Release v0.0.43-2156cfa
 
