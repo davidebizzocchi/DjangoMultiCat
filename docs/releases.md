@@ -3,6 +3,25 @@
 
 
 type: issue
+New patch version: v0.0.47
+## Release v0.0.47-865d8cc
+
+### Informazioni Release
+- **Branch di origine**: 46-issue-controllare-se-la-chat-è-limitata-per-uno-specifico-chat_id-sonstraycat
+- **Branch di destinazione**: dev
+- **Issue**: [#46](https://github.com/davidebizzocchi/DjangoCat/issues/46)
+- **Tipo**: issue
+- **Versione precedente**: v0.0.46-c231ae7
+- **Nuova versione**: v0.0.47-865d8cc
+- **Statistiche modifiche**: 
+
+### Commit
+
+
+---
+
+
+type: issue
 New patch version: v0.0.46
 ## Release v0.0.46-c231ae7
 
