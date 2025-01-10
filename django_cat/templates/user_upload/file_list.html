@@ -30,9 +30,7 @@
                                     <span class="badge bg-success ms-2 status-badge">Pronto</span>
                                 {% endif %}
 
-                                {% if file.ingested %}
-                                    <span class="badge bg-success ms-2 ingested-badge">Ingested</span>
-                                {% endif %}
+                                <span class="badge bg-success ms-2 ingested-badge {% if not file.ingested %}hidden{% endif %}">Ingested</span>
                             </div>
 
                             <!-- Progress bar for OCR -->
@@ -107,7 +105,7 @@ const updateFileStatus = (fileId) => {
 
             // Aggiorna barra progresso
             const $progressBar = $fileElement.find('.progress');
-            if ($progressBar.length && data.is_ocr && data.status !== 'ready') {
+            if ($progressBar.length && data.status !== 'ready') {
                 $progressBar.show();
                 const $bar = $progressBar.find('.progress-bar');
                 $bar.css('width', `${data.progress}%`)
