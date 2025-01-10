@@ -24,6 +24,19 @@ class MetadataUpdate(BaseModel):
     update: Dict = {}
 
 
+# DELETE conversation history from working memory
+@endpoint.endpoint(path="/conversation_history", prefix="", methods=["DELETE"])
+async def wipe_conversation_history(
+    request: Request,
+    stray=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.DELETE)),
+) -> Dict:
+    """Delete the specified user's conversation history from working memory"""
+
+    stray.get_beloved_son().working_memory.history = []
+
+    return {
+        "deleted": True,
+    }
 
 # GET conversation history from working memory
 @endpoint.get(path="/memory/conversation_history", prefix="")
@@ -36,6 +49,25 @@ async def get_conversation_history(
     result = {"history": stray.working_memory.history}
     log.debug(f"Returned history with {len(result['history'])} messages")
     return result
+
+# DELETE vector memory by chat_id
+@endpoint.endpoint(path="/memory/conversation_history/{chat_id}", methods=["DELETE"], prefix="")
+async def wipe_vector_memory_by_chat(
+    request: Request,
+    chat_id: str,
+    stray: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.DELETE)),
+) -> Dict:
+    log.debug(f"User ID: {stray.user_id}")
+    log.debug(f"Wiping vector memory for chat_id: {chat_id}")
+    
+    if chat_id in stray.chat_list:
+        stray.get_son(chat_id).history = []
+        log.debug(f"Successfully wiped history for chat_id: {chat_id}")
+    
+    return {
+        "deleted": True,
+        "chat_id": chat_id
+    }
 
 # GET lista delle working memories 
 @endpoint.get(path="/memory/working_memories", prefix="")
@@ -146,6 +178,55 @@ async def update_points_metadata(
         "matched_points": matched_points,
         "count": len(matched_points),
         "status": result
+    }
+
+# GET points by metadata
+@endpoint.get(path="/collections/{collection_id}/points", prefix="")
+async def get_points_by_metadata(
+    request: Request,
+    collection_id: str,
+    metadata: Dict = {},
+    stray=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
+) -> Dict:
+    """Get points in a collection by metadata filter"""
+    
+    vector_memory = stray.memory.vectors
+    collection = vector_memory.collections.get(collection_id)
+    
+    if not collection:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "Collection does not exist."}
+        )
+
+    # Construct filter from metadata
+    query_filter = collection._qdrant_filter_from_dict(metadata)
+    
+    # Search points with the filter
+    points = vector_memory.vector_db.scroll(
+        collection_name=collection_id,
+        scroll_filter=query_filter,
+        with_payload=True,
+        with_vectors=False,
+        limit=10000 
+    )[0]  # scroll returns (points, next_page_offset)
+
+    if not points:
+        return {
+            "points": [],
+            "count": 0,
+            "message": "No points found matching metadata criteria"
+        }
+
+    # Extract points data
+    matched_points = [{
+        "id": p.id,
+        "metadata": p.payload.get("metadata", {}),
+    } for p in points]
+
+    return {
+        "points": matched_points,
+        "count": len(matched_points)
     }
 
 # GET points filtered by metadata
