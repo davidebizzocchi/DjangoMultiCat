@@ -19,15 +19,15 @@ class Chat(BaseUserModel):
         return File.objects.filter(
             associations__library__chats=self  # Naviga la relazione
         ).distinct()
-
+    
     def send_message(self, message):
         """Send message to cat"""
         return self.client.send(message, chat_id=self.chat_id)
-
+    
     def stream(self):
         """Stream messages from this specific chat"""
         return self.client.stream(chat_id=self.chat_id)
-
+        
     def wait_message_content(self):
         """Wait and return last message content for this specific chat"""
         return self.client.wait_message_content(chat_id=self.chat_id)
@@ -39,7 +39,7 @@ class Chat(BaseUserModel):
     def get_history(self):
         """Get chat history"""
         return self.client.get_chat_history(self.chat_id)
-
+    
     def __str__(self):
         return f"Chat with {self.user.username}, id: {self.chat_id}"
     
@@ -49,12 +49,14 @@ class Chat(BaseUserModel):
 
         first_save = False
         ic(self.pk)
+        
         if not self.pk:
             first_save = True
         
         result = super().save(*args, **kwargs)
 
         ic(first_save)
+        
         if first_save and self.libraries:
             for library in self.libraries.all():
                 ic("chat create", library)
@@ -68,7 +70,7 @@ class Chat(BaseUserModel):
         files = self.files
         
         result = self.client.delete_chat(self.chat_id)
-
+        
         for file in files:
             ic("chat delete", file.file_id)
             self.client.remove_file_to_chats(file, str(self.chat_id))
