@@ -60,8 +60,9 @@ async def wipe_vector_memory_by_chat(
     log.debug(f"User ID: {stray.user_id}")
     log.debug(f"Wiping vector memory for chat_id: {chat_id}")
     
+    log.error(f"chat_id: {chat_id}, stray.chat_list: {stray.chat_list}, chat_id in stray.chat_list: {chat_id in stray.chat_list}")
     if chat_id in stray.chat_list:
-        stray.get_son(chat_id).history = []
+        stray.get_son(chat_id).working_memory.history = []
         log.debug(f"Successfully wiped history for chat_id: {chat_id}")
     
     return {
