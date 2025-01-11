@@ -39,6 +39,7 @@ services:
     volumes:
       - ../../core/core:/app
       - ../../plugins:/app/cat/plugins
+      - ../../config.json:/app/cat/data/metadata.json
 
       - long_term_memory:/app/cat/data
       - cheschire_cat_models:/app/cat/models

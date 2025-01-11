@@ -1,0 +1,107 @@
+{
+  "_default": {
+    "1": {
+      "name": "CoreOnlyAuthConfig",
+      "value": {},
+      "category": "auth_handler_factory",
+      "setting_id": "24556a26-dcda-4432-990e-55da4ff5dc06",
+      "updated_at": 1734533127
+    },
+    "2": {
+      "name": "auth_handler_selected",
+      "value": { "name": "CoreOnlyAuthConfig" },
+      "category": "auth_handler_factory",
+      "setting_id": "8f8e6410-8dce-4d80-bf7e-386b561bfbd9",
+      "updated_at": 1734533127
+    },
+    "3": {
+      "name": "users",
+      "value": {
+        "ff1431dc-85f4-458d-b0bc-a9e85fb1ceff": {
+          "id": "ff1431dc-85f4-458d-b0bc-a9e85fb1ceff",
+          "username": "admin",
+          "password": "$2b$12$Z1O8XcsAP9s7Xhrz2GJUN.KVkk5UwZGw91zB4oTzKNGrzP6x2jI0q",
+          "permissions": {
+            "STATUS": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
+            "MEMORY": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
+            "CONVERSATION": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
+            "SETTINGS": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
+            "LLM": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
+            "EMBEDDER": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
+            "AUTH_HANDLER": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
+            "USERS": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
+            "UPLOAD": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
+            "PLUGINS": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
+            "STATIC": ["WRITE", "EDIT", "LIST", "READ", "DELETE"]
+          }
+        },
+        "b1ca80b8-b60e-428a-9917-b9ac01eb40c4": {
+          "id": "b1ca80b8-b60e-428a-9917-b9ac01eb40c4",
+          "username": "prova",
+          "permissions": {
+            "CONVERSATION": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
+            "MEMORY": ["READ", "LIST", "WRITE", "DELETE"],
+            "STATIC": ["READ"],
+            "STATUS": ["READ"]
+          },
+          "password": "$2b$12$VfcfVd5dIVfx/UcHB.3jpe32CLtLQDXK/LvF0n4wuo0V/P9EmM1/i"
+        }
+      },
+      "category": null,
+      "setting_id": "8b636157-47e5-4d70-a43b-e315466f3f55",
+      "updated_at": 1736083493
+    },
+    "4": {
+      "name": "active_plugins",
+      "value": [
+        "groqai_integration",
+        "core_plugin",
+        "multi_chat",
+        "cat_advanced_tools"
+      ],
+      "category": null,
+      "setting_id": "c4f202c2-6692-4c1d-9465-f1f46abbdaa2",
+      "updated_at": 1736208441
+    },
+    "5": {
+      "name": "GroqAIConfig",
+      "value": {
+        "groq_api_key": "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",
+        "model": "llama-3.1-8b-instant",
+        "max_tokens": "8000",
+        "top_p": 1,
+        "temperature": 0.7,
+        "streaming": true
+      },
+      "category": "llm_factory",
+      "setting_id": "6c1281d2-b9bd-4415-8864-2cf27e643e2a",
+      "updated_at": 1736560792
+    },
+    "6": {
+      "name": "llm_selected",
+      "value": { "name": "GroqAIConfig" },
+      "category": "llm",
+      "setting_id": "a4dba239-11bf-4711-a400-8ce57136bb16",
+      "updated_at": 1736560792
+    },
+    "7": {
+      "name": "EmbedderQdrantFastEmbedConfig",
+      "value": {
+        "model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        "max_length": 512,
+        "doc_embed_type": "passage",
+        "cache_dir": "cat/models/fast_embed"
+      },
+      "category": "embedder_factory",
+      "setting_id": "4f8c3118-0ea3-4ec7-8327-f8c142d04e80",
+      "updated_at": 1736560799
+    },
+    "8": {
+      "name": "embedder_selected",
+      "value": { "name": "EmbedderQdrantFastEmbedConfig" },
+      "category": "embedder",
+      "setting_id": "b3062c27-1d2a-4955-b57c-76c7eca1d408",
+      "updated_at": 1736560799
+    }
+  }
+}
