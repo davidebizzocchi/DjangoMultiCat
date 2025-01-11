@@ -1,14 +1,10 @@
 import time
-import traceback
 from typing import Any, Dict, List, Optional, Union
-from cat.mad_hatter.decorators import option, hook
-from cat.agents.form_agent import FormAgent
 from fastapi import WebSocket
 
 
 from cat.auth.permissions import AuthUserInfo
 from cat.convo.messages import CatMessage, UserMessage
-from cat.experimental.form.cat_form import CatFormState
 from cat.log import log
 
 from cat.looking_glass.stray_cat import StrayCat
@@ -18,6 +14,7 @@ from cat.memory.vector_memory_collection import VectorMemoryCollection
 from cat.rabbit_hole import RabbitHole
 from cat.looking_glass.stray_cat import MSG_TYPES
 
+from .decorators import get_true_class, option
 
 
 # NOTE: If you don't have option, this is all useless
@@ -30,6 +27,18 @@ from cat.looking_glass.stray_cat import MSG_TYPES
 ### Endpoints:
 #### POST /chat/{chat_id}/message
 
+TrueRabbitHole: RabbitHole = get_true_class(RabbitHole)
+
+stray_cat_attr = {k: v for k, v in StrayCat.__dict__.items()}
+MyStrayCat: StrayCat = type("MyStrayCat", StrayCat.__bases__, stray_cat_attr)
+
+def new_straycat_init(self, user_id, main_loop, user_data=None, ws=None):
+    self.__user_id = user_id
+    self.__user_data = user_data
+    self.__ws = ws
+    self.__main_loop = main_loop
+
+
 @option(UserMessage)
 class UserMessageChat(UserMessage):
     chat_id: Optional[str] = "default"
@@ -37,9 +46,6 @@ class UserMessageChat(UserMessage):
 @option(CatMessage)
 class CatMessageChat(CatMessage):
     chat_id: Optional[str] = "default"
-
-stray_cat_attr = {k: v for k, v in StrayCat.__dict__.items()}
-MyStrayCat: StrayCat = type("MyStrayCat", StrayCat.__bases__, stray_cat_attr)
 
 # A perfect son
 class SonStrayCat(MyStrayCat):
@@ -118,6 +124,8 @@ class SonStrayCat(MyStrayCat):
 
         return output
 
+StrayCat.__init__ = new_straycat_init
+
 # Adapt the StrayCat to curate the SonStrayCat (the perfect father)
 @option(StrayCat)
 class FatherStrayCat(StrayCat):
@@ -128,19 +136,21 @@ class FatherStrayCat(StrayCat):
         user_data: AuthUserInfo = None,
         ws: WebSocket = None,
     ):
-        log.warning("FatherStrayCat created")
+        log.warning(f"FatherStrayCat created, {self.__class__.mro()}")
         
         super().__init__(user_id, main_loop, user_data, ws)
 
-        self.__user_id = user_id
-        self.__user_data = user_data
+        self.user_id = user_id
+        self.user_data = user_data
 
         # # self.working_memory = WorkingMemory()
 
         # # attribute to store ws connection
         self.__ws = ws
+        self._StrayCat__ws = self.__ws
 
         self.__main_loop = main_loop
+        self._StrayCat__main_loop = self.__main_loop
 
         self.stray_sons: Dict[str, SonStrayCat] = {}
 
@@ -150,10 +160,10 @@ class FatherStrayCat(StrayCat):
         self.stray_sons[chat_id] = SonStrayCat(
             chat_id,
             self,
-            super().user_id,
-            self.main_loop,
+            self.user_id,
+            self.__main_loop,
             self.user_data,
-            self.ws
+            self.__ws
         )
         
         return self.stray_sons[chat_id]
@@ -186,7 +196,7 @@ class FatherStrayCat(StrayCat):
         return self.get_beloved_son().__build_why()
     
     def __call__(self, message_dict):
-        user_message = self.mad_hatter.get_option(UserMessageChat).model_validate(message_dict)
+        user_message = UserMessageChat.model_validate(message_dict)
         chat_id = user_message.chat_id
 
         # now recall son
@@ -199,20 +209,39 @@ class FatherStrayCat(StrayCat):
         return f"FatherStrayCat of {self.user_id}"
     
     @property
-    def main_loop(self):
+    def _StrayCat__ws(self):
+        return self.__ws
+    
+    @_StrayCat__ws.setter
+    def _StrayCat__ws(self, ws):
+        self.__ws = ws
+    
+    @property
+    def _StrayCat__main_loop(self):
         return self.__main_loop
     
-    @property
-    def user_data(self):
-        return self.__user_data
+    @_StrayCat__main_loop.setter
+    def _StrayCat__main_loop(self, main_loop):
+        self.__main_loop = main_loop
     
-    @property
-    def user_id(self):
-        return self.__user_id
+    user_id = "default"
+    user_data = None
     
-    @property
-    def ws(self):
-        return self.__ws
+    # @property
+    # def main_loop(self):
+    #     return self.__main_loop
+    
+    # @property
+    # def user_data(self):
+    #     return self.__user_data
+    
+    # @property
+    # def user_id(self):
+    #     return self.__user_id
+    
+    # @property
+    # def ws(self):
+    #     return self.__ws
     
 @option(VectorMemoryCollection)
 class MyVectorMemoryCollection(VectorMemoryCollection):
@@ -235,8 +264,11 @@ class MyVectorMemoryCollection(VectorMemoryCollection):
         )
         return update_result
     
-@option(RabbitHole)
-class MyRabbitHole(RabbitHole):
+@option(TrueRabbitHole)
+class MyRabbitHole(TrueRabbitHole):
+    def __init__(self, *args, **kwargs):
+        log.error("MyRabbitHole created")
+        super().__init__(*args, **kwargs)
     def _send_progress_notification(self, stray, perc_read, file_source):
         """Helper method to send progress notification"""
         stray.send_ws_message(
