@@ -28,7 +28,7 @@ colorama==0.4.6
     # via icecream
 distro==1.9.0
     # via groq
-django==5.1.4
+django==5.1.5
     # via
     #   -r requirements/base.in
     #   django-ninja
