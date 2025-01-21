@@ -1,1 +1,0 @@
-docker compose -p django_cat -f ../docker-compose.local.yml up

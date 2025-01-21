@@ -2,6 +2,7 @@
 .venv
 core
 docs
+scripts
 
 !requirements/*.txt
 
