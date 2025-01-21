@@ -25,6 +25,15 @@ requirements:	## Create requirements.txt from requirements.in
 	@git commit -m "automatic upgrade requirements"
 	@git push
 
+build-local-cat:
+	docker build -t cheshire-cat-core:latest -f core/Dockerfile .
+	@echo "Image cheshire-cat-core:latest builded and tagged: cheshire-cat-core:latest"
+
+build-ghcr-cat:
+	docker pull ghcr.io/cheshire-cat-ai/core:latest
+	docker tag ghcr.io/cheshire-cat-ai/core:latest cheshire-cat-core:latest
+	@echo "Image cheshire-cat-core:latest builded and tagged: cheshire-cat-core:latest"
+
 destroy-django:
 	docker rmi -f django_cat-app:local
 
@@ -34,16 +43,25 @@ destroy-cat:
 requirements-load-cat:
 	source .venv/bin/activate && cp -r .cat-package/cat .venv/lib/python3.13/site-packages
 
-up-local:           ## Run the LOCAL stack via Docker on http://0.0.0.0:8000/
-	@{ \
-		if ! docker info > /dev/null 2>&1; then \
+wait-docker:
+	@if ! docker info > /dev/null 2>&1; then \
+		if [ -e "/Applications/Docker.app" ]; then \
 			echo "Docker non è in esecuzione. Avvio Docker Desktop..."; \
-			open -n /Applications/Docker.app; \
+			open -a Docker; \
 			echo "Attendo che Docker sia pronto..."; \
-			while ! docker info > /dev/null 2>&1; do \
-				sleep 1; \
+			until docker info > /dev/null 2>&1; do \
+				sleep 2; \
 			done; \
+			echo "Docker è pronto!"; \
+		else \
+			echo "ATTENZIONE: Docker.app non trovato nel percorso standard."; \
+			echo "Assicurati che Docker sia installato e configurato correttamente."; \
 		fi; \
+	fi
+
+up-local:           ## Run the LOCAL stack via Docker on http://0.0.0.0:8000/
+	@make wait-docker
+	@{ \
 		(docker compose -p django_cat -f docker/local/docker-compose.yml up || exit 1) & \
 		PID=$$!; \
 		trap 'docker compose -p django_cat -f docker/local/docker-compose.yml down && exit 0' EXIT; \
