@@ -1,6 +1,0 @@
-# [submodule "core"]
-# 	path = core
-# 	url = https://github.com/davidebizzocchi/cheschire-cat-core.git
-# [submodule "odoo"]
-# 	path = odoo
-# 	url = https://github.com/odoo/odoo.git
