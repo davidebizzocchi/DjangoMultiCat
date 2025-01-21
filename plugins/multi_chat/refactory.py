@@ -1,14 +1,10 @@
 import time
-import traceback
 from typing import Any, Dict, List, Optional, Union
-from cat.mad_hatter.decorators import option, hook
-from cat.agents.form_agent import FormAgent
 from fastapi import WebSocket
 
 
 from cat.auth.permissions import AuthUserInfo
 from cat.convo.messages import CatMessage, UserMessage
-from cat.experimental.form.cat_form import CatFormState
 from cat.log import log
 
 from cat.looking_glass.stray_cat import StrayCat
@@ -17,6 +13,8 @@ from cat.looking_glass.stray_cat import MSG_TYPES
 from cat.memory.vector_memory_collection import VectorMemoryCollection
 from cat.rabbit_hole import RabbitHole
 from cat.looking_glass.stray_cat import MSG_TYPES
+
+from cat.plugins.multi_chat.decorators import option
 
 
 
