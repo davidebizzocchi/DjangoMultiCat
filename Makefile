@@ -13,7 +13,6 @@ activate:	## Acvtivate venv
 	@echo "source .venv/bin/activate"
 
 requirements:	## Create requirements.txt from requirements.in
-	# @git pull
 
 	@rm -f docker/local/requirements.txt
 	
@@ -26,7 +25,7 @@ requirements:	## Create requirements.txt from requirements.in
 	@git push
 
 build-local-cat:
-	docker build -t cheshire-cat-core:latest -f core/Dockerfile .
+	docker build -t cheshire-cat-core:latest -f core/core/Dockerfile core/core
 	@echo "Image cheshire-cat-core:latest builded and tagged: cheshire-cat-core:latest"
 
 build-ghcr-cat:
@@ -38,7 +37,7 @@ destroy-django:
 	docker rmi -f django_cat-app:local
 
 destroy-cat:
-	docker rmi -f django_cat-cheshire-cat-core:latest
+	docker rmi -f cheshire-cat-core:latest
 
 requirements-load-cat:
 	source .venv/bin/activate && cp -r .cat-package/cat .venv/lib/python3.13/site-packages
@@ -56,6 +55,7 @@ wait-docker:
 		else \
 			echo "ATTENZIONE: Docker.app non trovato nel percorso standard."; \
 			echo "Assicurati che Docker sia installato e configurato correttamente."; \
+			echo "Se non sei su MacOS, oppure funziona lo stesso, ignora questo messaggio!."; \
 		fi; \
 	fi
 
