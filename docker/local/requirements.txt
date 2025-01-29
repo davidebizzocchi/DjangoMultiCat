@@ -41,10 +41,12 @@ dnspython==2.7.0
     # via email-validator
 email-validator==2.2.0
     # via -r requirements/base.in
-executing==2.1.0
+executing==2.2.0
     # via icecream
 groq==0.15.0
-    # via -r requirements/base.in
+    # via
+    #   -r requirements/base.in
+    #   langchain-groq
 gtts==2.5.4
     # via -r requirements/base.in
 h11==0.14.0
@@ -52,7 +54,9 @@ h11==0.14.0
 httpcore==1.0.7
     # via httpx
 httpx==0.28.1
-    # via groq
+    # via
+    #   groq
+    #   langsmith
 icecream==2.1.4
     # via -r requirements/base.in
 idna==3.10
@@ -61,10 +65,24 @@ idna==3.10
     #   email-validator
     #   httpx
     #   requests
-markdown2==2.5.2
+jsonpatch==1.33
+    # via langchain-core
+jsonpointer==3.0.0
+    # via jsonpatch
+langchain-core==0.2.43
+    # via langchain-groq
+langchain-groq==0.1.4
+    # via -r requirements/local.in
+langsmith==0.1.147
+    # via langchain-core
+markdown2==2.5.3
     # via -r requirements/base.in
+orjson==3.10.15
+    # via langsmith
 packaging==24.2
-    # via pytesseract
+    # via
+    #   langchain-core
+    #   pytesseract
 pdf2image==1.17.0
     # via -r requirements/base.in
 pillow==11.1.0
@@ -74,11 +92,13 @@ pillow==11.1.0
     #   pytesseract
 psycopg2-binary==2.9.10
     # via -r requirements/base.in
-pydantic==2.10.5
+pydantic==2.10.6
     # via
     #   cheshire-cat-api
     #   django-ninja
     #   groq
+    #   langchain-core
+    #   langsmith
 pydantic-core==2.27.2
     # via pydantic
 pygments==2.19.1
@@ -89,13 +109,19 @@ python-dateutil==2.9.0.post0
     # via cheshire-cat-api
 python-decouple==3.8
     # via -r requirements/base.in
+pyyaml==6.0.2
+    # via langchain-core
 regex==2024.11.6
     # via tiktoken
 requests==2.32.3
     # via
     #   -r requirements/base.in
     #   gtts
+    #   langsmith
+    #   requests-toolbelt
     #   tiktoken
+requests-toolbelt==1.0.0
+    # via langsmith
 sentry-sdk==2.20.0
     # via -r requirements/base.in
 six==1.17.0
@@ -108,11 +134,14 @@ soupsieve==2.6
     # via beautifulsoup4
 sqlparse==0.5.3
     # via django
+tenacity==8.5.0
+    # via langchain-core
 tiktoken==0.8.0
     # via -r requirements/base.in
 typing-extensions==4.12.2
     # via
     #   groq
+    #   langchain-core
     #   pydantic
     #   pydantic-core
 urllib3==2.0.7
