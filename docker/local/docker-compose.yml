@@ -1,28 +1,11 @@
 # docker-compose.local.yml
 
 services:
-
-  # cheshire-cat-core:
-  #   image: ghcr.io/cheshire-cat-ai/core:latest
-  #   container_name: cheshire_cat_core
-  #   depends_on:
-  #     - cheshire-cat-vector-memory
-  #   ports:
-  #     - 1865:80
-  #     - 5678:5678
-  #   volumes:
-  #     - ./django_cat/cheshire_cat/volumes/static:/app/cat/static
-  #     - ./django_cat/cheshire_cat/volumes/plugins:/app/cat/plugins
-  #     - long_term_memory:/app/cat/data
-  #     - cheshire_cat_models:/app/cat/models
-
-  #   networks:
-  #     - app_network
-
   cheshire-cat-core:
-    build:
-      context: ../../core/core
+    # build:
+    #   context: ../../core/core
     container_name: cheshire_cat_core
+    image: cheshire-cat-core:latest
 
     env_file:
       - ../../env/local/.env
@@ -39,6 +22,7 @@ services:
     volumes:
       - ../../core/core:/app
       - ../../plugins:/app/cat/plugins
+      - ../../config.json:/app/cat/data/metadata.json
 
       - long_term_memory:/app/cat/data
       - cheschire_cat_models:/app/cat/models
@@ -101,21 +85,6 @@ services:
 
     networks:
       - app_network
-
-
-# networks:
-#   internal_network:
-#     internal: true
-#   external_network:
-#     external: false
-
-# networks:
-#   internal_network:
-#     driver: bridge
-#     internal: true
-
-#   public_network:
-#     driver: bridge
  
 volumes:
   postgres_data-local:

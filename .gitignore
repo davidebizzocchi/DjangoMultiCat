@@ -3,6 +3,7 @@
 core
 docs
 scripts
+config.json
 
 !requirements/*.txt
 
