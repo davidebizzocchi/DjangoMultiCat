@@ -32,10 +32,11 @@ def option(old_class: Type, *args: Union[str, Type[Any]], priority: int = 1) -> 
 
         print("true_old_class:", true_old_class.__name__)
         def _make_option(class_: Type[Any]) -> Type:
-            print("class:", class_.__name__)
+            true_class_ = get_true_class(class_)
+            print("class:", true_class_.__name__)
             # Imposta sempre il redirect usando l'utility function
-            set_redirect_class(true_old_class, class_)
-            return class_
+            set_redirect_class(true_old_class, true_class_)
+            return true_class_
             
         return _make_option
     
