@@ -6,6 +6,7 @@ anyio==4.8.0
     # via
     #   groq
     #   httpx
+    #   openai
 asgiref==3.8.1
     # via django
 asttokens==3.0.0
@@ -27,7 +28,9 @@ click==8.1.8
 colorama==0.4.6
     # via icecream
 distro==1.9.0
-    # via groq
+    # via
+    #   groq
+    #   openai
 django==5.1.5
     # via
     #   -r requirements/base.in
@@ -43,10 +46,8 @@ email-validator==2.2.0
     # via -r requirements/base.in
 executing==2.2.0
     # via icecream
-groq==0.15.0
-    # via
-    #   -r requirements/base.in
-    #   langchain-groq
+groq==0.16.0
+    # via -r requirements/base.in
 gtts==2.5.4
     # via -r requirements/base.in
 h11==0.14.0
@@ -56,7 +57,7 @@ httpcore==1.0.7
 httpx==0.28.1
     # via
     #   groq
-    #   langsmith
+    #   openai
 icecream==2.1.4
     # via -r requirements/base.in
 idna==3.10
@@ -65,24 +66,14 @@ idna==3.10
     #   email-validator
     #   httpx
     #   requests
-jsonpatch==1.33
-    # via langchain-core
-jsonpointer==3.0.0
-    # via jsonpatch
-langchain-core==0.2.43
-    # via langchain-groq
-langchain-groq==0.1.4
-    # via -r requirements/local.in
-langsmith==0.1.147
-    # via langchain-core
+jiter==0.8.2
+    # via openai
 markdown2==2.5.3
     # via -r requirements/base.in
-orjson==3.10.15
-    # via langsmith
+openai==1.60.2
+    # via -r requirements/base.in
 packaging==24.2
-    # via
-    #   langchain-core
-    #   pytesseract
+    # via pytesseract
 pdf2image==1.17.0
     # via -r requirements/base.in
 pillow==11.1.0
@@ -97,8 +88,7 @@ pydantic==2.10.6
     #   cheshire-cat-api
     #   django-ninja
     #   groq
-    #   langchain-core
-    #   langsmith
+    #   openai
 pydantic-core==2.27.2
     # via pydantic
 pygments==2.19.1
@@ -109,19 +99,13 @@ python-dateutil==2.9.0.post0
     # via cheshire-cat-api
 python-decouple==3.8
     # via -r requirements/base.in
-pyyaml==6.0.2
-    # via langchain-core
 regex==2024.11.6
     # via tiktoken
 requests==2.32.3
     # via
     #   -r requirements/base.in
     #   gtts
-    #   langsmith
-    #   requests-toolbelt
     #   tiktoken
-requests-toolbelt==1.0.0
-    # via langsmith
 sentry-sdk==2.20.0
     # via -r requirements/base.in
 six==1.17.0
@@ -130,18 +114,19 @@ sniffio==1.3.1
     # via
     #   anyio
     #   groq
+    #   openai
 soupsieve==2.6
     # via beautifulsoup4
 sqlparse==0.5.3
     # via django
-tenacity==8.5.0
-    # via langchain-core
 tiktoken==0.8.0
     # via -r requirements/base.in
+tqdm==4.67.1
+    # via openai
 typing-extensions==4.12.2
     # via
     #   groq
-    #   langchain-core
+    #   openai
     #   pydantic
     #   pydantic-core
 urllib3==2.0.7
