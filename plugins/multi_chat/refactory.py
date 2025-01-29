@@ -14,7 +14,8 @@ from cat.memory.vector_memory_collection import VectorMemoryCollection
 from cat.rabbit_hole import RabbitHole
 from cat.looking_glass.stray_cat import MSG_TYPES
 
-from cat.plugins.multi_chat.decorators import option
+from cat.plugins.multi_chat.decorators import option, get_true_class
+from cat.utils import singleton
 
 
 
@@ -63,7 +64,7 @@ class SonStrayCat(MyStrayCat):
 
         super().__init__(user_id, main_loop, user_data, ws)
 
-        self.working_memory = WorkingMemory()
+        # self.working_memory = WorkingMemory()
 
     def __send_ws_json(self, data: Any):
         log.error(f"Sending data to chat {self.chat_id}")
@@ -99,7 +100,7 @@ class SonStrayCat(MyStrayCat):
 
         if isinstance(message, str):
             why = self.__build_why()
-            message = CatMessage(content=message, user_id=self.user_id, why=why, chat_id=self.chat_id)
+            message = CatMessage(text=message, user_id=self.user_id, why=why, chat_id=self.chat_id)
 
         if save:
             self.working_memory.update_conversation_history(
@@ -133,14 +134,15 @@ class FatherStrayCat(StrayCat):
         self.__user_id = user_id
         self.__user_data = user_data
 
-        # # self.working_memory = WorkingMemory()
-
         # # attribute to store ws connection
         self.__ws = ws
 
         self.__main_loop = main_loop
 
         self.stray_sons: Dict[str, SonStrayCat] = {}
+
+        # self.working_memory = property(self._get_working_memory)
+        # log.error(f"Working memory: {self.working_memory}")
 
     def create_son(self, chat_id: str):
         """Create a new son"""
@@ -156,6 +158,14 @@ class FatherStrayCat(StrayCat):
         
         return self.stray_sons[chat_id]
     
+    @property
+    def working_memory(self):
+        return self.get_beloved_son().working_memory
+    
+    @working_memory.setter
+    def working_memory(self, value):
+        pass
+
     @property
     def chat_list(self) -> List:
         return list(self.stray_sons.keys())
@@ -175,16 +185,16 @@ class FatherStrayCat(StrayCat):
         """Get the beloved son"""
         return self.get_son("default")
 
-    @property
-    def working_memory(self) -> WorkingMemory:
-        """Return the beloved son"""
-        return self.get_beloved_son().working_memory
+    # @property
+    # def working_memory(self) -> WorkingMemory:
+    #     """Return the beloved son"""
+    #     return self.get_beloved_son().working_memory
 
     def __build_why(self):
         return self.get_beloved_son().__build_why()
     
     def __call__(self, message_dict):
-        user_message = self.mad_hatter.get_option(UserMessageChat).model_validate(message_dict)
+        user_message = UserMessageChat.model_validate(message_dict)
         chat_id = user_message.chat_id
 
         # now recall son
@@ -234,7 +244,8 @@ class MyVectorMemoryCollection(VectorMemoryCollection):
         return update_result
     
 @option(RabbitHole)
-class MyRabbitHole(RabbitHole):
+@singleton
+class MyRabbitHole(get_true_class(RabbitHole)):
     def _send_progress_notification(self, stray, perc_read, file_source):
         """Helper method to send progress notification"""
         stray.send_ws_message(
