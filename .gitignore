@@ -4,6 +4,7 @@ core
 docs
 scripts
 config.json
+__vscode.code-workspace
 
 !requirements/*.txt
 
