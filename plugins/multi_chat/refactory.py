@@ -104,7 +104,7 @@ class SonStrayCat(MyStrayCat):
 
         if save:
             self.working_memory.update_conversation_history(
-                who="AI", message=message["content"], why=message["why"]
+                who="AI", text=message["text"], why=message["why"]
             )
 
         self.__send_ws_json(message.model_dump())
@@ -194,6 +194,7 @@ class FatherStrayCat(StrayCat):
         return self.get_beloved_son().__build_why()
     
     def __call__(self, message_dict):
+        log.error(f"FatherStrayCat called with {message_dict}")
         user_message = UserMessageChat.model_validate(message_dict)
         chat_id = user_message.chat_id
 
