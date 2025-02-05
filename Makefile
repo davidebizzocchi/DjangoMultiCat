@@ -182,7 +182,9 @@ merge-and-close:
 	git checkout dev; \
 	git merge --no-ff --no-edit $$BRANCH; \
 	git commit --amend -m "Close #$$ISSUE_NUM, $$RELEASE_VERSION"; \
+	git tag -a $$RELEASE_VERSION -m "Release $$RELEASE_VERSION"; \
 	git push origin dev; \
+	git push origin $$RELEASE_VERSION; \
 	git push origin --delete $$BRANCH; \
 	$(MAKE) git-sync-branches
 
