@@ -16,7 +16,7 @@
 
 <style>
     .hidden {
-        display: none;
+        display: none!important;
     }
 
     .action-button-active {
@@ -57,7 +57,17 @@
     }
 
     .spin {
-    animation: rotate 1s linear infinite;
+        animation: rotate 1s linear infinite;
+        -webkit-animation: rotate 1s linear infinite;
+    }
+
+    @-webkit-keyframes rotate {
+        from {
+            -webkit-transform: rotate(0deg);
+        }
+        to {
+            -webkit-transform: rotate(360deg);
+        }
     }
 
     @keyframes rotate {
@@ -71,6 +81,141 @@
 
     svg.loader {
         width: 30px;
+    }
+
+    div.copy-icon-svg {
+        padding: 2px;
+    }
+
+    .logo-svg path {
+        fill: #d5e2fa
+    }
+
+    .brand-logo-svg svg {
+        width: 200px;
+        height: 50px;
+    }
+
+    /* Asst message think */
+
+    /* Asst message think animations */
+    @-webkit-keyframes fadeInUpScale {
+        0% {
+            -webkit-transform: scaleY(0);
+            transform: scaleY(0);
+            -webkit-transform-origin: top;
+            transform-origin: top;
+        }
+        100% {
+            -webkit-transform: scaleY(1);
+            transform: scaleY(1);
+            -webkit-transform-origin: top;
+            transform-origin: top;
+        }
+    }
+    
+    @keyframes fadeInUpScale {
+        0% {
+            transform: scaleY(0);
+            transform-origin: top;
+        }
+        100% {
+            transform: scaleY(1);
+            transform-origin: top;
+        }
+    }
+
+    @-webkit-keyframes fadeInUpTranslate {
+        0% {
+            opacity: 0;
+            -webkit-transform: translateY(10px);
+            transform: translateY(10px);
+        }
+        70% {
+            opacity: 1;
+            -webkit-transform: translateY(5px);  /* TOOD: decide if it's better -5px (bouncing effect) */
+            transform: translateY(5px);
+        }
+        100% {
+            opacity: 1;
+            -webkit-transform: translateY(0);
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        70% {
+            opacity: 1;
+            transform: translateY(5px);  /* TOOD: decide if it's better -5px (bouncing effect) */
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    div.think-wrapper {
+        padding: 0 0 0 13px;
+        line-height: 26px;
+        position: relative;
+        color: #a6a6a6;
+
+        --arrow-transition-time: 0.3s;
+        --transition-time: 0.7s;
+    }
+
+    div.think-wrapper div.think-line {
+        border-left: 2px solid #e5e5e5;
+        border-color: #4e4e56;
+        border-radius: 10px;
+        height: calc(100% - 10px);
+        margin-top: 5px;
+        position: absolute;
+        top: 0px;
+        left: 0;
+    }
+
+    button.collapse-think .arrow {
+        transition: transform var(--arrow-transition-time) ease-in-out;
+        -webkit-transition: transform var(--arrow-transition-time) ease-in-out;
+    }
+
+    button.collapse-think[aria-expanded="true"] .arrow {
+        transform: rotate(180deg);
+    }
+
+    button.collapse-think[aria-expanded="false"] .arrow {
+        transform: rotate(0deg);
+    }
+
+    div.think-wrapper div.think-container {
+        transition: all var(--transition-time) ease-out;
+        -webkit-transition: all var(--transition-time) ease-out;
+    }
+
+    div.think-wrapper div.think-content {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all var(--transition-time) ease-out;
+        -webkit-transition: all var(--transition-time) ease-out;
+    }
+
+    div.think-wrapper div.collapse.show div.think-content {
+        opacity: 1;
+        transform: translateY(0);
+        animation: fadeInUpTranslate var(--transition-time) ease-out forwards;
+        -webkit-animation: fadeInUpTranslate var(--transition-time) ease-out forwards;;
+    }
+
+    /* Asst message think line animated */
+    div.think-wrapper div.collapse.show div.think-line {
+        /* animation: fadeInUpScale var(--transition-time) cubic-bezier(0.95, 0.06, 0, 0.14) forwards; */
+        animation: fadeInUpScale calc(var(--transition-time)*0.8) ease-out forwards;
+        -webkit-animation: fadeInUpScale calc(var(--transition-time)*0.8) ease-out forwards;
     }
 
 </style>
@@ -100,12 +245,12 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         <div class="sidebar-navigation">
 
             <!-- SIDEBAR -->
-            {% include "chat/components/chat/sidebar/base.html" %}
+            {% include "chat/components/sidebar/base.html" %}
 
 
             <!-- CHAT -->
 
-            {% include "chat/components/chat/chat/base.html" %}
+            {% include "chat/components/chat/base.html" %}
 
 
         </div>
@@ -169,143 +314,23 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 </div>
 
 <!-- CREATE FORM -->
-
-<div id="popup-create-thread" style="
-{% if not create_thread %}
-    display: none;
-{% endif %}
-z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center">
-    <div class="ds-modal">
-        <div data-focus-guard="true" tabindex="0"
-            style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;">
-        </div>
-        <div data-focus-lock-disabled="false">
-            <div class="ds-theme" style="font-size: var(--ds-font-size-m); line-height: var(--ds-line-height-m);">
-                <div tabindex="-1" data-autofocus="true" class="ds-modal-content ds-elevated" role="dialog"
-                    style="--ds-modal-content-color: #3A3A46; font-size: var(--ds-font-size-m); line-height: var(--ds-line-height-m);">
-                    <div class="ds-modal-content__header-wrapper">
-                        <div class="ds-modal-content__title">Create a new Chat</div>
-                        <div class="ds-icon-button" tabindex="0" style="--ds-icon-button-hover-color: #474756;">
-                            <div class="ds-icon" style="font-size: 12px; width: 12px; height: 12px;"><svg
-                                    xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"
-                                    fill="none">
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M9.314.687a.97.97 0 0 1 0 1.373L2.059 9.315A.97.97 0 1 1 .686 7.943L7.941.687a.97.97 0 0 1 1.373 0z"
-                                        fill="currentColor"></path>
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M.686.685a.97.97 0 0 1 1.373 0l7.255 7.256A.97.97 0 0 1 7.94 9.314L.686 2.058a.97.97 0 0 1 0-1.373z"
-                                        fill="currentColor"></path>
-                                </svg></div>
-                        </div>
-                    </div>
-                    <div class="elements">
-                        
-                        <div class="ds-flex" style="padding: 12px 0px; border-bottom: 1px solid rgb(var(--ds-rgb-separator)); justify-content: space-between; align-items: center; gap: 12px;">
-                            <form id="create-thread-form" method="post" class="ds-flex" style="width: 100%; flex-direction: column; gap: 16px;">
-                                <!-- VectorStore RadioSelect Field -->
-                                <!-- <div class="ds-flex" style="flex-direction: column; gap: 8px;">
-                                    <label for="{{ form.vectorstore_fk.id_for_label }}" style="font-weight: bold;">
-                                        {{ form.vectorstore_fk.label }}
-                                    </label>
-                                    {% if form.vectorstore_fk.help_text %}
-                                        <small style="color: #666;">{{ form.vectorstore_fk.help_text }}</small>
-                                    {% endif %}
-                                    <div class="ds-flex" style="flex-direction: column; gap: 8px;">
-                                        {{ form.vectorstore_fk }}
-                                    </div>
-                                </div> -->
-                                <!-- Assistant ForeignKey Field -->
-                                <!-- <div class="ds-flex" style="flex-direction: column; gap: 8px;">
-                                    <label for="{{ form.assistant_fk.id_for_label }}" style="font-weight: bold;">
-                                        {{ form.assistant_fk.label }}
-                                    </label>
-                                    {{ form.assistant_fk }}
-                                </div> -->
-                                <!-- Submit Button -->
-                                <!-- <div style="text-align: right; margin-top: 16px;">
-                                    <button type="submit" class="ds-button ds-button--primary">
-                                        Submit
-                                    </button>
-                                </div> -->
-
-                                <div class="row g-3">
-                                    <!-- Assistant ForeignKey Field -->
-                                    <div class="col-md-12">
-                                        <label for="{{ form.assistant_fk.id_for_label }}" class="form-label fw-bold">
-                                            {{ form.assistant_fk.label }}
-                                        </label>
-                                        {{ form.assistant_fk|add_class:"form-select" }}
-                                    </div>
-                    
-                                    <!-- VectorStore RadioSelect Field -->
-                                    <div class="col-md-12">
-                                        <label for="{{ form.vectorstore_fk.id_for_label }}" class="form-label fw-bold">
-                                            {{ form.vectorstore_fk.label }}
-                                        </label>
-                                        {% if form.vectorstore_fk.help_text %}
-                                            <div class="form-text">{{ form.vectorstore_fk.help_text }}</div>
-                                        {% endif %}
-                                        <div class="mt-2">
-                                            {{ form.vectorstore_fk }}
-                                        </div>
-                                    </div>
-                                </div>
-                    
-                                <!-- Submit Button -->
-                                <div class="text-end mt-3">
-                                    <button type="submit" class="btn btn-primary">
-                                        Submit
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <!-- <div class="ds-flex" style="padding: 12px 0px; border-bottom: 1px solid rgb(var(--ds-rgb-separator)); justify-content: space-between; align-items: center; gap: 12px;">
-                            Theme
-                            <div
-                                class="ds-native-select ds-native-select--filled ds-native-select--none ds-native-select--m"
-                                role="none" style="width: fit-content; --ds-native-select-color: #555562;"><select
-                                    class="ds-native-select__select">
-                                    <option value="light">Light</option>
-                                    <option value="dark" selected="">Dark</option>
-                                    <option value="system">System</option>
-                                </select>
-                                <div class="ds-native-select__arrow" aria-hidden="true"><svg version="1.1"
-                                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                        x="0px" y="0px" viewBox="0 0 512 512" enable-background="new 0 0 512 512"
-                                        xml:space="preserve">
-                                        <path d="M256,294.1L383,167c9.4-9.4,24.6-9.4,33.9,0s9.3,24.6,0,34L273,345c-9.1,9.1-23.7,9.3-33.1,0.7L95,201.1
-	c-4.7-4.7-7-10.9-7-17c0-6.1,2.3-12.3,7-17c9.4-9.4,24.6-9.4,33.9,0L256,294.1z" fill="currentColor"></path>
-                                    </svg></div>
-                            </div>
-                        </div> -->
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div data-focus-guard="true" tabindex="0"
-            style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;">
-        </div>
-    </div>
-</div>
+{% include 'chat/components/general/create_chat_form.html' %}
 
 <!-- ALL THE PROTO OBJECTS -->
 
-{% include 'chat/components/chat/chat/messages/user.html' %}
-{% include 'chat/components/chat/chat/messages/asst.html' %}
+{% include 'chat/components/chat/messages/user.html' %}
+{% include 'chat/components/chat/messages/asst.html' %}
 
-{% include 'chat/components/chat/sidebar/history/date_group.html' %}
-{% include 'chat/components/chat/sidebar/history/chat_item.html' %}
+{% include 'chat/components/sidebar/history/date_group.html' %}
+{% include 'chat/components/sidebar/history/chat_item.html' %}
 
-{% include 'chat/components/chat/general/loader.html' %}
-{% include 'chat/components/chat/general/change_name.html' %}
-{% include 'chat/components/chat/general/error_banner.html' %}
-{% include 'chat/components/chat/general/create.html' %}
+{% include 'chat/components/general/loader.html' %}
+{% include 'chat/components/general/change_name.html' %}
+{% include 'chat/components/general/error_banner.html' %}
+{% include 'chat/components/general/create.html' %}
 
 
-<script type="module">
-    // {% include 'deepseek/demo/js/handlers.js' %}
-    
+<script type="module">    
     
     // Carica la libreria SSE come modulo
     import { SSE } from 'https://cdn.jsdelivr.net/npm/sse.js@2.4.1/lib/sse.min.js';
@@ -320,7 +345,7 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
     */
 
 
-    const THREAD_ID = "{{ thread.thread_id }}"
+    const THREAD_ID = "{{ thread.chat_id }}"
     const MESSAGE_LIFETIME = Number("{% messages_lifetime %}")  // in milliseconds
 
     console.log("lifetime", MESSAGE_LIFETIME, "{% messages_lifetime %}");
@@ -385,6 +410,8 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
     console.log("buttons", buttons_dom, sidebar_button_dom);
 
     /* OVVERIDE */
+
+    // Button to send messages
     send_message_dom.toggle_active = function () {
         send_message_dom.toggleClass("file-input-hidden");
         send_message_dom.attr("aria-disabled", send_message_dom.hasClass("file-input-hidden"));
@@ -404,6 +431,27 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
         return !send_message_dom.hasClass("file-input-hidden");
     }
 
+    // Textarea to write content
+    input_textarea_dom.toggle_active = function () {
+        input_textarea_dom.prop("disabled", !input_textarea_dom.prop("disabled"));
+    }
+
+    input_textarea_dom.active = function () {
+        console.log("ACTIVE TEXTAREA");
+        input_textarea_dom.prop("disabled", false);
+    }
+
+    input_textarea_dom.disable = function () {
+        console.log("DISABLE TEXTAREA");
+        input_textarea_dom.prop("disabled", true);
+    }
+
+    input_textarea_dom.is_active = function () {
+        return input_textarea_dom.prop("disabled");
+    }
+
+
+
 
     $(document).ready(function () {
 
@@ -420,7 +468,6 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
 
         /* HANDLERS */
         
-        
         // This control all the outside elements click
         $("body").on("click", function (event) {
             let target = $(event.target);
@@ -433,7 +480,6 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
             }
         });
 
-
         sidebar_button_dom.on('click', function (event) {
             // Assign the event target to the variable 'target'
             let target = event.currentTarget;
@@ -444,7 +490,6 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
             sidebar_dom.toggleClass("collapse");
         });
 
-
         new_chat_dom.on('click', function (event) {
             // Assign the event target to the variable 'target'
             let target = event.currentTarget;
@@ -452,7 +497,7 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
             // Log the target element to the console
             console.log("HAI PREMUTO IL NUOVA CHAT!", target);
 
-            // window.location.href = "{% url 'chat:thread-create' %}"
+            // window.location.href = "{% url 'chat:api:thread-create' %}"
             {% if create_thread_immediately %}
             send_data(
                 "{% url 'chat:api:thread-create' %}",
@@ -516,7 +561,7 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
         chat_bubble_dom.on("scroll", function (event) {
             let target = $(event.currentTarget);
 
-            console.log(target.scrollTop(), (chat_heigth() - target.innerHeight()));
+            // console.log(target.scrollTop(), (chat_heigth() - target.innerHeight()));
             
             // difference between the scroll and the chat height: 200px
             if (target.scrollTop() >= (chat_heigth() - target.innerHeight()) * 0.9) {
@@ -580,9 +625,10 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
 
         });
 
+        // Redirect: Change chat when press chat button
         chat_list_dom.on("click", "div.chat-history-item", function (event) {
             let target = $(event.currentTarget);
-
+            
             if ($(event.target).closest('.chat-item-menu').length)  // Press menu item
                 return;
 
@@ -617,7 +663,7 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
 
         // Logo superlarn sidebar in alto
         sp_logo_svg.on("click", function (event) {
-            window.location.href = "{% url 'chat:chat_home' %}";
+            window.location.href = "{% url 'chat:home' %}";
         })
 
         new_chat_form_dom.on("submit", function (event) {
@@ -649,6 +695,13 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
 
             input_textarea_dom.val(target.text().trim());
             send_message(event);
+        });
+    
+        // Show/hide think content of asst messages
+        chat_bubble_dom.on("click", "div.think-wrapper button.collapse-think", function (event) {
+            let target = $(event.currentTarget);
+            target.closest("div.think-wrapper").find("div.think-container").toggleClass("show");
+            target.attr("aria-expanded") == "true" ? target.attr("aria-expanded", "false") : target.attr("aria-expanded", "true");
         });
     });
 
@@ -689,7 +742,7 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
             item.attr("data-" + key, value);
         }
 
-        console.log("add data:", data, item.data(), item.attr("data-thread_id"), get_data(item, "thread_id"));
+        // console.log("add data:", data, item.data(), item.attr("data-thread_id"), get_data(item, "thread_id"));
     }
 
     function remove_all_data(item) {
@@ -722,7 +775,7 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
 
     function fetch_old_messages() {
         send_data(
-            "{% url 'chat:api:message-list' thread_id=thread.thread_id %}",
+            "{% url 'chat:api:message-list' thread_id=thread.chat_id %}",
             "POST", {"limit": 0}, show_old_messages
         );
     }
@@ -754,7 +807,7 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
     }
 
     function scroll_chat_to_bottom() {
-        console.log("SCROLL DOWN of ", chat_heigth(), "easeInOutSine");
+        // console.log("SCROLL DOWN of ", chat_heigth(), "easeInOutSine");
 
         chat_bubble_dom.stop().animate({
                 scrollTop: chat_heigth()
@@ -866,7 +919,9 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
     }
 
     function create_asst_msg() {
-        return create_msg(false);
+        let msg = create_msg(false);
+        // add_data(msg, {"think_started": "not-started"});
+        return msg;
     }
 
     function populate_user_message(msg, text) {
@@ -879,9 +934,30 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
         return marked.parse(text);
     }
 
+    function parse_asst_text(text) {
+        if (text.startsWith("<think>")) {
+            let final_think_index = text.indexOf("</think>");
+
+            if (final_think_index == -1) {
+                return [text, ""];
+            }
+            else {
+                return [text.substring(7, final_think_index), text.substring(final_think_index + 8)];
+            }
+        }
+        else {
+            return ["", text];
+        }
+    }
+
     function populate_asst_message(msg, text) {
+        console.log(text);
         msg.testo += text;
-        msg.find("div.ds-markdown").html(convertToHTML(msg.testo));
+        
+        let parsed_text = parse_asst_text(msg.testo);
+
+        msg.find("div.think-content").text(parsed_text[0]);
+        msg.find("div.ds-markdown").html(convertToHTML(parsed_text[1]));
     }
 
     function create_chat_item() {
@@ -904,7 +980,7 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
         
         last_spacer.before(item);
         
-        console.log("all:", last_chat_group, last_spacer)
+        // console.log("all:", last_chat_group, last_spacer);
         return item;
     }
 
@@ -970,19 +1046,16 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
 
     function reload_thread_page(response = null) {
         console.log("realod", response);
-        console.log("{% dynamic_url prova %}")
-        {% with request.resolver_match.namespace as url_name %}
+
         
-        console.log("{% url url_name|add:':thread-create' %}");
+        console.log("{% url 'chat:create' %}");
         if (response === null)
-            window.location.href = "{% url url_name|add:':thread-create' %}"
+            window.location.href = "{% url 'chat:create' %}"
 
         if (response.url !== null)
             window.location.href = response.url
         else
-            window.location.href = "{% url url_name|add:':thread-create' %}"
-
-        {% endwith %}
+            window.location.href = "{% url 'chat:create' %}"
             
     }
 
@@ -1258,7 +1331,7 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
         // responses.append(assMsg);
 
         console.log("Sending request to:", e.target);
-        const source = new SSE("{% url 'chat:api:thread-stream' thread.thread_id %}", {
+        const source = new SSE("{% url 'chat:api:thread-stream' thread.chat_id %}", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1364,11 +1437,11 @@ z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center"
     function startLoadingState() {
         send_message_dom.disable();
         input_textarea_dom.val("");
+        input_textarea_dom.disable();
     }
 
-    function endLoadingState() {
-        send_message_dom.active();
-        
+    function endLoadingState() {   
+        input_textarea_dom.active();     
         input_textarea_dom.val("");
         input_textarea_dom.focus();
         // $("#chat-form-help-text").text("");
