@@ -1,8 +1,10 @@
+from typing import List, Optional, Union
+from django.urls import reverse
 from ninja import Router, File
 from ninja.files import UploadedFile
 from ninja.schema import Schema
 from django.http import StreamingHttpResponse, JsonResponse, FileResponse
-from chat.models import Message
+from chat.models import Chat, Message
 import json
 from icecream import ic
 from cheshire_cat.client import Cat
@@ -11,7 +13,9 @@ import os
 from pathlib import Path
 import glob
 from django.shortcuts import get_object_or_404
-from chat.models import Chat
+from library.models import Library
+
+router = Router(tags=["Chat"])
 
 class MessageIn(Schema):
     message: str
@@ -20,14 +24,24 @@ class MessageIn(Schema):
 class TextIn(Schema):
     text: str
 
-router = Router()
 
 def get_user_client(user) -> Cat:
     return user.userprofile.client
 
-def message_generator(message, chat_id, usr):
-    # Get chat and verify ownership
-    chat = get_object_or_404(Chat, chat_id=chat_id, user=usr)
+def message_generator(message, chat, user):
+    """Generator function that streams messages from a specific chat"""
+
+    # Retrive Chat models instance
+    if isinstance(chat, str):
+        chat = get_object_or_404(Chat, chat_id=chat, user=user)
+    elif not isinstance(chat, Chat):
+        raise ValueError("Invalid chat type")
+    
+    # Retrive message text
+    if isinstance(message, Message):
+        message = message.text
+    elif not isinstance(message, str):
+        raise ValueError("Invalid message type")
     
     # Send message using chat
     chat.send_message(message)
@@ -38,12 +52,12 @@ def message_generator(message, chat_id, usr):
     
     # Save assistant response
     Message.objects.create(
-        text=chat.wait_message_content().content,
+        text=chat.wait_message_content().content,  
         sender=Message.Sender.ASSISTANT,
         chat=chat
     )
     
-    yield "event: done\ndata: {}\n\n"
+    yield "event: Done\ndata: {}\n\n"
 
 @router.post("/stream-api", url_name="stream-api")
 def stream(request, data: MessageIn):
@@ -65,30 +79,6 @@ def stream(request, data: MessageIn):
 
 @router.post("/audio-api", url_name="audio-api")
 def audio_upload(request, audio: UploadedFile = File(...)):
-    # # Create audio directory if it doesn't exist
-    # audio_dir = settings.MEDIA_ROOT / "audio"
-    # audio_dir.mkdir(parents=True, exist_ok=True)
-    
-    # # Get user's cheshire_cat ID and save file
-    # cheshire_id = request.user.userprofile.cheschire_id
-    
-    # # # Find next available number for this user
-    # # pattern = str(audio_dir / f"{cheshire_id}_*.wav")
-    # # existing_files = glob.glob(pattern)
-    # # next_number = len(existing_files) + 1
-    
-    # # # Create filename and save
-    # filename = f"{cheshire_id}_{next_number}.wav"
-    # filepath = audio_dir / filename
-    
-    # with open(filepath, "wb+") as destination:
-    #     audio.file.seek(0)  # Reset file pointer
-    #     for chunk in audio.chunks():
-    #         destination.write(chunk)
-            
-    # print(f"Saved audio file: {filepath}")
-
-    # Get user's client
     client: Cat = get_user_client(request.user)
     
     # Get transcription
@@ -96,8 +86,7 @@ def audio_upload(request, audio: UploadedFile = File(...)):
     
     return JsonResponse({
         "status": "success",
-        "text": transcribed_text,
-        # "file": filename
+        "text": transcribed_text
     })
 
 @router.post("/speak-api", url_name="speak-api")
@@ -143,7 +132,7 @@ def speak_last(request, chat_id: str):
 
 @router.post("/wipe-chat/{chat_id}", url_name="wipe-chat-api")
 def wipe_chat(request, chat_id: str):
-    # Get chat and verify ownership
+    # Get chat and verify ownership  
     chat = get_object_or_404(Chat, chat_id=chat_id, user=request.user)
     
     # Wipe chat memory
@@ -156,3 +145,148 @@ def wipe_chat(request, chat_id: str):
         "status": "success",
         "message": "Chat memory wiped successfully"
     })
+
+
+# --- ENDPOINTS INTEGRATI (basati sul modello Chat) ---
+
+# MiniThreadSchema now represents a Chat summary; 'title' is managed via an optional attribute on Chat
+class MiniThreadSchema(Schema):
+    thread_id: str
+    title: str
+    date: str
+
+class MessageStreamPayloadSchema(Schema):
+    message: str
+
+class LimitValueSchema(Schema):
+    limit: int = 100
+
+class StartLimitValueSchemaSchema(Schema):
+    limit: int = 10
+    start: int = 0
+
+class ThreadValueSchema(Schema):
+    thread_id: str
+
+class RenameValueSchema(Schema):
+    name: str
+    thread_id: str
+
+class ThreadCreateSchema(Schema):
+    name: Optional[str] = None
+    libraries: Optional[Union[List[str], str]] = None
+
+@router.delete("threads/{thread_id}/", response=dict, url_name="thread-delete")
+def thread_delete(request, thread_id: str):
+
+    chat = get_object_or_404(Chat, chat_id=thread_id, user=request.user)
+    chat.delete()
+    return {"success": True}
+
+@router.put("threads/{thread_id}/rename", response=dict, url_name="thread-rename")
+def thread_rename(request, thread_id: str, name: str):
+    chat = get_object_or_404(Chat, chat_id=thread_id, user=request.user)
+
+    chat.title = name
+    chat.save()
+    return {"success": True}
+
+@router.post("threads/list", response=List[MiniThreadSchema], url_name="thread-list")
+def thread_list(request, data: StartLimitValueSchemaSchema) -> List[MiniThreadSchema]:
+    chats = Chat.objects.filter(user=request.user)[data.start : data.start + data.limit]
+
+    return [
+        MiniThreadSchema(
+            thread_id=chat.chat_id,
+            title=chat.name,
+            date=chat.timedelta
+        ) 
+        for chat in chats
+    ]
+
+@router.post("messages/{thread_id}/list", response=dict, url_name="message-list")
+def message_list(request, thread_id: str, data: LimitValueSchema):
+    limit = data.limit
+    chat = get_object_or_404(Chat, chat_id=thread_id, user=request.user)
+    messages_qs = chat.messages.only("text", "timestamp", "sender")
+    messages = messages_qs if limit == 0 else messages_qs[:limit]
+
+    return {
+        "thread_id": thread_id,
+        "messages": [
+            {
+                "text": m.text,
+                "timestamp": m.timestamp.isoformat(),
+                "sender": m.sender,
+            }
+            for m in messages
+        ]
+    }
+
+@router.post("threads/{thread_id}/stream", url_name="thread-stream")
+def stream_response(request, thread_id: str, payload: MessageStreamPayloadSchema):
+    message = payload.message
+
+    chat = get_object_or_404(Chat, chat_id=thread_id, user=request.user)
+
+    Message.objects.create(
+        text=message,
+        sender=Message.Sender.USER,
+        chat=chat
+    )
+
+    response = StreamingHttpResponse(
+        message_generator(message, chat, request.user),
+        content_type="text/event-stream"
+    )
+    response['Cache-Control'] = 'no-cache'
+    response['X-Accel-Buffering'] = 'no'
+    return response
+
+@router.post("threads/thread-url", response=dict, url_name="thread-url")
+def get_thread_url(request, data: ThreadValueSchema):
+    chat = get_object_or_404(Chat, chat_id=data.thread_id, user=request.user)
+
+    return {
+        "url": reverse("chat:chat", kwargs={"chat_id": chat.chat_id}),
+    }
+
+# Questo endpoint è duplicato, già definito sopra (thread_rename) ma lo lasciamo per compatibilità
+@router.post("threads/rename", url_name="thread-rename")
+def rename_thread(request, data: RenameValueSchema):
+    chat = get_object_or_404(Chat, chat_id=data.thread_id, user=request.user)
+    setattr(chat, "title", data.name)
+    chat.save()
+    return JsonResponse({"success": True})
+
+# Analogamente, questo è per la cancellazione di un thread, già gestito in thread_delete
+@router.post("threads/delete", url_name="thread-delete")
+def delete_thread(request, data: ThreadValueSchema):
+    chat = get_object_or_404(Chat, chat_id=data.thread_id, user=request.user)
+    chat.delete()
+    return JsonResponse({"success": True})
+
+@router.post("threads/create", url_name="thread-create")
+def create_thread(request, data: ThreadCreateSchema):
+    ic("create_thread", data)
+    user = request.user
+
+    chat = Chat.objects.create(user=user)
+    if data.name is not None:
+        chat.title = data.name
+        
+    if data.libraries is not None:
+        if isinstance(data.libraries, str):
+            data.libraries = [data.libraries]
+            
+        for library in Library.objects.only("id").filter(library_id__in=data.libraries, user=user):
+            chat.libraries.add(library)
+            library.add_new_chat(str(chat.chat_id))
+
+        chat.save()
+
+    return JsonResponse({
+        "thread_id": chat.chat_id,
+        "success": True,
+        "url": reverse("chat:chat", kwargs={"chat_id": chat.chat_id})
+        })
