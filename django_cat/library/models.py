@@ -13,6 +13,7 @@ class Library(BaseUserModel):
     @property
     def files(self):
         """Returns all files associated with this library with optimized query"""
+        
         from user_upload.models import File  # Import here to avoid circular imports
         return File.objects.filter(
             associations__library=self
@@ -59,7 +60,7 @@ class Library(BaseUserModel):
             self.client.remove_file_to_chats(file_id, str(chat_id))
 
     def __str__(self):
-        return f"Library {self.name} of {self.user.username}, id: {self.library_id}"
+        return f"Library {self.name}, files: {self.files_id.count()} id: {self.library_id}"
     
     class Meta:
         verbose_name = "library"
