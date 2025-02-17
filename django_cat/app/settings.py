@@ -101,6 +101,7 @@ INSTALLED_APPS = [
     # CheshireCat app
     "cheshire_cat",
     # your app
+    "common",
     "users",
     "chat",
     "library",
