@@ -1,0 +1,171 @@
+{% load poll_extras %}
+
+<style>
+    
+</style>
+
+<div id="popup-create-thread" style="
+{% if not create_thread %}
+    display: none;
+{% endif %}
+z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center">
+    <div class="ds-modal">
+        <div data-focus-guard="true" tabindex="0"
+            style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;">
+        </div>
+        <div data-focus-lock-disabled="false">
+            <div class="ds-theme" style="font-size: var(--ds-font-size-m); line-height: var(--ds-line-height-m);">
+                <div tabindex="-1" data-autofocus="true" class="ds-modal-content ds-elevated" role="dialog" 
+                    style="--ds-modal-content-color: #3A3A46; font-size: var(--ds-font-size-m); line-height: var(--ds-line-height-m); max-width: 500px;">
+                    <div class="ds-modal-content__header-wrapper">
+                        <div class="ds-modal-content__title" style="font-size: 1.25rem; font-weight: 500;">Create a new Chat</div>
+                        <div class="ds-icon-button close-modal" tabindex="0" style="--ds-icon-button-hover-color: #474756; cursor: pointer;">
+                            <div class="ds-icon" style="font-size: 12px; width: 12px; height: 12px;"><svg
+                                    xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"
+                                    fill="none">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M9.314.687a.97.97 0 0 1 0 1.373L2.059 9.315A.97.97 0 1 1 .686 7.943L7.941.687a.97.97 0 0 1 1.373 0z"
+                                        fill="currentColor"></path>
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M.686.685a.97.97 0 0 1 1.373 0l7.255 7.256A.97.97 0 0 1 7.94 9.314L.686 2.058a.97.97 0 0 1 0-1.373z"
+                                        fill="currentColor"></path>
+                                </svg></div>
+                        </div>
+                    </div>
+                    <div class="elements">
+                        <div class="ds-flex" style="padding: 20px 0; border-bottom: 1px solid rgba(var(--ds-rgb-separator), 0.2);">
+                            <form id="create-thread-form" method="post" class="ds-flex" style="width: 100%; flex-direction: column; gap: 20px;">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <!-- Libraries Selection -->
+                                    <div class="col-12">
+                                        <label class="form-label" style="font-weight: 500; color: #555; margin-bottom: 12px;">Select Libraries</label>
+                                        <div class="d-flex justify-content-between mb-3" style="gap: 10px;">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="selectNone" 
+                                                style="flex: 1; padding: 8px 16px; border-radius: 6px;">
+                                                <i class="fas fa-times-circle me-2"></i>Deselect All
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="selectAll"
+                                                style="flex: 1; padding: 8px 16px; border-radius: 6px;">
+                                                <i class="fas fa-check-circle me-2"></i>Select All
+                                            </button>
+                                        </div>
+                                        <div class="list-group" style="max-height: 300px; overflow-y: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                            {{ form.libraries|safe }}
+                                        </div>
+                                    </div>
+                                </div>
+                    
+                                <!-- Submit Button -->
+                                <div class="text-end mt-4">
+                                    <button type="submit" class="btn btn-primary" style="padding: 10px 24px; border-radius: 6px; font-weight: 500;">
+                                        <i class="fas fa-plus-circle me-2"></i>Create Chat
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div data-focus-guard="true" tabindex="0"
+            style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;">
+        </div>
+    </div>
+</div>
+
+<style>
+.list-group label {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    margin: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: rgba(255,255,255,0.9);
+}
+
+.list-group label:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+.list-group input[type="checkbox"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    accent-color: #0d6efd;
+}
+
+.btn-outline-secondary {
+    border-color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.9);
+}
+
+.btn-outline-secondary:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.3);
+    color: white;
+}
+
+.ds-modal-content {
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    background-color: #2d2d3a;
+}
+
+.close-modal:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 50%;
+}
+
+.form-label {
+    color: rgba(255,255,255,0.9) !important;
+}
+
+.list-group {
+    background-color: #23232e;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+/* Scrollbar styling for dark theme */
+.list-group::-webkit-scrollbar {
+    width: 8px;
+}
+
+.list-group::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+
+.list-group::-webkit-scrollbar-thumb {
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 4px;
+}
+
+.list-group::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255,255,255,0.3);
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    $('#selectAll').on('click', function() {
+        $('input[type=checkbox]').prop('checked', true);
+    });
+
+    $('#selectNone').on('click', function() {
+        $('input[type=checkbox]').prop('checked', false);
+    });
+});
+</script>
