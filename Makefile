@@ -71,7 +71,7 @@ down:
 
 up-local:
 	@make wait-docker
-	@up
+	@make up
 
 
 shell-bash:			## Open a sh shell in LOCAL inside app

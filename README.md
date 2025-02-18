@@ -1,4 +1,4 @@
-# DjangoCat 🐱
+# DjangoCat 😺
 
 Integrating CheshireCat in Django
 
