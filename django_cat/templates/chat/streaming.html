@@ -158,6 +158,24 @@
         }
     }
 
+    @-webkit-keyframes IncreseOpacity {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes IncreseOpacity {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
     div.think-wrapper {
         padding: 0 0 0 13px;
         line-height: 26px;
@@ -193,15 +211,13 @@
     }
 
     div.think-wrapper div.think-container {
-        transition: all var(--transition-time) ease-out;
-        -webkit-transition: all var(--transition-time) ease-out;
+        transition: IncreseOpacity var(--transition-time) ease-out;
+        -webkit-transition: IncreseOpacity var(--transition-time) ease-out;
     }
 
     div.think-wrapper div.think-content {
-        opacity: 0;
-        transform: translateY(10px);
-        transition: all var(--transition-time) ease-out;
-        -webkit-transition: all var(--transition-time) ease-out;
+        transition: fadeInUp var(--transition-time) ease-out;
+        -webkit-transition: fadeInUp var(--transition-time) ease-out;
     }
 
     div.think-wrapper div.collapse.show div.think-content {
@@ -417,7 +433,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         send_message_dom.attr("aria-disabled", send_message_dom.hasClass("file-input-hidden"));
     }
 
-    send_message_dom.active = function () {
+    send_message_dom.activate = function () {
         send_message_dom.removeClass("file-input-hidden");
         send_message_dom.attr("aria-disabled", "false");
     }
@@ -436,7 +452,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         input_textarea_dom.prop("disabled", !input_textarea_dom.prop("disabled"));
     }
 
-    input_textarea_dom.active = function () {
+    input_textarea_dom.activate = function () {
         console.log("ACTIVE TEXTAREA");
         input_textarea_dom.prop("disabled", false);
     }
@@ -458,6 +474,20 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         console.log("WE ARE READY TO GO!");
 
         /* INIT */
+
+        send_data(
+            "{% url 'chat:api:thread-url' %}",
+            "POST",
+            {
+                "thread_id": THREAD_ID
+            },
+            function (response) {
+                if (response !== null)
+                    input_textarea_dom.activate();
+                    input_textarea_dom.focus();
+            }
+        )
+
         scroll_chat_to_bottom();
         popup_chat_actions_dom.hide();
         input_textarea_dom.focus();
@@ -618,7 +648,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             // console.log("INPUT TEXTAREA!", text);
             
             if (text.length > 0) {
-                send_message_dom.active();
+                send_message_dom.activate();
             } else {
                 send_message_dom.disable();
             }
@@ -683,7 +713,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         popup_new_chat_dom.on("click", "div.ds-icon-button", function (event) {
             console.log("hide chat form")
 
-            {% if not create_thread %}
+            {% if not force_create_thread %}
             new_chat_form_dom.trigger("reset");
             popup_new_chat_dom.hide();
             {% endif %}
@@ -936,25 +966,28 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 
     function parse_asst_text(text) {
         if (text.startsWith("<think>")) {
+            text = text.substring(7);
             let final_think_index = text.indexOf("</think>");
 
             if (final_think_index == -1) {
                 return [text, ""];
             }
             else {
-                return [text.substring(7, final_think_index), text.substring(final_think_index + 8)];
+                return [text, text.substring(final_think_index + 8)];
             }
         }
-        else {
-            return ["", text];
-        }
+        
+        return ["", text];
     }
 
     function populate_asst_message(msg, text) {
-        console.log(text);
         msg.testo += text;
         
         let parsed_text = parse_asst_text(msg.testo);
+
+        if (parsed_text[0].length != 0) {
+            msg.find("div.think-wrapper").show();
+        }
 
         msg.find("div.think-content").text(parsed_text[0]);
         msg.find("div.ds-markdown").html(convertToHTML(parsed_text[1]));
@@ -1312,6 +1345,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         user_msg.populate(user_text)
 
         let asst_msg = create_asst_msg();
+        asst_msg.find("div.think-container").removeClass("collapse");
 
         let loader = create_message_loader(asst_msg);
         let exist_loader = true;
@@ -1441,7 +1475,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     }
 
     function endLoadingState() {   
-        input_textarea_dom.active();     
+        input_textarea_dom.activate();     
         input_textarea_dom.val("");
         input_textarea_dom.focus();
         // $("#chat-form-help-text").text("");
