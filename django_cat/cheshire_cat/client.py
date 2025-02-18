@@ -81,7 +81,7 @@ class Cat(CatClient):
             super().__init__(on_message=self.on_message, *args, **kwargs)
 
             self._llm = OpenAI(
-                base_url=settings.LLM_PROVIDER_API_URL if settings.LLM_PROVIDER_API_URL is not "" else None,
+                base_url=settings.LLM_PROVIDER_API_URL if settings.LLM_PROVIDER_API_URL != "" else None,
                 api_key=settings.LLM_PROVIDER_API_KEY
             )
             self.startup()
