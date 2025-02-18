@@ -20,10 +20,6 @@ requirements:	## Create requirements.txt from requirements.in
 
 	source .venv/bin/activate && uv pip install -r docker/local/requirements.txt
 
-	git add */requirements.txt
-	@git commit -m "automatic upgrade requirements"
-	@git push
-
 build-local-cat:
 	docker build -t cheshire-cat-core:latest -f core/core/Dockerfile core/core
 	@echo "Image cheshire-cat-core:latest builded and tagged: cheshire-cat-core:latest"
@@ -59,14 +55,24 @@ wait-docker:
 		fi; \
 	fi
 
-up-local:           ## Run the LOCAL stack via Docker on http://0.0.0.0:8000/
-	@make wait-docker
+up:
 	@{ \
 		(docker compose -p django_cat -f docker/local/docker-compose.yml up || exit 1) & \
 		PID=$$!; \
 		trap 'docker compose -p django_cat -f docker/local/docker-compose.yml down && exit 0' EXIT; \
 		wait $$PID; \
 	}
+
+upd:
+	docker compose -p django_cat -f docker/local/docker-compose.yml up -d
+
+down:
+	docker compose -p django_cat -f docker/local/docker-compose.yml down
+
+up-local:
+	@make wait-docker
+	@up
+
 
 shell-bash:			## Open a sh shell in LOCAL inside app
 	@docker exec -it django_cat-app-1 /bin/bash
@@ -103,10 +109,7 @@ git-sync-branches:
 	@echo "Creating new branch from origin..."
 	@git branch -r | grep -v '\->' | grep -v 'origin/main\|origin/dependabot' | sed 's/origin\///' | while read branch; do git branch --track "$$branch" "origin/$$branch" 2>/dev/null || true; done
 
-up-ngrok:
-	@ngrok http 8000
-
-# Versioning commands
+# Versioning commands (if your are MAINTAINER)
 get-version:
 	@cat django_cat/VERSION
 

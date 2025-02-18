@@ -15,7 +15,7 @@ from typing import NamedTuple, Deque
 import uuid
 
 from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification, DocReadingProgress
-from groq import Groq
+from openai import OpenAI
 
 import cheshire_cat_api as ccat
 
@@ -80,7 +80,10 @@ class Cat(CatClient):
             
             super().__init__(on_message=self.on_message, *args, **kwargs)
 
-            self._groq = Groq(api_key=settings.GROQ_API_KEY)
+            self._llm = OpenAI(
+                base_url=settings.LLM_PROVIDER_API_URL if settings.LLM_PROVIDER_API_URL is not "" else None,
+                api_key=settings.LLM_PROVIDER_API_KEY
+            )
             self.startup()
             
             self._notification_handlers: Dict[str, callable] = {}
@@ -234,9 +237,9 @@ class Cat(CatClient):
     
     def _transcribe(self, audio_bytes):
         start = time.time()
-        transcription = self._groq.audio.transcriptions.create(
+        transcription = self._llm.audio.transcriptions.create(
             file=("temp.wav", audio_bytes),
-            model="whisper-large-v3",
+            model=settings.LLM_MODEL_AUDIO_TRANSCRIPTION_ID,
             language="it",
             prompt="Trascrivi il messaggio dell'utente",
             response_format="json"
@@ -273,18 +276,17 @@ class Cat(CatClient):
     def parse_markdown(self, text):
         return BeautifulSoup(markdown2.markdown(text), "html.parser").get_text()
     
-    def _speak(self, text):
-        tts = gTTS(
+    def _speak_gtts(self, text):
+        return gTTS(
             text=self.parse_markdown(text),
-            lang="it",
-        )
+            lang=settings.LANGUAGE_CODE.split("-")[0].lower(),
+        ).write_to_fp(io.BytesIO())
 
-        stream = io.BytesIO()
-        tts.write_to_fp(stream)
+    def _speak(self, text):
+        if settings.LLM_MODEL_AUDIO_ID == "gtts":
+            return self._speak_gtts(text)
 
-        stream.seek(0)
-
-        return stream
+        return None
     
     def speak(self, text):
         return self._speak(text)

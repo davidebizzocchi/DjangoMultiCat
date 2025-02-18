@@ -34,8 +34,12 @@ sentry_sdk.init(
     release=get_version_from_file()
 )
 
-GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')  # '' è il valore di default se non trovato
-
+LLM_PROVIDER_API_URL = config("LLM_PROVIDER_API_URL", "")
+LLM_PROVIDER_API_KEY = config("LLM_PROVIDER_API_KEY", "")
+LLM_MODEL_TEXT_ID = config("LLM_MODEL_TEXT_ID", "")
+LLM_MODEL_AUDIO_TRANSCRIPTION_ID = config("LLM_MODEL_AUDIO_TRANSCRIPTION_ID", "")
+# LLM_MODEL_AUDIO_SPEAK_ID = config("LLM_MODEL_AUDIO_ID", "gtts")  # if not given use gtts (Google Translate’s text-to-speech API)
+LLM_MODEL_AUDIO_SPEAK_ID = "gtts"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

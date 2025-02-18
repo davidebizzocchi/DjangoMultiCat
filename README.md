@@ -1,70 +1,159 @@
-# DjangoCat
+# DjangoCat 🐱
 
 Integrating CheshireCat in Django
 
-## First Setup
+> [!IMPORTANT]
+>
+> - **Agent Provider**: [Cheshire Cat AI](https://github.com/cheshire-cat-ai/core)  
+>   The core framework for building conversational AI agents.
+>
+> - **Plugin**: [MultiCat](https://github.com/davidebizzocchi/multicat)  
+>   Enables efficient communication with the Cheshire Cat AI framework.
+>
 
-### 1. Virtual Environment
+**Django integration for the Cheshire Cat AI framework**
 
-1. Create a new virtual environment:
+A Django project integrating the [Cheshire Cat AI](https://github.com/cheshire-cat-ai/core) framework with built-in support for:
 
-   ```sh
-   uv venv
-   ```
+- Qdrant vector database
+- [MultiCat](https://github.com/davidebizzocchi/multicat) plugin (pre-installed)
+- Dockerized development environment
+- Managment for libraries (vectorstore), files and chats
 
-2. Activate the virtual environment:
-   - On macOS/Linux:
+## 🚀 Features
 
-     ```sh
-     source .venv/bin/activate
-     ```
+- Full Docker integration (Compose files included)
+- Pre-configured Qdrant vector memory
+- Version management system
+- Development tools with Makefile
+- Sample environment configuration
+- Integrated CI/CD-ready versioning
 
-   - On Windows:
+### Built-in Supports
 
-     ```sh
-     .\.venv\Scripts\activate
-     ```
+- 🐱 Cheshire Cat AI Framework
+- 📦 Qdrant Vector Database
+- 🤖 MultiCat Plugin (pre-installed)
+- 📚 **Vectorstore Management** (libraries, files, and chat history)
+- 🐳 Dockerized Environment
+- 🔄 Version Control System
 
-3. Install dependencies:
+### 📚 Data Management
 
-   ```sh
-   make requirements
-   ```
+- 📚 Library/Collection organization
+- 📁 File upload & document processing
+- 💬 Chat history persistence
+- 🔍 Vector similarity search
+- 🗂️ Metadata tagging system
 
-### 2. Django Configuration
+## ⚙️ Prerequisites
 
-1. Start Docker containers:
+- Docker & Docker Compose
+- Python 3.11+
+- UV package manager (`pip install uv`)
+- Make (optional but recommended)
 
-   ```sh
-   make up-local
-   ```
+## 🛠️ Installation
 
-2. Open a bash shell in Django container:
+### 1. Environment Setup
 
-   ```sh
-   make shell-bash
-   ```
+```sh
+# Clone repository
+git clone https://github.com/yourusername/djangocat.git
+cd djangocat
 
-3. Open Django shell:
+# Copy environment template
+cp env-sample/.env env/.env
+```
 
-   ```sh
-   make shell-django
-   ```
+Edit `env/.env` with your configuration:
 
-## Main Commands
+```ini
+# Minimum required settings
+SECRET_KEY='your-django-secret-key'
+DEBUG=1
+SQL_DATABASE=mydatabase
+SQL_USER=myuser
+SQL_PASSWORD="mypassword"
+```
 
-### Environment Management
+### 2. Virtual Environment
 
-- `make requirements` - Update and install dependencies
+```sh
+# Create and activate virtual environment
+uv venv
+source .venv/bin/activate  # Linux/macOS
 
-### Docker and Development
+# Install dependencies
+make requirements
+```
 
-- `make up-local` - Start containers in local environment
-- `make shell-bash` - Open a bash shell in Django container
-- `make shell-django` - Open Django shell to interact with the application
-- `make django-log` - View Django container logs
+### 3. Start Services
 
-### Database and Migrations
+```sh
+# Start Docker containers
+make up-local
+
+# Verify containers
+docker ps
+```
+
+## 🐳 Docker Management
+
+| Command               | Description                                  |
+|-----------------------|----------------------------------------------|
+| `make up-local`       | Start containers with local config          |
+| `make upd`            | Start containers in background              |
+| `make down`           | Stop and remove containers                  |
+| `make shell-bash`     | Access Django container shell               |
+| `make shell-django`   | Open Django management shell                |
+| `make django-log`     | View Django container logs                  |
+
+## 🔄 Cheshire Cat Configuration
+
+Configure in `env/.env`:
+
+```ini
+CCAT_CORE_HOST=cheshire-cat-core
+CCAT_CORE_PORT=1865
+CCAT_QDRANT_HOST=cheshire-cat-vector-memory
+CCAT_QDRANT_PORT=6333
+```
+
+## 🌐 Web Interface
+
+After starting containers, access:
+
+- Django: <http://localhost:8000>
+- Cheshire Cat Admin: <http://localhost:1865/admin>
+
+## Utilities
+
+- `make git-sync-branches` - Synchronize local branches with remote
+
+## 🔧 Troubleshooting
+
+**Common Issues:**
+
+1. **Docker not starting**:
+   - Ensure Docker Desktop is running
+   - Check `docker ps` works in terminal
+
+2. **Migration conflicts**:
+
+```sh
+make remove-all
+docker exec django_cat-app-1 python manage.py migrate
+```
+
+3. **Missing dependencies**:
+
+```sh
+make requirements
+make build-local-cat
+```
+
+## 🗄️ Database Operations
 
 > ⚠️ **Warning**: The following commands are potentially destructive and irreversible!
 
@@ -77,14 +166,11 @@ Integrating CheshireCat in Django
 - `make remove-all` - Remove migrations and database
   > ⚠️ **DANGER**: Executes both operations above. Use only for complete environment resets.
 
-### Versioning and Release
+## 📦 Version Management
 
-- `make bump-patch` - Increment patch version (x.x.X)
-- `make bump-minor` - Increment minor version (x.X.0)
-- `make bump-major` - Increment major version (X.0.0)
-- `make release` - Execute a complete new release
-
-### Utilities
-
-- `make git-sync-branches` - Synchronize local branches with remote
-- `make up-ngrok` - Start ngrok tunnel on port 8000
+| Command             | Description                      |
+|---------------------|----------------------------------|
+| `make bump-patch`   | Increment patch version (0.0.X)  |
+| `make bump-minor`   | Increment minor version (0.X.0)  |
+| `make bump-major`   | Increment major version (X.0.0)  |
+| `make release`      | Create new production release    |
