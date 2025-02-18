@@ -202,7 +202,7 @@ class Cat(CatClient):
             chat_queque = self._chat_queues[chat_id]
             try:
                 token = chat_queque.get(block=True)
-                ic(token is END_STREAM, self._stream_active.get(chat_id, False))
+                # ic(token is END_STREAM, self._stream_active.get(chat_id, False))
                 if token is END_STREAM:  # segnale di terminazione
                     break
                 yield token

@@ -1,0 +1,123 @@
+{% load poll_extras %}
+
+<div id="popup-create-thread" style="
+{% if not create_thread %}
+    display: none;
+{% endif %}
+z-index: 1025;" class="ds-theme ds-modal-wrapper" data-transform-origin="center">
+    <div class="ds-modal">
+        <div data-focus-guard="true" tabindex="0" style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"></div>
+        <div data-focus-lock-disabled="false">
+            <div class="ds-theme">
+                <div tabindex="-1" data-autofocus="true" class="ds-modal-content ds-elevated modal-content border-0 shadow-lg" role="dialog">
+                    <div class="ds-modal-content__header-wrapper modal-header border-bottom border-secondary py-3">
+                        <div class="ds-modal-content__title modal-title fs-5 fw-semibold">
+                            <i class="fas fa-comment-dots me-2"></i>Create a new Chat
+                        </div>
+                        <div class="ds-icon-button close-modal" tabindex="0">
+                            <button type="button" class="btn-close btn-close-white" aria-label="Close"></button>
+                        </div>
+                    </div>
+                    <div class="elements modal-body p-4">
+                        <form id="create-thread-form" method="post">
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold mb-3">Select Libraries</label>
+                                <div class="d-flex gap-2 mb-3">
+                                    <button type="button" class="btn btn-outline-light w-50 py-2" id="selectNone">
+                                        <i class="fas fa-times-circle me-2"></i>Deselect All
+                                    </button>
+                                    <button type="button" class="btn btn-outline-light w-50 py-2" id="selectAll">
+                                        <i class="fas fa-check-circle me-2"></i>Select All
+                                    </button>
+                                </div>
+                                <div class="libraries-list rounded-3">
+                                    {% for library in form.libraries %}
+                                        <div class="form-control d-flex align-items-center">
+                                            {{ library.tag }}
+                                            <label class="form-check-label flex-grow-1 m-1" for="{{ library.id_for_label }}">
+                                                {{ library.choice_label }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="text-end mt-4">
+                                <button type="submit" class="btn btn-primary px-4 py-2">
+                                    <i class="fas fa-plus-circle me-2"></i>Create Chat
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div data-focus-guard="true" tabindex="0" style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"></div>
+    </div>
+</div>
+
+<style>
+.modal-content {
+    background-color: #2d2d3a !important;
+}
+
+.libraries-list {
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: #23232e;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.libraries-list label {
+    padding: 12px 16px;
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: rgba(255,255,255,0.9);
+}
+
+.libraries-list label:hover {
+    background-color: rgba(255,255,255,0.05);
+    border: 1px solid rgba(140, 140, 140, 0.521);
+    border-radius: 1em;
+}
+
+.libraries-list .form-control {
+    background-color: #2d2d3a;
+    border: 1px solid #2d2d3a;
+}
+
+.libraries-list .form-control:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+.libraries-list .form-check-input {
+    /* margin-right: 12px;
+    width: 18px;
+    height: 18px; */
+    accent-color: #0d6efd;
+}
+
+.libraries-list .form-check-label {
+    color: rgba(255,255,255,0.9);
+    cursor: pointer;
+    /* margin: 0; */
+}
+
+.ds-modal-content {
+    background-color: #2d2d3a !important;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.ds-modal-content__title {
+    font-size: 1.25rem;
+    color: rgba(255,255,255,0.9);
+}
+
+.ds-icon-button {
+    cursor: pointer;
+}
+</style>
