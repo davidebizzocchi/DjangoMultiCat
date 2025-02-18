@@ -69,7 +69,7 @@ class ChatCreateView(ChatStreamView):
         }
      
     def pre_dispatch_login(self, *args, **kwargs):
-        if self.request.GET.get("force", False):
+        if self.request.GET.get("force", "false") == "false":
             if (qs := Chat.objects.filter(user=self.usr)).count() > 0:
                 return redirect(
                     "chat:chat",

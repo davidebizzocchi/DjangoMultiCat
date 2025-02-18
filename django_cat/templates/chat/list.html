@@ -5,7 +5,7 @@
 {% block contenuto %}
 <h2>Le tue chat</h2>
     
-<a href="{% url 'chat:create' %}" class="btn btn-success mb-4">Nuova Chat</a>
+<a href="{% url 'chat:create' %}?force=true" class="btn btn-success mb-4">Nuova Chat</a>
 
 <div class="list-group">
     {% for chat in chats %}
