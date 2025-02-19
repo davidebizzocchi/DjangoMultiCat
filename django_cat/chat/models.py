@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User, UserProfile
+
 import uuid
 from app.utils import BaseUserModel
 from library.models import Library
@@ -7,8 +7,13 @@ from icecream import ic
 from django.utils import timezone
 from django.db.models import QuerySet
 
+from agent.models import Agent
+
+
 class Chat(BaseUserModel):
     messages: QuerySet["Message"]
+
+    agent = models.ForeignKey(Agent, on_delete=models.CASCADE, related_name='chats', default=Agent.get_default)
 
     title = models.CharField(max_length=255, default="Nuova Chat")
     chat_id = models.CharField(max_length=255, unique=True, default=uuid.uuid4)
