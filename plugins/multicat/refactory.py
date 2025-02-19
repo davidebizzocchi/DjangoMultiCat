@@ -1,12 +1,14 @@
 import time
 from typing import Any, Dict, List, Optional, Union
+import uuid
+
 from fastapi import WebSocket
-
-
 from cat.auth.permissions import AuthUserInfo
+
 from cat.convo.messages import CatMessage, UserMessage
 from cat.log import log
 
+from cat.looking_glass.cheshire_cat import CheshireCat
 from cat.looking_glass.stray_cat import StrayCat
 from cat.memory.working_memory import WorkingMemory
 from cat.looking_glass.stray_cat import MSG_TYPES
@@ -14,9 +16,12 @@ from cat.memory.vector_memory_collection import VectorMemoryCollection
 from cat.rabbit_hole import RabbitHole
 from cat.looking_glass.stray_cat import MSG_TYPES
 
-from cat.plugins.multi_chat.decorators import option, get_true_class
-from cat.utils import singleton
+from cat.plugins.multicat.decorators import option, get_true_class
+from cat.plugins.multicat.types import Agent
 
+# from .types import Agent
+
+from cat.utils import singleton
 
 
 # NOTE: If you don't have option, this is all useless
@@ -32,6 +37,7 @@ from cat.utils import singleton
 @option(UserMessage)
 class UserMessageChat(UserMessage):
     chat_id: Optional[str] = "default"
+    agent_id: Optional[str] = "default"
 
 @option(CatMessage)
 class CatMessageChat(CatMessage):
@@ -116,6 +122,38 @@ class SonStrayCat(MyStrayCat):
             output.chat_id = self.chat_id
 
         return output
+    
+    @property
+    def agent_id(self):
+        return self.working_memory.user_message_json.agent_id
+    
+    def is_default_agent(self):
+        return self.agent_id == "default"
+    
+    def get_agent_by_id(self, agent_id):
+        if agent_id in self.agents:
+            return self.agents[agent_id]
+        
+        return None
+    
+    @property
+    def agents(self) -> Dict[str, Agent]:
+        return CheshireCat().agents
+    
+    def create_agent(self, **kwargs):
+        while ( new_agent_id := str(uuid.uuid4()) ) in self.agents:
+            pass
+        
+        agent = Agent(id=new_agent_id, **kwargs)
+        self.agents[new_agent_id] = agent
+
+        return agent
+
+    def get_instructions(self):        
+        if self.agent_id in self.agents and not self.is_default_agent():
+            return self.agents[self.agent_id].instructions
+        
+        return None
 
 # Adapt the StrayCat to curate the SonStrayCat (the perfect father)
 @option(StrayCat)
@@ -207,6 +245,25 @@ class FatherStrayCat(StrayCat):
     def __str__(self) -> str:
         return f"FatherStrayCat of {self.user_id}"
     
+    def get_agent_by_id(self, agent_id):
+        if agent_id in self.agents:
+            return self.agents[agent_id]
+        
+        return None
+    
+    @property
+    def agents(self) -> Dict[str, Agent]:
+        return CheshireCat().agents
+    
+    def create_agent(self, **kwargs):
+        while ( new_agent_id := str(uuid.uuid4()) ) in self.agents:
+            pass
+        
+        agent = Agent(id=new_agent_id, **kwargs)
+        self.agents[new_agent_id] = agent
+
+        return agent
+
     @property
     def main_loop(self):
         return self.__main_loop
