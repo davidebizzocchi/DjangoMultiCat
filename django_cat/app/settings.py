@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     "chat",
     "library",
     "user_upload",
+    "agent",
 ]
 
 MIDDLEWARE = [

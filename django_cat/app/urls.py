@@ -22,10 +22,12 @@ from app.static_view import HomeView, Error403View, Error404View, Error500View
 from ninja import NinjaAPI
 from chat.api import router as chat_router
 from user_upload.api import router as file_router
+from agent.api import router as agent_router
 
 api = NinjaAPI()
 api.add_router("/chat/", chat_router)
 api.add_router("/file/", file_router)
+api.add_router("/agent/", agent_router)
 
 handler403 = Error403View.as_view()
 handler404 = Error404View.as_view()
