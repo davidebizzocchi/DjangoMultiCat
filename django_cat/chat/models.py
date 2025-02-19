@@ -13,7 +13,7 @@ from agent.models import Agent
 class Chat(BaseUserModel):
     messages: QuerySet["Message"]
 
-    agent = models.ForeignKey(Agent, on_delete=models.CASCADE, related_name='chats', default=Agent.get_default)
+    agent = models.ForeignKey(Agent, on_delete=models.CASCADE, related_name='chats', null=True, blank=True, default=None)
 
     title = models.CharField(max_length=255, default="Nuova Chat")
     chat_id = models.CharField(max_length=255, unique=True, default=uuid.uuid4)
@@ -60,14 +60,13 @@ class Chat(BaseUserModel):
         """Save chat and create chat on cat"""
 
         first_save = False
-        ic(self.pk)
         
         if not self.pk:
             first_save = True
+            self.agent = Agent.get_default(self.user)
         
         super().save(*args, **kwargs)
 
-        ic(first_save)
         
         if first_save and self.libraries:
             for library in self.libraries.all():
