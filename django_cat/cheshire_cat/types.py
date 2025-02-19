@@ -1,5 +1,5 @@
 from pydantic import BaseModel, field_validator
-from typing import List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict
 import time
@@ -174,3 +174,11 @@ class DocReadingProgress(BaseModel):
     perc_read: int 
     source: str
     received_at: float = Field(default_factory=lambda: time.time())
+
+class AgentRequest(BaseModel):
+    name: str
+    instructions: str
+    metadata: Dict = Field(default_factory=dict)
+
+class Agent(AgentRequest):
+    id: str = "default"
