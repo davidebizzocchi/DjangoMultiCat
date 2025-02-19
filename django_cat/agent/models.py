@@ -1,8 +1,9 @@
 from threading import Thread
 from django.db import models
 from cheshire_cat.types import AgentRequest, Agent as AgentModel
+from app.utils import BaseUserModel
 
-class Agent(models.Model):
+class Agent(BaseUserModel):
     agent_id = models.CharField(max_length=255, null=True, blank=True, default=None)
     name = models.CharField(max_length=255, default="")
     instructions = models.TextField(default="")
@@ -10,6 +11,9 @@ class Agent(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("user", "-updated_at")
 
     def model_dump(self) -> AgentModel:
         if self.agent_id is None:
@@ -34,8 +38,8 @@ class Agent(models.Model):
         return self.agent_id == "default"
 
     @staticmethod
-    def get_default():
-        return Agent.objects.get_or_create(agent_id="default")[0]
+    def get_default(user=None):
+        return Agent.objects.get_or_create(agent_id="default", user=user)[0]
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
