@@ -1,7 +1,12 @@
-from threading import Thread
 from django.db import models
+from django.dispatch import receiver
 from cheshire_cat.types import AgentRequest, Agent as AgentModel
-from app.utils import BaseUserModel
+from common.utils import BaseUserModel
+
+from app.signals import server_start
+
+from icecream import ic
+
 
 class Agent(BaseUserModel):
     agent_id = models.CharField(max_length=255, null=True, blank=True, default=None)
@@ -16,12 +21,20 @@ class Agent(BaseUserModel):
         ordering = ("user", "-updated_at")
 
     def model_dump(self) -> AgentRequest:
-        return AgentRequest(
-            name=self.name,
-            instructions=self.instructions,
-            metadata=self.metadata
-        ).model_dump()
-    
+        if self.agent_id is None:
+            return AgentRequest(
+                name=self.name,
+                instructions=self.instructions,
+                metadata=self.metadata
+            ).model_dump()
+        else:
+            return AgentModel(
+                id=self.agent_id,
+                name=self.name,
+                instructions=self.instructions,
+                metadata=self.metadata
+            ).model_dump()
+        
     def full_model_dump(self) -> AgentModel:
         return AgentModel(
             id=self.agent_id,
@@ -43,7 +56,7 @@ class Agent(BaseUserModel):
         self.agent_id = agent.id
 
         if save:
-            self.save()
+            self.save(update_fields=["agent_id"])
 
         return agent
 
@@ -51,7 +64,7 @@ class Agent(BaseUserModel):
         super().save(*args, **kwargs)
 
         if self.agent_id is None:
-            self.create_agent(save=False)
+            self.create_agent()
         elif self.pk:
             self.client.update_agent(self)
 
@@ -59,3 +72,10 @@ class Agent(BaseUserModel):
         self.client.delete_agent(self.agent_id)
         
         return super().delete(*args, **kwargs)
+    
+@receiver(server_start)
+def create_agents_on_server_start(sender, **kwargs):
+    for agent in Agent.objects.all():
+        agent.create_agent()
+    
+    ic("Agents created on server start")

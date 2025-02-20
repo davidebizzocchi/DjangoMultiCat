@@ -7,8 +7,8 @@ from django import forms
 from icecream import ic
 
 from library.models import Library
-from user_upload.fields import FileObject, IngestionConfig, IngestionType, PageMode, PostProcessType
-from user_upload.models import File
+from file.fields import FileObject, IngestionConfig, IngestionType, PageMode, PostProcessType
+from file.models import File
 
 
 class MultipleFileInput(forms.ClearableFileInput):

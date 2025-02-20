@@ -7,7 +7,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h2>I tuoi File</h2>
-            <a href="{% url 'user_upload:upload' %}" class="btn btn-success">Upload nuovo file</a>
+            <a href="{% url 'file:upload' %}" class="btn btn-success">Upload nuovo file</a>
         </div>
         <div class="card-body">
             {% if files %}
@@ -47,12 +47,12 @@
 
                             <small class="text-muted d-block mb-2">{{ file.file.size|filesizeformat }}</small>
                             <div class="btn-group">
-                                <a href="{% url 'user_upload:assoc' file.file_id %}" class="btn btn-primary btn-sm">Associazioni</a>
+                                <a href="{% url 'file:assoc' file.file_id %}" class="btn btn-primary btn-sm">Associazioni</a>
                                 <a href="{{ file.link }}" target="_blank" class="btn btn-info btn-sm">Anteprima</a>
                             </div>
                         </div>
                         <div>
-                            <a href="{% url 'user_upload:delete' file.file_id %}" class="btn btn-danger btn-sm">Elimina</a>
+                            <a href="{% url 'file:delete' file.file_id %}" class="btn btn-danger btn-sm">Elimina</a>
                         </div>
                     </div>
                 </li>

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from user_upload.models import File, FileLibraryAssociation
+from file.models import File, FileLibraryAssociation
 
 @admin.register(File)
 class FileAdmin(admin.ModelAdmin):

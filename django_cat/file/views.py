@@ -4,15 +4,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
-from user_upload.models import File, FileLibraryAssociation
-from user_upload.forms import FileUploadForm
+from file.models import File, FileLibraryAssociation
+from file.forms import FileUploadForm
 from icecream import ic
 
 
 class FileUploadView(LoginRequiredMixin, CreateView):
     model = File
     form_class = FileUploadForm
-    template_name = 'user_upload/file_upload.html'
+    template_name = 'file/upload.html'
     success_url = reverse_lazy('file:list')
 
     def get_form_kwargs(self):
@@ -48,7 +48,7 @@ class FileUploadView(LoginRequiredMixin, CreateView):
 
 class FileListView(LoginRequiredMixin, ListView):
     model = File
-    template_name = 'user_upload/file_list.html'
+    template_name = 'file/list.html'
     context_object_name = 'files'
 
     def get_queryset(self):
@@ -56,7 +56,7 @@ class FileListView(LoginRequiredMixin, ListView):
 
 class FileDeleteView(LoginRequiredMixin, DeleteView):
     model = File
-    template_name = 'user_upload/file_delete.html'
+    template_name = 'file/delete.html'
     success_url = reverse_lazy('file:list')
     context_object_name = 'file'
     slug_field = 'file_id'
@@ -73,7 +73,7 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
 class FileAssociationView(LoginRequiredMixin, UpdateView):
     model = File
     form_class = FileUploadForm
-    template_name = 'user_upload/file_assoc.html'
+    template_name = 'file/assoc.html'
     success_url = reverse_lazy('file:list')
     slug_field = 'file_id'
     slug_url_kwarg = 'file_id'

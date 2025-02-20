@@ -529,13 +529,13 @@ class Cat(CatClient):
     def create_agent(self, agent: Union[AgentRequest, AgentComplete]):
         from agent.models import Agent
 
-        if isinstance(agent, AgentRequest) or isinstance(agent, Agent):
+        if isinstance(agent, AgentRequest) or isinstance(agent, Agent) or isinstance(agent, AgentComplete):
             response = self.agents.create_agent(
                 data=agent.model_dump()
             )
-        elif isinstance(agent, AgentComplete):
+        elif isinstance(agent, dict):
             response = self.agents.create_agent(
-                data=agent.model_dump(exclude={"id"})
+                data=agent
             )
         else:
             return False

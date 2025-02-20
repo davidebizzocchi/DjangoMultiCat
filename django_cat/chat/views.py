@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, DeleteView, DetailView
+from django.views.generic import ListView, DeleteView, DetailView, RedirectView
 
 from common.mixin import LoginRequiredMixin
 
@@ -12,8 +12,9 @@ from chat.forms import ChatCreateForm
 from icecream import ic
 
 
-def home(request):
-    return render(request, 'chat/home.html')
+class ChatHome(RedirectView):
+    url = reverse_lazy('chat:list')
+    permanent = True
 
 
 class ChatMixin():

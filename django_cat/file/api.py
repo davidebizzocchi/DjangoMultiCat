@@ -1,6 +1,6 @@
 from ninja import Router, Schema
 from django.shortcuts import get_object_or_404
-from user_upload.models import File
+from file.models import File
 from typing import Optional
 
 router = Router()

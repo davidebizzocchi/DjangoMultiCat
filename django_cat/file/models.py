@@ -6,16 +6,16 @@ from typing import Union
 import uuid
 from django.conf import settings
 from django.db import models
-from app.utils import BaseUserModel
+from common.utils import BaseUserModel
 from cheshire_cat.types import DocReadingProgress
-from user_upload.fields import FileObject, FileObjectDecoder, FileObjectEncoder, IngestionConfig, IngestionConfigEncoder, IngestionConfigDecoder, IngestionType, PageMode, PostProcessType
+from file.fields import FileObject, FileObjectDecoder, FileObjectEncoder, IngestionConfig, IngestionConfigEncoder, IngestionConfigDecoder, IngestionType, PageMode, PostProcessType
 from decouple import config
 from library.models import Library
 import re
 from threading import Event
 from icecream import ic
 from PIL import Image
-from user_upload.utils import process_image_ocr, get_image_from_file, save_processed_text, extract_and_validate_json, update_processed_text, next_file_path
+from file.utils import process_image_ocr, get_image_from_file, save_processed_text, extract_and_validate_json, update_processed_text, next_file_path
 
 
 class FileLibraryAssociation(models.Model):

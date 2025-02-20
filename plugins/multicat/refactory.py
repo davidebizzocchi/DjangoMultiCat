@@ -141,14 +141,23 @@ class SonStrayCat(MyStrayCat):
         return CheshireCat().agents
     
     def create_agent(self, **kwargs):
-        while ( new_agent_id := str(uuid.uuid4()) ) in self.agents:
-            pass
-        
+        id = kwargs.pop("id", "default")
+
+        # Generate a new agent id if not specified
+        if id == "default":
+            new_agent_id = str(uuid.uuid4())
+        else:
+            new_agent_id = id
+
+        # Check if the agent already exists
+        while new_agent_id in self.agents:
+            new_agent_id = str(uuid.uuid4())
+
         agent = Agent(id=new_agent_id, **kwargs)
         self.agents[new_agent_id] = agent
 
         return agent
-
+    
     def get_instructions(self):        
         if self.agent_id in self.agents and not self.is_default_agent():
             return self.agents[self.agent_id].instructions
@@ -256,14 +265,23 @@ class FatherStrayCat(StrayCat):
         return CheshireCat().agents
     
     def create_agent(self, **kwargs):
-        while ( new_agent_id := str(uuid.uuid4()) ) in self.agents:
-            pass
-        
+        id = kwargs.pop("id", "default")
+
+        # Generate a new agent id if not specified
+        if id == "default":
+            new_agent_id = str(uuid.uuid4())
+        else:
+            new_agent_id = id
+
+        # Check if the agent already exists
+        while new_agent_id in self.agents:
+            new_agent_id = str(uuid.uuid4())
+
         agent = Agent(id=new_agent_id, **kwargs)
         self.agents[new_agent_id] = agent
 
         return agent
-
+    
     @property
     def main_loop(self):
         return self.__main_loop

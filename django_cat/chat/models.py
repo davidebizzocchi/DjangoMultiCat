@@ -1,7 +1,7 @@
 from django.db import models
 
 import uuid
-from app.utils import BaseUserModel
+from common.utils import BaseUserModel
 from library.models import Library
 from icecream import ic
 from django.utils import timezone
@@ -22,7 +22,7 @@ class Chat(BaseUserModel):
 
     @property
     def files(self):
-        from user_upload.models import File
+        from file.models import File
 
         """Returns all files associated with this chat with optimized query"""
         return File.objects.filter(

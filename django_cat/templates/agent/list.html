@@ -1,0 +1,48 @@
+{% extends "base/base.html" %}
+{% block title %}Agenti{% endblock %}
+
+{% block contenuto %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>I tuoi agenti</h2>
+        <a href="{% url 'agent:create' %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Nuovo Agente
+        </a>
+    </div>
+
+    <div class="list-group">
+        {% for agent in agents %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-robot me-2"></i>
+                    <a href="{% url 'agent:detail' agent.agent_id %}">
+                        {{ agent.name }}
+                    </a>
+                    {% if agent.is_default %}
+                        <span class="badge bg-primary ms-2">Default</span>
+                    {% endif %}
+                </div>
+                {% if agent.instructions %}
+                <div class="small text-muted mt-1">
+                    {{ agent.instructions|truncatechars:100 }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="btn-group">
+                <a href="{% url 'agent:update' agent.agent_id %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-edit"></i>
+                </a>
+                {% if not agent.is_default %}
+                <a href="{% url 'agent:delete' agent.agent_id %}" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-trash"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center text-muted">Non hai ancora creato agenti.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

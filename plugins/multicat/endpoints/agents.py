@@ -62,12 +62,13 @@ async def retrieve_agent(
 @endpoint.post(path="/agents", prefix="")
 async def create_agent(
     request: Request,
-    data: AgentUpdateRequest,
+    data: AgentRequestResponse,
     stray: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.WRITE)),
 ) -> Dict:
     """Create a new agent"""
     
     new_agent = stray.create_agent(
+        id=data.id,
         name=data.name or "",
         instructions=data.instructions or "",
         metadata=data.metadata or {}
@@ -96,7 +97,7 @@ async def update_agent(
             status_code=400,
             detail={"error": "Agent does not exist."}
         )
-
+    
     if data.name is not None:
         agent.name = data.name
 
