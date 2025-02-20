@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user_upload', '0003_file_config_progress_file_status'),
+        ('file', '0003_file_config_progress_file_status'),
     ]
 
     operations = [

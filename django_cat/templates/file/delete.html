@@ -11,7 +11,7 @@
         <p>Sei sicuro di voler eliminare il file "{{ file.title }}"?</p>
         <p class="text-sm opacity-70">I vector store contenti questo file non saranno eliminati</p>
         <div class="card-actions justify-end mt-4">
-            <a href="{% url 'user_upload:list' %}" class="btn btn-secondary">Annulla</a>
+            <a href="{% url 'file:list' %}" class="btn btn-secondary">Annulla</a>
             <form method="post" class="d-inline">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger">Elimina</button>

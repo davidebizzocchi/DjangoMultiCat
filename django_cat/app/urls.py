@@ -21,7 +21,7 @@ from app.static_view import HomeView, Error403View, Error404View, Error500View
 
 from ninja import NinjaAPI
 from chat.api import router as chat_router
-from user_upload.api import router as file_router
+from file.api import router as file_router
 from agent.api import router as agent_router
 
 api = NinjaAPI()
@@ -39,7 +39,7 @@ urlpatterns = [
     path("users/", include("users.urls", namespace="users")),
     path("chat/", include("chat.urls", namespace="chat")),
     path("library/", include("library.urls", namespace="library")),
-    path("file/", include("user_upload.urls", namespace="file")),
+    path("file/", include("file.urls", namespace="file")),
     path("api/", api.urls),
 ]
 

@@ -1,9 +1,9 @@
 from django.urls import path, include
-from user_upload import views
-from user_upload.api import router
+from file import views
+from file.api import router
 
 
-app_name = 'user_upload'
+app_name = 'file'
 
 urlpatterns = [
     path('', views.FileListView.as_view(), name='list'),

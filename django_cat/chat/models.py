@@ -22,7 +22,7 @@ class Chat(BaseUserModel):
 
     @property
     def files(self):
-        from user_upload.models import File
+        from file.models import File
 
         """Returns all files associated with this chat with optimized query"""
         return File.objects.filter(

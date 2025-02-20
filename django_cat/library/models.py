@@ -14,7 +14,7 @@ class Library(BaseUserModel):
     def files(self):
         """Returns all files associated with this library with optimized query"""
         
-        from user_upload.models import File  # Import here to avoid circular imports
+        from file.models import File  # Import here to avoid circular imports
         return File.objects.filter(
             associations__library=self
         ).values(
@@ -28,7 +28,7 @@ class Library(BaseUserModel):
     
     @property
     def files_id(self):
-        from user_upload.models import File
+        from file.models import File
         return File.objects.filter(
             associations__library=self
         ).values_list('file_id', flat=True)

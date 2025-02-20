@@ -109,7 +109,7 @@ INSTALLED_APPS = [
     "users",
     "chat",
     "library",
-    "user_upload",
+    "file",
     "agent",
 ]
 

@@ -3,15 +3,12 @@
 {% block title %}Superlearn{% endblock %}
 
 {% block contenuto %}
-<h1>Associazioni al tuo file</h1>
-
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
     {{ form.as_p }}
-    <button type="submit">Salva</button>
+    <button type="submit">Upload</button>
 </form>
 
-<a href="{% url 'user_upload:list' %}" class="btn btn-success btn-sm">Torna ai files</a>
+<a href="{% url 'file:list' %}" class="btn btn-success btn-sm">Torna ai files</a>
 {% endblock %}
-

@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user_upload', '0002_file_ingestion_config'),
+        ('file', '0002_file_ingestion_config'),
     ]
 
     operations = [
