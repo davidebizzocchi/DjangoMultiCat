@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from cat.auth.permissions import AuthPermission
 
@@ -6,14 +6,12 @@ from cat.auth.connection import HTTPAuth
 from cat.auth.permissions import AuthResource
 
 
-from typing import Dict, List
+from typing import Dict
 from pydantic import BaseModel
-from fastapi import Query, Request, HTTPException, Depends
+from fastapi import Request, HTTPException, Depends
 from cat.mad_hatter.decorators import endpoint
 from cat.auth.connection import HTTPAuth
 from cat.auth.permissions import AuthPermission, AuthResource
-
-from cat.looking_glass.cheshire_cat import CheshireCat
 
 from cat.looking_glass.stray_cat import StrayCat
 from cat.log import log
