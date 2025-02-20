@@ -240,6 +240,12 @@
         justify-content: center;
     }
 
+
+    /* Modal dialog */
+    div.ds-modal-content {
+        min-width: 80vw !important;
+        min-height: 80vh !important;
+    }
 </style>
 {% endblock%}
 
@@ -1132,10 +1138,9 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 
     function send_delete_thread(thread_id) {
         send_data(
-            "{% url 'chat:api:thread-delete'%}",
+            "{% url 'chat:api:thread-delete' thread_id=0 %}".replace("0", thread_id),
             "POST",
             {
-                "thread_id": thread_id
             },
             function (response) {
                 thread_delete_reload(thread_id)
@@ -1151,10 +1156,9 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 
     function send_rename_thread(thread_id, new_name) {
         send_data(
-            "{% url 'chat:api:thread-rename' %}",
+            "{% url 'chat:api:thread-rename' thread_id=0 %}".replace("0", thread_id),
             "POST",
             {
-                "thread_id": thread_id,
                 "name": new_name
             }, function (response) {
                 change_thread_name(thread_id, new_name);  // Viene richiamata solo se resituisce un 200
