@@ -1,20 +1,18 @@
 import mimetypes
-from typing import Iterable, Dict, List
+from typing import Iterable, Dict, List, Union
 from icecream import ic
 # from users.models import UserProfile
 import requests
 import time
-from functools import wraps
 from cheshire_cat.decorators import wait_cat, HOST, PORT, wait_for_cat
 import json
 from queue import Queue
 from decouple import config
 import io
-from collections import deque
-from typing import NamedTuple, Deque
 import uuid
 
-from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification, DocReadingProgress
+from cheshire_cat.types import AgentRequest, ChatContent, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification, DocReadingProgress
+from cheshire_cat.types import Agent as AgentComplete
 from openai import OpenAI
 
 import cheshire_cat_api as ccat
@@ -527,6 +525,64 @@ class Cat(CatClient):
         return self.edit_file_chats(
             file_id, chat_ids, "remove", "declarative"
         )
+
+    def create_agent(self, agent: Union[AgentRequest, AgentComplete]):
+        from agent.models import Agent
+
+        if isinstance(agent, AgentRequest) or isinstance(agent, Agent):
+            response = self.agents.create_agent(
+                data=agent.model_dump()
+            )
+        elif isinstance(agent, AgentComplete):
+            response = self.agents.create_agent(
+                data=agent.model_dump(exclude={"id"})
+            )
+        else:
+            return False
+
+        if response.get("success", False):
+            ic(response["agent"])
+            return AgentComplete.model_validate(response["agent"])
+        
+        return None
+    
+    def retrieve_agent(self, agent_id: str):
+        response = self.agents.retrieve_agent(agent_id=agent_id)
+
+        if response.get("success", False):
+            ic(response["agent"])
+            return AgentComplete.model_validate(response["agent"])
+        
+        return None
+    
+    def list_agents(self):
+        response = self.agents.list_agents()
+        return list(AgentComplete.model_validate(**agent) for agent in response["agents"])
+        
+    def delete_agent(self, agent_id: str):
+        response = self.agents.delete_agent(agent_id=agent_id)
+
+        if response.get("success", False):
+            return True
+        
+        return False
+    
+    def update_agent(self, agent: Union[AgentComplete]):
+        from agent.models import Agent
+
+        if isinstance(agent, Agent):
+            response = self.agents.update_agent(agent_id=agent.agent_id, data=agent.model_dump())
+        if isinstance(agent, AgentComplete):
+            response = self.agents.update_agent(agent_id=agent.id, data=agent.model_dump(exclude={"id"}))
+        else:
+            return False
+
+        if response.get("success", False):
+            return AgentComplete.model_validate(response["agent"])
+        
+        return None
+
+
 
 @wait_cat
 def get_user_id(username: str):
