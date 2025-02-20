@@ -70,8 +70,8 @@ down:
 	docker compose -p django_cat -f docker/local/docker-compose.yml down
 
 up-local:
-	@make wait-docker
-	@make up
+	@$(MAKE) wait-docker
+	@$(MAKE) up
 
 
 shell-bash:			## Open a sh shell in LOCAL inside app
@@ -96,8 +96,8 @@ destroy-database: 	## Destroy local database
 
 remove-all:			## Remove migrations and DB local
 	@echo "Remove migrations and DB local"
-	@make remove-migrations
-	@make destroy-database
+	@$(MAKE) remove-migrations
+	@$(MAKE) destroy-database
 
 git-sync-branches:
 	@echo "Fetching..."
@@ -149,12 +149,12 @@ get-diff-stats:
 	@git diff --stat origin/dev..HEAD | tail -n 1
 
 create-release-note:
-	@BRANCH_INFO=$$(make -s get-branch-info); \
+	@BRANCH_INFO=$$($(MAKE) -s get-branch-info); \
 	BRANCH=$$(echo $$BRANCH_INFO | cut -d'|' -f1); \
 	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
 	TYPE=$$(echo $$BRANCH_INFO | cut -d'|' -f3); \
 	OLD_VERSION=$$(cat django_cat/VERSION); \
-	DIFF_STATS=$$(make -s get-diff-stats); \
+	DIFF_STATS=$$($(MAKE) -s get-diff-stats); \
 	echo "\n\ntype: $$TYPE"; \
 	if [ "$$TYPE" = "issue" ]; then \
 		$(MAKE) bump-patch; \
@@ -164,21 +164,21 @@ create-release-note:
 		$(MAKE) bump-major; \
 	fi; \
 	NEW_VERSION=$$(cat django_cat/VERSION); \
-	COMMITS=$$(make -s get-commits); \
+	COMMITS=$$($(MAKE) -s get-commits); \
 	echo "## Release $$NEW_VERSION\n\n### Information\n- **Source branch**: $$BRANCH\n- **Target branch**: dev\n- **Issue**: [#$$ISSUE_NUM](https://github.com/davidebizzocchi/DjangoCat/issues/$$ISSUE_NUM)\n- **Type**: $$TYPE\n- **Previous version**: $$OLD_VERSION\n- **New version**: $$NEW_VERSION\n- **Code change statistics**: $$DIFF_STATS\n\n### Commits\n$$COMMITS\n\n---\n"
 
 update-releases-md:
 	echo "update release md $(VERSION) $(BRANCH)"
-	@RELEASE_NOTE=$$(make -s create-release-note); \
+	@RELEASE_NOTE=$$($(MAKE) -s create-release-note); \
 	echo "# Releases\n\n$$RELEASE_NOTE$$(tail -n +2 docs/releases.md)" > docs/releases.md; \
 	git add django_cat/VERSION docs/releases.md;
 
 merge-and-close:
-	@BRANCH_INFO=$$(make -s get-branch-info); \
+	@BRANCH_INFO=$$($(MAKE) -s get-branch-info); \
 	BRANCH=$$(echo $$BRANCH_INFO | cut -d'|' -f1); \
 	ISSUE_NUM=$$(echo $$BRANCH_INFO | cut -d'|' -f2); \
 	TYPE=$$(echo $$BRANCH_INFO | cut -d'|' -f3); \
-	make update-releases-md; \
+	$(MAKE) update-releases-md; \
 	RELEASE_VERSION=$$(cat django_cat/VERSION); \
 	git add django_cat/VERSION docs/releases.md; \
 	git commit -m "Update version to $$RELEASE_VERSION"; \
@@ -198,6 +198,6 @@ check-uncommitted:
 	fi
 
 release: ## Esegui una nuova release
-	@make -s check-uncommitted
-	@make -s merge-and-close
+	@$(MAKE) -s check-uncommitted
+	@$(MAKE) -s merge-and-close
 	@echo "Release completata con successo"
