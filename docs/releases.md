@@ -1,20 +1,21 @@
 # Releases
 
-
-
 type: issue_create
+
 ## Release v0.0.48-c9b4e2d
 
 ### Informations
-- **Branch di origine**: 63-issue_create-views-and-template-for-manage-agents
-- **Branch di destinazione**: dev
+
+- **Source branch**: 63-issue_create-views-and-template-for-manage-agents
+- **Target branch**: dev
 - **Issue**: [#63](https://github.com/davidebizzocchi/DjangoCat/issues/63)
-- **Tipo**: issue_create
-- **Versione precedente**: v0.0.48-c9b4e2d
-- **Nuova versione**: v0.0.48-c9b4e2d
-- **Statistiche modifiche**:  49 files changed, 1384 insertions(+), 90 deletions(-)
+- **Type**: issue_create
+- **Previous version**: v0.0.48-c9b4e2d
+- **New version**: v0.0.48-c9b4e2d
+- **Code change statisticse**:  49 files changed, 1384 insertions(+), 90 deletions(-)
 
 ### Commit
+
 - 8d49aae - agent templates (davidebizzocchi)
 - ab6bda9 - fix custom_cat_client _update_agent_serialize body_params (davidebizzocchi)
 - 1f970c8 - fix client create_agent (davidebizzocchi)
@@ -36,20 +37,22 @@ type: issue_create
 
 ---
 
-
 type: issue_write
+
 ## Release v0.0.48-c9b4e2d
 
 ### Informations
-- **Branch di origine**: 62-issue_write-agent-api-client
-- **Branch di destinazione**: dev
+
+- **Source branch**: 62-issue_write-agent-api-client
+- **Target branch**: dev
 - **Issue**: [#62](https://github.com/davidebizzocchi/DjangoCat/issues/62)
-- **Tipo**: issue_write
-- **Versione precedente**: v0.0.48-c9b4e2d
-- **Nuova versione**: v0.0.48-c9b4e2d
-- **Statistiche modifiche**:  9 files changed, 599 insertions(+), 90 deletions(-)
+- **Type**: issue_write
+- **Previous version**: v0.0.48-c9b4e2d
+- **New version**: v0.0.48-c9b4e2d
+- **Code change statisticse**:  9 files changed, 599 insertions(+), 90 deletions(-)
 
 ### Commit
+
 - 91c8fc9 - update plugin (davidebizzocchi)
 - 6ea3bf8 - agent api client (davidebizzocchi)
 - 5402f19 - add openai (davidebizzocchi)
@@ -58,20 +61,22 @@ type: issue_write
 
 ---
 
-
 type: issue_create
+
 ## Release v0.0.48-c9b4e2d
 
 ### Informations
-- **Branch di origine**: 61-issue_create-agent-model-and-rel-to-chat
-- **Branch di destinazione**: dev
+
+- **Source branch**: 61-issue_create-agent-model-and-rel-to-chat
+- **Target branch**: dev
 - **Issue**: [#61](https://github.com/davidebizzocchi/DjangoCat/issues/61)
-- **Tipo**: issue_create
-- **Versione precedente**: v0.0.48-c9b4e2d
-- **Nuova versione**: v0.0.48-c9b4e2d
-- **Statistiche modifiche**:  14 files changed, 128 insertions(+), 3 deletions(-)
+- **Type**: issue_create
+- **Previous version**: v0.0.48-c9b4e2d
+- **New version**: v0.0.48-c9b4e2d
+- **Code change statisticse**:  14 files changed, 128 insertions(+), 3 deletions(-)
 
 ### Commit
+
 - 918d8af - add Agent into Caht (davidebizzocchi)
 - 494d0d7 - add agent in app (davidebizzocchi)
 - 83413e9 - create agent model (davidebizzocchi)
@@ -80,20 +85,22 @@ type: issue_create
 
 ---
 
-
 type: issue_aggiungere
+
 ## Release v0.0.48-c9b4e2d
 
 ### Informations
-- **Branch di origine**: 58-issue_aggiungere-chat-deepseek
-- **Branch di destinazione**: dev
+
+- **Source branch**: 58-issue_aggiungere-chat-deepseek
+- **Target branch**: dev
 - **Issue**: [#58](https://github.com/davidebizzocchi/DjangoCat/issues/58)
-- **Tipo**: issue_aggiungere
-- **Versione precedente**: v0.0.48-c9b4e2d
-- **Nuova versione**: v0.0.48-c9b4e2d
-- **Statistiche modifiche**:  45 files changed, 10877 insertions(+), 10035 deletions(-)
+- **Type**: issue_aggiungere
+- **Previous version**: v0.0.48-c9b4e2d
+- **New version**: v0.0.48-c9b4e2d
+- **Code change statisticse**:  45 files changed, 10877 insertions(+), 10035 deletions(-)
 
 ### Commit
+
 - cbbacae - docker compose use of default network (davidebizzocchi)
 - 83cc00c - big update streaming (davidebizzocchi)
 - a41a71a - library list use chat.name (davidebizzocchi)
@@ -105,7 +112,7 @@ type: issue_aggiungere
 - 2baa995 - asst.html show think box (davidebizzocchi)
 - 70ef3e1 - delete icon (davidebizzocchi)
 - 8044f52 - deleted old css (davidebizzocchi)
-- 2d783ef - library __str__ (davidebizzocchi)
+- 2d783ef - library **str** (davidebizzocchi)
 - 3ef53d5 - client comment ic (davidebizzocchi)
 - 36af4b8 - big update chat views (davidebizzocchi)
 - 4031ad5 - update chat.urls use of api namespace for chat_router urls (davidebizzocchi)
@@ -122,77 +129,81 @@ type: issue_aggiungere
 
 ---
 
-
 type: issue
 New patch version: v0.0.48
+
 ## Release v0.0.48-c9b4e2d
 
 ### Informations
-- **Branch di origine**: 46-issue-controllare-se-la-chat-è-limitata-per-uno-specifico-chat_id-sonstraycat
-- **Branch di destinazione**: dev
+
+- **Source branch**: 46-issue-controllare-se-la-chat-è-limitata-per-uno-specifico-chat_id-sonstraycat
+- **Target branch**: dev
 - **Issue**: [#46](https://github.com/davidebizzocchi/DjangoCat/issues/46)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.47-865d8cc
-- **Nuova versione**: v0.0.48-c9b4e2d
-- **Statistiche modifiche**: 
+- **Type**: issue
+- **Previous version**: v0.0.47-865d8cc
+- **New version**: v0.0.48-c9b4e2d
+- **Code change statisticse**:
 
 ### Commit
 
-
 ---
-
 
 type: issue
 New patch version: v0.0.47
+
 ## Release v0.0.47-865d8cc
 
 ### Informations
-- **Branch di origine**: 46-issue-controllare-se-la-chat-è-limitata-per-uno-specifico-chat_id-sonstraycat
-- **Branch di destinazione**: dev
+
+- **Source branch**: 46-issue-controllare-se-la-chat-è-limitata-per-uno-specifico-chat_id-sonstraycat
+- **Target branch**: dev
 - **Issue**: [#46](https://github.com/davidebizzocchi/DjangoCat/issues/46)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.46-c231ae7
-- **Nuova versione**: v0.0.47-865d8cc
-- **Statistiche modifiche**: 
+- **Type**: issue
+- **Previous version**: v0.0.46-c231ae7
+- **New version**: v0.0.47-865d8cc
+- **Code change statisticse**:
 
 ### Commit
-
 
 ---
 
-
 type: issue
 New patch version: v0.0.46
+
 ## Release v0.0.46-c231ae7
 
 ### Informations
-- **Branch di origine**: 41-issue-controllare-file_id
-- **Branch di destinazione**: dev
+
+- **Source branch**: 41-issue-controllare-file_id
+- **Target branch**: dev
 - **Issue**: [#41](https://github.com/davidebizzocchi/DjangoCat/issues/41)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.45-2156cfa
-- **Nuova versione**: v0.0.46-c231ae7
-- **Statistiche modifiche**:  1 file changed, 15 insertions(+)
+- **Type**: issue
+- **Previous version**: v0.0.45-2156cfa
+- **New version**: v0.0.46-c231ae7
+- **Code change statisticse**:  1 file changed, 15 insertions(+)
 
 ### Commit
+
 - c231ae7 - add user_id in declarative, Close #40 (davidebizzocchi)
 
 ---
 
-
 type: dev
+
 ## Release v0.0.43-2156cfa
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.43-2156cfa
-- **Nuova versione**: v0.0.43-2156cfa
-- **Statistiche modifiche**:  1 file changed, 2 insertions(+), 2 deletions(-)
+- **Type**: dev
+- **Previous version**: v0.0.43-2156cfa
+- **New version**: v0.0.43-2156cfa
+- **Code change statisticse**:  1 file changed, 2 insertions(+), 2 deletions(-)
 
 ### Commit
+
 - 63ade0e - fix makefile (davidebizzocchi)
 - 83fccde - fix commits (davidebizzocchi)
 - 2005e0d - makefile version (davidebizzocchi)
@@ -200,180 +211,203 @@ type: dev
 
 ---
 
-
 type: issue
 New patch version: v0.0.43
+
 ## Release v0.0.43-2156cfa
 
 ### Informations
-- **Branch di origine**: 36-issue-copy-button-not-send-django-message
-- **Branch di destinazione**: dev
+
+- **Source branch**: 36-issue-copy-button-not-send-django-message
+- **Target branch**: dev
 - **Issue**: [#36](https://github.com/davidebizzocchi/DjangoCat/issues/36)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.42-ab50f3f
-- **Nuova versione**: v0.0.43-2156cfa
-- **Statistiche modifiche**:  3 files changed, 26 insertions(+), 3 deletions(-)
+- **Type**: issue
+- **Previous version**: v0.0.42-ab50f3f
+- **New version**: v0.0.43-2156cfa
+- **Code change statisticse**:  3 files changed, 26 insertions(+), 3 deletions(-)
 
 ### Commit
+
 2156cfa - makefile version (davidebizzocchi)
 c306a76 - Update version to v0.0.42-ab50f3f (davidebizzocchi)
 ab50f3f - add info in release (davidebizzocchi)
 
 ---
 
-
 type: issue
 New patch version: v0.0.42
+
 ## Release v0.0.42-ab50f3f
 
 ### Informations
-- **Branch di origine**: 36-issue-copy-button-not-send-django-message
-- **Branch di destinazione**: dev
+
+- **Source branch**: 36-issue-copy-button-not-send-django-message
+- **Target branch**: dev
 - **Issue**: [#36](https://github.com/davidebizzocchi/DjangoCat/issues/36)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.41-96b4674
-- **Nuova versione**: v0.0.42-ab50f3f
-- **Statistiche modifiche**:  1 file changed, 6 insertions(+), 2 deletions(-)
+- **Type**: issue
+- **Previous version**: v0.0.41-96b4674
+- **New version**: v0.0.42-ab50f3f
+- **Code change statisticse**:  1 file changed, 6 insertions(+), 2 deletions(-)
 
 ### Commit
+
 ab50f3f - add info in release (davidebizzocchi)
 
 ---
 
-
 type: issue
 New patch version: v0.0.41
+
 ## Release v0.0.41-96b4674
 
 ### Informations
-- **Branch di origine**: 36-issue-copy-button-not-send-django-message
-- **Branch di destinazione**: dev
+
+- **Source branch**: 36-issue-copy-button-not-send-django-message
+- **Target branch**: dev
 - **Issue**: [#36](https://github.com/davidebizzocchi/DjangoCat/issues/36)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.40-8ce6165
-- **Nuova versione**: v0.0.41-96b4674
+- **Type**: issue
+- **Previous version**: v0.0.40-8ce6165
+- **New version**: v0.0.41-96b4674
 
 ### Commit
+
 96b4674 - update version
 
 ---
 
-
 type: issue
 New patch version: v0.0.12
+
 ## Release v0.0.12-8ce6165
 
 ### Informations
-- **Branch di origine**: 36-issue-copy-button-not-send-django-message
-- **Branch di destinazione**: dev
+
+- **Source branch**: 36-issue-copy-button-not-send-django-message
+- **Target branch**: dev
 - **Issue**: [#36](https://github.com/davidebizzocchi/DjangoCat/issues/36)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.11-4518c7a
-- **Nuova versione**: v0.0.12-8ce6165
+- **Type**: issue
+- **Previous version**: v0.0.11-4518c7a
+- **New version**: v0.0.12-8ce6165
 
 ### Commit
+
 8ce6165 - fix merge
 0ff11a0 - Close #36, v0.0.11-4518c7a
 752e1da - fix version
 
 ---
 
-
 type: issue
 New patch version: v0.0.11
+
 ## Release v0.0.11-4518c7a
 
 ### Informations
-- **Branch di origine**: 36-issue-copy-button-not-send-django-message
-- **Branch di destinazione**: dev
+
+- **Source branch**: 36-issue-copy-button-not-send-django-message
+- **Target branch**: dev
 - **Issue**: [#36](https://github.com/davidebizzocchi/DjangoCat/issues/36)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.10-d4bf367
-- **Nuova versione**: v0.0.11-4518c7a
+- **Type**: issue
+- **Previous version**: v0.0.10-d4bf367
+- **New version**: v0.0.11-4518c7a
 
 ### Commit
+
 4518c7a - version update
 752e1da - fix version
 
 ---
 
-
 type: dev
+
 ## Release v0.0.11-d4bf367
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.11-d4bf367
-- **Nuova versione**: v0.0.11-d4bf367
+- **Type**: dev
+- **Previous version**: v0.0.11-d4bf367
+- **New version**: v0.0.11-d4bf367
 
 ### Commit
+
 1e48a7a - fix version
 
 ---
 
-
 type: dev
+
 ## Release v0.0.11-d4bf367
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.11-d4bf367
-- **Nuova versione**: v0.0.11-d4bf367
+- **Type**: dev
+- **Previous version**: v0.0.11-d4bf367
+- **New version**: v0.0.11-d4bf367
 
 ### Commit
+
 1824284 - Merge branch '36-issue-copy-button-not-send-django-message' into dev
 b080a90 - fix version
 
 ---
 type: dev
+
 ## Release v0.0.11-d4bf367
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.11-d4bf367
-- **Nuova versione**: v0.0.11-d4bf367
+- **Type**: dev
+- **Previous version**: v0.0.11-d4bf367
+- **New version**: v0.0.11-d4bf367
 
 ### Commit
+
 39a4dee - Merge branch '36-issue-copy-button-not-send-django-message' into dev
 805f8b9 - fix version
 
 ---
 type: dev
+
 ## Release v0.0.12-7f62e62
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.12-7f62e62
-- **Nuova versione**: v0.0.12-7f62e62
+- **Type**: dev
+- **Previous version**: v0.0.12-7f62e62
+- **New version**: v0.0.12-7f62e62
 
 ### Commit
+
 e4e1b74 - Merge branch '36-issue-copy-button-not-send-django-message' into dev
 62cd50d - fix version
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 bb9ab22 - Merge branch '35-issue-chat-play-message-button' into dev
 d870fa9 - copy button
 1aa52c5 - created_at chat fiedl
@@ -388,17 +422,20 @@ a322f14 - include js in streaming
 638a5e3 - add volume static file
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 ce59972 - Merge branch '34-issue-docling' into dev
 686af04 - readme first refactory
 d487564 - reuse python 3.13
@@ -411,17 +448,20 @@ d9590bd - use python 3.12 cause docling
 4e63746 - docling
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 798bd5d - Merge branch '33-feauture-enviroments-for-release' into dev
 79f69ea - local
 0684a8e - renamed local.in
@@ -431,17 +471,20 @@ c18f6d0 - docker local
 e3eaea5 - docker local
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 7cd061c - Merge branch '31-issue-ocr-per-pdf' into dev
 de6e369 - next_file_path and update_processed_text in utisl
 4ed7480 - refacory of post_process (not tested)
@@ -479,47 +522,56 @@ a45aa29 - pdf ocr req
 cc99483 - automatic upgrade requirements
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 19ab90d - Merge branch '25-feature-migliorare-associazione-file-memorie-librerie' into dev
 87f294a - all perfect
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 bbad195 - Merge branch '29-issue-adeguare-stile-cancella-file' into dev
 9bee8b6 - file delete cool
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 5ef4894 - Merge branch '28-issue-migliorare-richieste-di-associazione' into dev
 4502971 - core
 738c3cc - reuse file name in upload source
@@ -545,17 +597,20 @@ b484c87 - chat libraries view
 4cfa57e - save and delete client requests
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 d20128a - Merge branch '27-issue-scrivere-due-endpoint-che-dato-un-file_id-permetta-di-aggiungeretogliere-la-chat-dai-metadati' into dev
 ee473d8 - core
 016c48a - fix edit_chat_to_memories_from_metadata
@@ -566,17 +621,20 @@ a33aee4 - update_chat_ids api endpont
 02e1102 - update file chats
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 0d4e3b3 - Merge branch '26-issue-controllare-i-file-allegati-ad-una-libreria-e-le-chat' into dev
 e47c32b - file list restyle
 8566ffb - library see file and chat
@@ -587,17 +645,20 @@ ce61f55 - update files library
 a23c78a - detail see files and chat
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 ceaeddc - Merge branch '24-issue-search-declarative-memory-linked-to-chat' into dev
 28bc4a7 - core
 86dea90 - endpoint api
@@ -608,17 +669,20 @@ fe0f438 - file update chat
 31d28ae - files metadata upload
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 dc53ea1 - Merge branch '23-issue-add-footer-version' into dev
 b2ba2eb - beautiful
 bb798ba - wrong name
@@ -627,17 +691,20 @@ bb798ba - wrong name
 5e6d42b - footer template
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 015f0a0 - Merge branch '22-issue-associare-una-libreria-ad-una-chat' into dev
 3bf6661 - nuova chat button
 96dae0d - add library to chat
@@ -647,17 +714,20 @@ aeaad11 - urls new chat endpoint
 6eac446 - teamplate new chat
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 79398cf - Merge branch '21-issue-check-library-file-association' into dev
 30dc1b2 - upgrade assoc in form
 9331740 - remake form_valid in assoc file
@@ -667,17 +737,20 @@ aeaad11 - urls new chat endpoint
 518cbaf - get success url
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 1e16539 - Merge branch '20-issue-caricamento-file' into dev
 8649636 - core
 b072833 - file upload
@@ -723,17 +796,20 @@ c9cd1d4 - file
 ebc2848 - user upload
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 ad23faa - Merge branch '19-feauture-libreria' into dev
 9e9e7a9 - core
 1324c58 - add library
@@ -746,102 +822,123 @@ fb3183b - fix template
 d84d48e - library and templates
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: dev
-- **Branch di destinazione**: dev
+
+- **Source branch**: dev
+- **Target branch**: dev
 - **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
-- **Tipo**: dev
-- **Versione precedente**: v0.0.10-6e49b2b
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: dev
+- **Previous version**: v0.0.10-6e49b2b
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 f567a49 - Merge branch '17-issue-define-version' into dev
 83ba07d - makefile
 
 ---
+
 ## Release v0.0.10-6e49b2b
 
 ### Informations
-- **Branch di origine**: 17-issue-define-version
-- **Branch di destinazione**: dev
+
+- **Source branch**: 17-issue-define-version
+- **Target branch**: dev
 - **Issue**: [#17](https://github.com/davidebizzocchi/DjangoCat/issues/17)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.9-be5e4f9
-- **Nuova versione**: v0.0.10-6e49b2b
+- **Type**: issue
+- **Previous version**: v0.0.9-be5e4f9
+- **New version**: v0.0.10-6e49b2b
 
 ### Commit
+
 6e49b2b - makefile
 
 ---
+
 ## Release v0.0.9-be5e4f9
 
 ### Informations
-- **Branch di origine**: 17-issue-define-version
-- **Branch di destinazione**: dev
+
+- **Source branch**: 17-issue-define-version
+- **Target branch**: dev
 - **Issue**: [#17](https://github.com/davidebizzocchi/DjangoCat/issues/17)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.8-e86f9f4
-- **Nuova versione**: v0.0.9-be5e4f9
+- **Type**: issue
+- **Previous version**: v0.0.8-e86f9f4
+- **New version**: v0.0.9-be5e4f9
 
 ### Commit
+
 be5e4f9 - makefile
 
 ---
+
 ## Release v0.0.8-e86f9f4
 
 ### Informations
-- **Branch di origine**: 17-issue-define-version
-- **Branch di destinazione**: dev
+
+- **Source branch**: 17-issue-define-version
+- **Target branch**: dev
 - **Issue**: [#17](https://github.com/davidebizzocchi/DjangoCat/issues/17)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.7-618e405
-- **Nuova versione**: v0.0.8-e86f9f4
+- **Type**: issue
+- **Previous version**: v0.0.7-618e405
+- **New version**: v0.0.8-e86f9f4
 
 ### Commit
+
 e86f9f4 - makefile
 
 ---
+
 ## Release v0.0.7-618e405
 
 ### Informations
-- **Branch di origine**: 17-issue-define-version
-- **Branch di destinazione**: dev
+
+- **Source branch**: 17-issue-define-version
+- **Target branch**: dev
 - **Issue**: [#17](https://github.com/davidebizzocchi/DjangoCat/issues/17)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.6-fb7b5d6
-- **Nuova versione**: v0.0.7-618e405
+- **Type**: issue
+- **Previous version**: v0.0.6-fb7b5d6
+- **New version**: v0.0.7-618e405
 
 ### Commit
+
 618e405 - makefile
 
 ---
+
 ## Release v0.0.6-fb7b5d6
 
 ### Informations
-- **Branch di origine**: 17-issue-define-version
-- **Branch di destinazione**: dev
+
+- **Source branch**: 17-issue-define-version
+- **Target branch**: dev
 - **Issue**: [#17](https://github.com/davidebizzocchi/DjangoCat/issues/17)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.5-9b71887
-- **Nuova versione**: v0.0.6-fb7b5d6
+- **Type**: issue
+- **Previous version**: v0.0.5-9b71887
+- **New version**: v0.0.6-fb7b5d6
 
 ### Commit
+
 fb7b5d6 - makefile
 
 ---
+
 ## Release v0.0.5-9b71887
 
 ### Informations
-- **Branch di origine**: 17-issue-define-version
-- **Branch di destinazione**: dev
+
+- **Source branch**: 17-issue-define-version
+- **Target branch**: dev
 - **Issue**: [#17](https://github.com/davidebizzocchi/DjangoCat/issues/17)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.4-6044a3b
-- **Nuova versione**: v0.0.5-9b71887
+- **Type**: issue
+- **Previous version**: v0.0.4-6044a3b
+- **New version**: v0.0.5-9b71887
 
 ### Commit
+
 9b71887 - makefile
 7a34124 - Close #17
 6044a3b - makefile
@@ -854,17 +951,20 @@ d396f93 - fix release
 331968e - versione makefile
 
 ---
+
 ## Release v0.0.4-6044a3b
 
 ### Informations
-- **Branch di origine**: 17-issue-define-version
-- **Branch di destinazione**: dev
+
+- **Source branch**: 17-issue-define-version
+- **Target branch**: dev
 - **Issue**: [#17](https://github.com/davidebizzocchi/DjangoCat/issues/17)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.3-de1ba8e
-- **Nuova versione**: v0.0.4-6044a3b
+- **Type**: issue
+- **Previous version**: v0.0.3-de1ba8e
+- **New version**: v0.0.4-6044a3b
 
 ### Commit
+
 6044a3b - makefile
 b09ef7d - Close #17
 de1ba8e - link release
@@ -875,17 +975,20 @@ d396f93 - fix release
 331968e - versione makefile
 
 ---
+
 ## Release v0.0.3-de1ba8e
 
 ### Informations
-- **Branch di origine**: 17-issue-define-version
-- **Branch di destinazione**: dev
+
+- **Source branch**: 17-issue-define-version
+- **Target branch**: dev
 - **Issue**: [#17](https://github.com/davidebizzocchi/DjangoCat/issues/17)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.2-c88e127
-- **Nuova versione**: v0.0.3-de1ba8e
+- **Type**: issue
+- **Previous version**: v0.0.2-c88e127
+- **New version**: v0.0.3-de1ba8e
 
 ### Commit
+
 de1ba8e - link release
 c88e127 - version
 3469fdc - release
@@ -894,17 +997,20 @@ d396f93 - fix release
 331968e - versione makefile
 
 ---
+
 ## Release v0.0.2-c88e127
 
 ### Informations
-- **Branch di origine**: 17-issue-define-version
-- **Branch di destinazione**: dev
+
+- **Source branch**: 17-issue-define-version
+- **Target branch**: dev
 - **Issue**: [#17](https://github.com/davidebizzocchi/DjangoCat/issues/17)
-- **Tipo**: issue
-- **Versione precedente**: v0.0.1-6ccd8f8
-- **Nuova versione**: v0.0.2-c88e127
+- **Type**: issue
+- **Previous version**: v0.0.1-6ccd8f8
+- **New version**: v0.0.2-c88e127
 
 ### Commit
+
 c88e127 - version
 3469fdc - release
 d396f93 - fix release
@@ -912,17 +1018,20 @@ d396f93 - fix release
 331968e - versione makefile
 
 ---
+
 ## Release v0.0.1-6ccd8f8
 
 ### Informations
-- **Branch di origine**: 17-issue-define-version
-- **Branch di destinazione**: dev
+
+- **Source branch**: 17-issue-define-version
+- **Target branch**: dev
 - **Issue**: #17
-- **Tipo**: issue
-- **Versione precedente**: v0.0.0-6ccd8f8
-- **Nuova versione**: v0.0.1-6ccd8f8
+- **Type**: issue
+- **Previous version**: v0.0.0-6ccd8f8
+- **New version**: v0.0.1-6ccd8f8
 
 ### Commit
+
 6ccd8f8 - update template
 331968e - versione makefile
 

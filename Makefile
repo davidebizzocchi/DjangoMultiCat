@@ -165,7 +165,7 @@ create-release-note:
 	fi; \
 	NEW_VERSION=$$(cat django_cat/VERSION); \
 	COMMITS=$$(make -s get-commits); \
-	echo "## Release $$NEW_VERSION\n\n### Informations\n- **Branch di origine**: $$BRANCH\n- **Branch di destinazione**: dev\n- **Issue**: [#$$ISSUE_NUM](https://github.com/davidebizzocchi/DjangoCat/issues/$$ISSUE_NUM)\n- **Tipo**: $$TYPE\n- **Versione precedente**: $$OLD_VERSION\n- **Nuova versione**: $$NEW_VERSION\n- **Statistiche modifiche**: $$DIFF_STATS\n\n### Commit\n$$COMMITS\n\n---\n"
+	echo "## Release $$NEW_VERSION\n\n### Information\n- **Source branch**: $$BRANCH\n- **Target branch**: dev\n- **Issue**: [#$$ISSUE_NUM](https://github.com/davidebizzocchi/DjangoCat/issues/$$ISSUE_NUM)\n- **Type**: $$TYPE\n- **Previous version**: $$OLD_VERSION\n- **New version**: $$NEW_VERSION\n- **Code change statistics**: $$DIFF_STATS\n\n### Commits\n$$COMMITS\n\n---\n"
 
 update-releases-md:
 	echo "update release md $(VERSION) $(BRANCH)"
