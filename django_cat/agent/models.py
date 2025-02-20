@@ -72,13 +72,16 @@ class Agent(BaseUserModel):
 
         if self.agent_id is None:
             self.create_agent()
-        elif self.pk:
+        elif self.pk and not self.is_default:
             self.client.update_agent(self)
 
     def delete(self, *args, **kwargs):
         self.client.delete_agent(self.agent_id)
         
         return super().delete(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.name} ({self.agent_id})"
     
 @receiver(server_start)
 def create_agents_on_server_start(sender, **kwargs):
