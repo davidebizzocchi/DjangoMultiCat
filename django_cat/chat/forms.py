@@ -2,10 +2,12 @@ from django import forms
 from agent.models import Agent
 from library.models import Library
 
+from icecream import ic
+
 class ChatCreateForm(forms.Form):
     agent = forms.ChoiceField(
         choices=[],
-        widget=forms.Select(attrs={'class': 'form-select'}),
+        widget=forms.Select(attrs={'class': 'form-select custom-option'}),
         label="Agent",
         required=True,
     )
@@ -24,6 +26,7 @@ class ChatCreateForm(forms.Form):
             (agent.agent_id, agent.name) for agent in Agent.objects.only("agent_id", "name").filter(user=user)
         ]
 
+        # ic([form.__dict__ for form in self.agent])
         self.fields['libraries'].choices = [
             (library.library_id, library.name) for library in Library.objects.only("library_id", "name").filter(user=user)
         ]
