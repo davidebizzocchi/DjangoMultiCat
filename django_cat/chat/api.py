@@ -8,11 +8,8 @@ from chat.models import Chat, Message
 import json
 from icecream import ic
 from cheshire_cat.client import Cat
-from django.conf import settings
-import os
-from pathlib import Path
-import glob
 from django.shortcuts import get_object_or_404
+from agent.models import Agent
 from library.models import Library
 
 router = Router(tags=["Chat"])
@@ -254,7 +251,12 @@ def create_thread(request, data: ThreadCreateSchema):
     ic("create_thread", data)
     user = request.user
 
-    chat = Chat.objects.create(user=user)
+    if data.agent == "default":
+        agent = Agent.get_default(user)
+    else:
+        agent = Agent.objects.get(agent_id=data.agent, user=user)
+
+    chat = Chat.objects.create(user=user, agent=agent)
     if data.name is not None:
         chat.title = data.name
         
