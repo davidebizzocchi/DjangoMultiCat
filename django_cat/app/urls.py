@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 from app.static_view import HomeView, Error403View, Error404View, Error500View
 
@@ -41,5 +43,5 @@ urlpatterns = [
     path("library/", include("library.urls", namespace="library")),
     path("file/", include("file.urls", namespace="file")),
     path("api/", api.urls),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
