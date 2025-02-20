@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from app.static_view import HomeView, Error403View, Error404View, Error500View
+from app.static_view import Error403View, Error404View, Error500View
 
 from ninja import NinjaAPI
 from chat.api import router as chat_router
@@ -37,11 +37,18 @@ handler500 = Error500View.as_view()
 
 urlpatterns = [
     path('XYZ2024-admin/', admin.site.urls),
-    path("", HomeView.as_view(), name="home"),
+    path("", include("common.urls")),
+    
     path("users/", include("users.urls", namespace="users")),
+    
     path("chat/", include("chat.urls", namespace="chat")),
+    
     path("library/", include("library.urls", namespace="library")),
     path("file/", include("file.urls", namespace="file")),
+
+    path("agent/", include("agent.urls", namespace="agent")),
+    
     path("api/", api.urls),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -1,7 +1,5 @@
 from django.views.generic import TemplateView
 
-class HomeView(TemplateView):
-    template_name = "base/base.html"
 
 class Error403View(TemplateView):
     template_name = "errors/403.html"

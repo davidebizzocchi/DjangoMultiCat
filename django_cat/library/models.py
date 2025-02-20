@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from users.models import User, UserProfile
-from app.utils import BaseUserModel
+from common.utils import BaseUserModel
 from icecream import ic
 
 

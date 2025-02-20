@@ -1,7 +1,7 @@
 from django.db import models
 
 import uuid
-from app.utils import BaseUserModel
+from common.utils import BaseUserModel
 from library.models import Library
 from icecream import ic
 from django.utils import timezone

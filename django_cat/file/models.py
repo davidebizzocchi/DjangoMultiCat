@@ -6,7 +6,7 @@ from typing import Union
 import uuid
 from django.conf import settings
 from django.db import models
-from app.utils import BaseUserModel
+from common.utils import BaseUserModel
 from cheshire_cat.types import DocReadingProgress
 from file.fields import FileObject, FileObjectDecoder, FileObjectEncoder, IngestionConfig, IngestionConfigEncoder, IngestionConfigDecoder, IngestionType, PageMode, PostProcessType
 from decouple import config
