@@ -13,6 +13,9 @@ __DjangoMultiCat.code-workspace
 
 !requirements/*.txt
 
+!docs/releases.md
+!docs/release_template.md
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
