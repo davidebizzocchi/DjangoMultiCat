@@ -2,6 +2,41 @@
 
 
 
+type: issue_create
+## Release v0.0.48-c9b4e2d
+
+### Informazioni Release
+- **Branch di origine**: 63-issue_create-views-and-template-for-manage-agents
+- **Branch di destinazione**: dev
+- **Issue**: [#63](https://github.com/davidebizzocchi/DjangoCat/issues/63)
+- **Tipo**: issue_create
+- **Versione precedente**: v0.0.48-c9b4e2d
+- **Nuova versione**: v0.0.48-c9b4e2d
+- **Statistiche modifiche**:  49 files changed, 1384 insertions(+), 90 deletions(-)
+
+### Commit
+- 8d49aae - agent templates (davidebizzocchi)
+- ab6bda9 - fix custom_cat_client _update_agent_serialize body_params (davidebizzocchi)
+- 1f970c8 - fix client create_agent (davidebizzocchi)
+- d52678c - fix server_start signal (davidebizzocchi)
+- a58b0c8 - agent views (davidebizzocchi)
+- 30a9c3e - agent urls (davidebizzocchi)
+- f080e6b - adapt agent form and creation on server_start (davidebizzocchi)
+- 390d8d6 - agent form (davidebizzocchi)
+- 468b4e6 - add agent urls (davidebizzocchi)
+- 781e5a0 - base add block head in head (davidebizzocchi)
+- 023aec2 - using common app (davidebizzocchi)
+- 39f2778 - align multicat plugin (davidebizzocchi)
+- f7b01af - add docs (davidebizzocchi)
+- c4b3c3b - chat removed home (davidebizzocchi)
+- 486f3d3 - chat urls (davidebizzocchi)
+- 216d640 - chat home classbased view (davidebizzocchi)
+- 77b680f - add media files in urls (davidebizzocchi)
+- 869ef68 - rename app user_upload in file (davidebizzocchi)
+
+---
+
+
 type: issue_write
 ## Release v0.0.48-c9b4e2d
 
