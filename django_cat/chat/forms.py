@@ -4,6 +4,7 @@ from library.models import Library
 
 from icecream import ic
 
+
 class ChatCreateForm(forms.Form):
     agent = forms.ChoiceField(
         choices=[],
