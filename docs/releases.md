@@ -1,5 +1,24 @@
 # Releases
 
+
+
+type: issue
+New patch version: v0.0.49
+## Release v0.0.49-c5d63cf
+
+### Information
+- **Source branch**: 66-issue-prova
+- **Target branch**: dev
+- **Issue**: [#66](https://github.com/davidebizzocchi/DjangoCat/issues/66)
+- **Type**: issue
+- **Previous version**: v0.0.48-c9b4e2d
+- **New version**: v0.0.49-c5d63cf
+- **Code change statistics**: 
+
+### Commits
+
+
+---
 type: issue_create
 
 ## Release v0.0.48-c9b4e2d
