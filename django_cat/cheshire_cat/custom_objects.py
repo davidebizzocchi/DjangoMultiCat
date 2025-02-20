@@ -937,9 +937,7 @@ class AgentsApi:
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
         _files: Dict[str, str] = {}
-        _body_params = {
-            'data': data,
-        }
+        _body_params = data
 
         _header_params['Accept'] = self.api_client.select_header_accept([
             'application/json'
