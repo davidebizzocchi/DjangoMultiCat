@@ -8,6 +8,11 @@ from app.signals import server_start
 from icecream import ic
 
 
+class AgentManager(models.Manager):
+    def filter(self, *args, **kwargs):
+        """Never return the default agent"""
+        return super().filter(*args, **kwargs).exclude(agent_id="default")
+
 class Agent(BaseUserModel):
     agent_id = models.CharField(max_length=255, null=True, blank=True, default=None)
     name = models.CharField(max_length=255, default="")
@@ -16,6 +21,8 @@ class Agent(BaseUserModel):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = AgentManager()
 
     class Meta:
         ordering = ("user", "-updated_at")
