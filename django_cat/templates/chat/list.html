@@ -3,9 +3,9 @@
 {% load poll_extras %}
 
 {% block contenuto %}
-<h2>Le tue chat</h2>
+<h2>Your chats</h2>
     
-<a href="{% url 'chat:create' %}?force=true" class="btn btn-success mb-4">Nuova Chat</a>
+<a href="{% url 'chat:create' %}?force=true" class="btn btn-success mb-4">New Chat</a>
 
 <div class="list-group">
     {% for chat in chats %}
@@ -14,21 +14,28 @@
             <a href="{% url 'chat:chat' chat.chat_id %}">
                 {{ chat.name }}
             </a>
-            {% if chat.libraries.exists %}
             <div class="small text-muted mt-1">
-                Librerie: 
-                {% for lib in chat.libraries.all %}
-                    <span class="badge bg-secondary">{{ lib.name }}</span>
-                {% endfor %}
+                <div class="mb-1">
+                    Agent: <span class="badge bg-primary">{{ chat.agent.name }}</span>
+                </div>
+                <div>
+                    {% if chat.libraries.exists %}
+                        Libraries: 
+                        {% for lib in chat.libraries.all %}
+                            <span class="badge bg-secondary">{{ lib.name }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-muted">No library created</span>
+                    {% endif %}
+                </div>
             </div>
-            {% endif %}
         </div>
         <a href="{% url 'chat:delete' chat.chat_id %}" class="btn btn-danger btn-sm">
-            Elimina
+            Delete
         </a>
     </div>
     {% empty %}
-    <p>Non hai ancora chat attive.</p>
+    <p>You don't have any active chats yet.</p>
     {% endfor %}
 </div>
 {% endblock %}
