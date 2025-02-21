@@ -15,7 +15,7 @@ class Chat(BaseUserModel):
 
     agent = models.ForeignKey(Agent, on_delete=models.SET(Agent.get_default), related_name='chats', null=True, blank=True, default=None)
 
-    title = models.CharField(max_length=255, default="Nuova Chat")
+    title = models.CharField(max_length=255, default="New Chat")
     chat_id = models.CharField(max_length=255, unique=True, default=uuid.uuid4)
     libraries = models.ManyToManyField(Library, related_name='chats', blank=True)
     created_at = models.DateTimeField(default=timezone.now)
@@ -144,7 +144,7 @@ class Chat(BaseUserModel):
     def name(self):
         """Return the chat name"""
 
-        if self.title == "Nuova Chat":
+        if self.title == "New Chat":
             if self.messages.count() > 0:
                 self.title = self.messages.first().text[:20]
                 self.save()

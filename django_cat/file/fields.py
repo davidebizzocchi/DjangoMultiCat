@@ -59,12 +59,12 @@ class PageMode(str, Enum):
     DOUBLE = "double"
 
 # System prompt di base per tutti i tipi di elaborazione
-SYSTEM_PROMPT = """Sei un assistente esperto in analisi e elaborazione di testi.
-Il tuo compito è aiutare a processare documenti seguendo le istruzioni specifiche fornite.
-Mantieni un tono professionale e fornisci output strutturati e ben organizzati.
-Non aggiungere commenti personali o informazioni non richieste.
-Concentrati esclusivamente sul compito assegnato.
-Evita di inserire commenti, informazioni personali o spiegazioni, il risultato che fornisci verra utilizzato direttamente."""
+SYSTEM_PROMPT = """You are an expert assistant in text analysis and processing.
+Your task is to help process documents following specific instructions.
+Maintain a professional tone and provide structured, well-organized output.
+Do not add personal comments or unrequested information.
+Focus exclusively on the assigned task.
+Avoid including comments, personal information or explanations, your output will be used directly."""
 
 class PostProcessType(str, Enum):
     NONE = "none"
@@ -84,7 +84,7 @@ class PostProcessType(str, Enum):
 # Dizionario dei prompt per ogni tipo di post-processing
 PROCESS_PROMPTS = {
     PostProcessType.SUMMARY: (
-        "Genera un riassunto conciso del seguente testo e formattalo come JSON nel seguente formato:\n"
+        "Generate a concise summary of the following text and format it as JSON in the following format:\n"
         "{\n"
         '    "new_text": "il tuo riassunto qui"\n'
         "}\n\n"
@@ -95,7 +95,7 @@ PROCESS_PROMPTS = {
         "Testo da elaborare:\n"
     ),
     PostProcessType.FIX_OCR: (
-        "Correggi il seguente testo OCR e formatta il risultato come JSON nel seguente formato:\n"
+        "Fix the following OCR text and format the result as JSON in the following format:\n"
         "{\n"
         '    "new_text": "il testo corretto qui"\n'
         "}\n\n"
@@ -127,15 +127,15 @@ PROCESS_PROMPTS = {
         "Testo da elaborare:\n"
     ),
     PostProcessType.KEYWORDS: (
-        "Analizza il seguente testo ed estrai le parole chiave e i concetti principali. "
-        "Organizza le keywords in ordine di rilevanza e raggruppa quelle correlate. "
-        "Aggiungi una breve spiegazione per ogni gruppo di keywords.\n\n"
+        "Analyze the following text and extract key words and main concepts. "
+        "Organize keywords by relevance and group related ones. "
+        "Add a brief explanation for each group of keywords.\n\n"
     ),
     PostProcessType.BOTH: (
-        "Analizza il seguente testo ed esegui queste operazioni:\n"
-        "1. Genera un riassunto conciso (circa 30% della lunghezza originale)\n"
-        "2. Estrai e organizza le parole chiave in ordine di rilevanza\n"
-        "3. Per ogni gruppo di keywords, fornisci una breve spiegazione\n\n"
+        "Analyze the following text and perform these operations:\n"
+        "1. Generate a concise summary (about 30% of original length)\n"
+        "2. Extract and organize keywords by relevance\n"
+        "3. For each group of keywords, provide a brief explanation\n\n"
     )
 }
 

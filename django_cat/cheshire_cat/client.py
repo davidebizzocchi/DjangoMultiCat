@@ -239,13 +239,13 @@ class Cat(CatClient):
                 return None
         return self._message_contents[chat_id]
     
-    def _transcribe(self, audio_bytes):
+    def _transcribe(self, audio_bytes, language="it"):
         start = time.time()
         transcription = self._llm.audio.transcriptions.create(
             file=("temp.wav", audio_bytes),
             model=settings.LLM_MODEL_AUDIO_TRANSCRIPTION_ID,
-            language="it",
-            prompt="Trascrivi il messaggio dell'utente",
+            language=language,
+            prompt="Transcribe the user's message",
             response_format="json"
         )
         ic("time", time.time() - start, transcription)
@@ -327,15 +327,15 @@ class Cat(CatClient):
 
     def register_notification_handler(self, handler, *handler_args, **handler_kwargs) -> str:
         """
-        Registra un handler per le notifiche e restituisce il suo ID
+        Register a handler for notifications and return its ID
         
         Args:
-            handler: Funzione che riceve una notifica
-            *handler_args: Argomenti posizionali da passare all'handler
-            **handler_kwargs: Argomenti nominali da passare all'handler
+            handler: Function that receives a notification
+            *handler_args: Positional arguments to pass to the handler
+            **handler_kwargs: Keyword arguments to pass to the handler
             
         Returns:
-            str: ID univoco dell'handler registrato
+            str: Unique ID of the registered handler
         """
         handler_id = str(uuid.uuid4())
         self._notification_handlers[handler_id] = handler
@@ -343,10 +343,10 @@ class Cat(CatClient):
 
     def unregister_notification_handler(self, handler_id: str):
         """
-        Rimuove un handler dato il suo ID
+        Remove a handler given its ID
         
         Args:
-            handler_id: ID dell'handler da rimuovere
+            handler_id: ID of the handler to remove
         """
         if handler_id in self._notification_handlers:
             del self._notification_handlers[handler_id]

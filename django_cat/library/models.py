@@ -34,27 +34,27 @@ class Library(BaseUserModel):
         ).values_list('file_id', flat=True)
     
     def add_new_chat(self, chat_id: str):
-        """Client add chat to client"""
+        """Add chat to client"""
         
         for file_id in self.files_id:
             ic("chat add", chat_id, file_id)
             self.client.add_file_to_chats(str(file_id), chat_id)
 
     def remove_chat(self, chat_id: str):
-        """Client remove chat from client"""
+        """Remove chat from client"""
         
         for file_id in self.files_id:
             ic("chat delete", chat_id, file_id)
             self.client.remove_file_to_chats(str(file_id), chat_id)
 
     def add_file_to_existing_chats(self, file_id: str):
-        """Invoked by FileLibraryAssociation"""
+        """Called by FileLibraryAssociation"""
         for chat_id in self.chats.values_list("chat_id", flat=True):
             ic("file add", chat_id, file_id)
             self.client.add_file_to_chats(file_id, str(chat_id))
 
     def remove_file_from_existing_chats(self, file_id: str):
-        """Invoked by FileLibraryAssociation"""
+        """Called by FileLibraryAssociation"""
         for chat_id in self.chats.values_list("chat_id", flat=True):
             ic("file delete", chat_id, file_id)
             self.client.remove_file_to_chats(file_id, str(chat_id))

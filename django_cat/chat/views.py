@@ -86,8 +86,6 @@ class ChatCreateView(ChatStreamView):
         context["create_thread_immediately"] = False
         context["force_create_thread"] = Chat.objects.filter(user=self.usr).count() == 0
 
-        ic(context)
-
         return context
 
 class ChatDeleteView(ChatMixin, LoginRequiredMixin, DeleteView):

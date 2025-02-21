@@ -79,6 +79,10 @@ class Agent(BaseUserModel):
         return agent
 
     def save(self, *args, **kwargs):
+        if self.is_default:
+            self.name = "Default"
+
+        
         super().save(*args, **kwargs)
 
         if self.agent_id is None:

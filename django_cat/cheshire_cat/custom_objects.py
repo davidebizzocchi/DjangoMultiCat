@@ -42,16 +42,15 @@ class CatRabbitHoleApi(RabbitHoleApi):
         Upload a file containing text (.txt, .md, .pdf, etc.). File content will be extracted and segmented into chunks.
         Chunks will be then vectorized and stored into documents memory.
 
-        :param file: File content as bytes or string
-        :type file: Union[bytes, str]
-        :param chunk_size: Maximum length of each chunk after the document is split (in tokens)
-        :type chunk_size: int, optional
-        :param chunk_overlap: Chunk overlap (in tokens)
-        :type chunk_overlap: int, optional
-        :param metadata: Metadata to be stored with each chunk
-        :type metadata: dict, optional
-        :param _request_timeout: timeout setting for this request
-        :type _request_timeout: int, tuple(int, int), optional
+        Args:
+            file: File content as bytes or string
+            chunk_size: Maximum length of each chunk after the document is split (in tokens)
+            chunk_overlap: Chunk overlap (in tokens)
+            metadata: Metadata to be stored with each chunk
+            _request_timeout: timeout setting for this request
+
+        Returns:
+            object: Response from the API
         """
         # Handle file-like objects
         if hasattr(file, 'read'):

@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% block title %}Elimina {{ agent.name }}{% endblock %}
+{% block title %}Delete {{ agent.name }}{% endblock %}
 
 {% block contenuto %}
 <div class="container">
@@ -8,21 +8,21 @@
             <div class="card">
                 <div class="card-header bg-danger text-white">
                     <h3 class="card-title mb-0">
-                        <i class="fas fa-exclamation-triangle"></i> Conferma eliminazione
+                        <i class="fas fa-exclamation-triangle"></i> Confirm deletion
                     </h3>
                 </div>
                 <div class="card-body">
-                    <p class="mb-0">Sei sicuro di voler eliminare l'agente "{{ agent.name }}"?</p>
-                    <p class="text-muted small">Questa azione non può essere annullata.</p>
+                    <p class="mb-0">Are you sure you want to delete the agent "{{ agent.name }}"?</p>
+                    <p class="text-muted small">This action cannot be undone.</p>
 
                     <form method="post">
                         {% csrf_token %}
                         <div class="d-flex justify-content-between mt-4">
                             <a href="{% url 'agent:list' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-times"></i> Annulla
+                                <i class="fas fa-times"></i> Cancel
                             </a>
                             <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash"></i> Elimina
+                                <i class="fas fa-trash"></i> Delete
                             </button>
                         </div>
                     </form>

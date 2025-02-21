@@ -30,17 +30,17 @@ class FileUploadView(LoginRequiredMixin, CreateView):
             if created:
                 messages.success(
                     self.request,
-                    f'File "{file.title}" caricato con successo.'
+                    f'File "{file.title}" uploaded successfully.'
                 )
                 if uploaded:
                     messages.info(
                         self.request,
-                        f'File aggiunto alle librerie: {", ".join(lib.name for lib in uploaded)}'
+                        f'File added to libraries: {", ".join(lib.name for lib in uploaded)}'
                     )
             else:
                 messages.warning(
                     self.request,
-                    f'Il file "{file.title}" esiste già nel sistema.'
+                    f'File "{file.title}" already exists in the system.'
                 )
         
         return super().form_valid(form)
@@ -67,7 +67,7 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
 
     def post(self, request, *args, **kwargs):
         file = self.get_object()
-        messages.error(request, f'File "{file.title}" eliminato con successo.')
+        messages.error(request, f'File "{file.title}" deleted successfully.')
         return super().post(request, *args, **kwargs)
 
 class FileAssociationView(LoginRequiredMixin, UpdateView):
@@ -94,13 +94,13 @@ class FileAssociationView(LoginRequiredMixin, UpdateView):
             ic(uploaded)
             messages.success(
                 self.request,
-                f'File "{file}" aggiunto alle librerie: {", ".join(lib.name for lib in uploaded)}'
+                f'File "{file}" added to libraries: {", ".join(lib.name for lib in uploaded)}'
             )
         if deleted:
             ic(deleted)
             messages.error(
                 self.request,
-                f'File "{file}" rimosso dalle librerie: {", ".join(lib.name for lib in deleted)}'
+                f'File "{file}" removed from libraries: {", ".join(lib.name for lib in deleted)}'
             )
         
         return super().form_valid(form)

@@ -1,15 +1,17 @@
 {% extends 'base/base.html' %}
 
+{% block title %}Users List{% endblock %}
+
 {% block contenuto %}
 <div class="container mt-4">
-    <h2>Lista Utenti</h2>
+    <h2>Users List</h2>
     <div class="table-responsive">
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Username</th>
-                    <th>Data registrazione</th>
-                    <th>Ultimo accesso</th>
+                    <th>Registration date</th>
+                    <th>Last login</th>
                     <th>Cheshire ID</th>
                 </tr>
             </thead>
@@ -18,12 +20,12 @@
                 <tr>
                     <td>{{ user.username }}</td>
                     <td>{{ user.date_joined|date:"d/m/Y H:i" }}</td>
-                    <td>{{ user.last_login|date:"d/m/Y H:i"|default:"Mai" }}</td>
+                    <td>{{ user.last_login|date:"d/m/Y H:i"|default:"Never" }}</td>
                     <td>{{ user.userprofile.cheschire_id }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">Nessun utente trovato</td>
+                    <td colspan="4" class="text-center">No users found</td>
                 </tr>
                 {% endfor %}
             </tbody>

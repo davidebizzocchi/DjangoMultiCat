@@ -6,8 +6,8 @@
 <div class="container mt-4">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h2>I tuoi File</h2>
-            <a href="{% url 'file:upload' %}" class="btn btn-success">Upload nuovo file</a>
+            <h2>Your Files</h2>
+            <a href="{% url 'file:upload' %}" class="btn btn-success">Upload New File</a>
         </div>
         <div class="card-body">
             {% if files %}
@@ -21,13 +21,13 @@
                                 
                                 <!-- Status badges -->
                                 {% if file.is_configuring %}
-                                    <span class="badge bg-warning ms-2 status-badge">Configurazione</span>
+                                    <span class="badge bg-warning ms-2 status-badge">Configuring</span>
                                 {% elif file.is_processing %}
                                     <span class="badge bg-info ms-2 status-badge">Post Processing</span>
                                 {% elif file.is_uploading %}
-                                    <span class="badge bg-primary ms-2 status-badge">Caricamento</span>
+                                    <span class="badge bg-primary ms-2 status-badge">Uploading</span>
                                 {% elif file.is_ready %}
-                                    <span class="badge bg-success ms-2 status-badge">Pronto</span>
+                                    <span class="badge bg-success ms-2 status-badge">Ready</span>
                                 {% endif %}
 
                                 <span class="badge bg-success ms-2 ingested-badge {% if not file.ingested %}hidden{% endif %}">Ingested</span>
@@ -47,19 +47,19 @@
 
                             <small class="text-muted d-block mb-2">{{ file.file.size|filesizeformat }}</small>
                             <div class="btn-group">
-                                <a href="{% url 'file:assoc' file.file_id %}" class="btn btn-primary btn-sm">Associazioni</a>
-                                <a href="{{ file.link }}" target="_blank" class="btn btn-info btn-sm">Anteprima</a>
+                                <a href="{% url 'file:assoc' file.file_id %}" class="btn btn-primary btn-sm">Associations</a>
+                                <a href="{{ file.link }}" target="_blank" class="btn btn-info btn-sm">Preview</a>
                             </div>
                         </div>
                         <div>
-                            <a href="{% url 'file:delete' file.file_id %}" class="btn btn-danger btn-sm">Elimina</a>
+                            <a href="{% url 'file:delete' file.file_id %}" class="btn btn-danger btn-sm">Delete</a>
                         </div>
                     </div>
                 </li>
                 {% endfor %}
             </ul>
             {% else %}
-            <p class="text-center my-4">Non ci sono file caricati.</p>
+            <p class="text-center my-4">No files uploaded.</p>
             {% endif %}
         </div>
     </div>
@@ -83,27 +83,27 @@ const updateFileStatus = (fileId) => {
             const $fileElement = $(`#file-${fileId}`);
             if ($fileElement.length === 0) return;
             
-            // Aggiorna badge di stato
+            // Update status badge
             const $statusBadge = $fileElement.find('.status-badge');
             if ($statusBadge.length) {
                 $statusBadge.removeClass().addClass('badge ms-2 status-badge');
                 switch (data.status) {
                     case 'pending_config':
-                        $statusBadge.addClass('bg-warning').text('Configurazione');
+                        $statusBadge.addClass('bg-warning').text('Configuring');
                         break;
                     case 'pending_process':
                         $statusBadge.addClass('bg-info').text('Post Processing');
                         break;
                     case 'pending_upload':
-                        $statusBadge.addClass('bg-primary').text('Caricamento');
+                        $statusBadge.addClass('bg-primary').text('Uploading');
                         break;
                     case 'ready':
-                        $statusBadge.addClass('bg-success').text('Pronto');
+                        $statusBadge.addClass('bg-success').text('Ready');
                         break;
                 }
             }
 
-            // Aggiorna barra progresso
+            // Update progress bar
             const $progressBar = $fileElement.find('.progress');
             if ($progressBar.length && data.status !== 'ready') {
                 $progressBar.show();
@@ -115,7 +115,7 @@ const updateFileStatus = (fileId) => {
                 $progressBar.hide();
             }
 
-            // Aggiorna badge ingested
+            // Update ingested badge
             const $ingestedBadge = $fileElement.find('.ingested-badge');
             if (data.is_ingested) {
                 $ingestedBadge.removeClass('d-none').addClass('d-inline');
@@ -123,7 +123,7 @@ const updateFileStatus = (fileId) => {
                 $ingestedBadge.removeClass('d-inline').addClass('d-none');
             }
 
-            // Continua il polling finché il file non è pronto E ingested
+            // Continue polling until the file is ready AND ingested
             if (data.status !== 'ready' || !data.is_ingested) {
                 setTimeout(() => updateFileStatus(fileId), 2000);
             } else {
@@ -138,7 +138,7 @@ const updateFileStatus = (fileId) => {
 };
 
 $(document).ready(function() {
-    // Avvia il controllo dello stato per tutti i file
+    // Start status check for all files
     $('[data-file-id]').each(function() {
         const fileId = $(this).data('fileId');
         updateFileStatus(fileId);
@@ -146,4 +146,3 @@ $(document).ready(function() {
 });
 </script>
 {% endblock %}
-

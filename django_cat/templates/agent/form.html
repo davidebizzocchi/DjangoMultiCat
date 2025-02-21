@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 {% load poll_extras %}
 
-{% block title %}{% if is_new %}Nuovo Agente{% else %}Modifica Agente{% endif %}{% endblock %}
+{% block title %}{% if is_new %}New Agent{% else %}Edit Agent{% endif %}{% endblock %}
 
 {% block contenuto %}
 <div class="container">
@@ -11,9 +11,9 @@
                 <div class="card-header">
                     <h3 class="card-title mb-0">
                         {% if is_new %}
-                            <i class="fas fa-plus-circle"></i> Nuovo Agente
+                            <i class="fas fa-plus-circle"></i> New Agent
                         {% else %}
-                            <i class="fas fa-edit"></i> Modifica Agente
+                            <i class="fas fa-edit"></i> Edit Agent
                         {% endif %}
                     </h3>
                 </div>
@@ -22,7 +22,7 @@
                         {% csrf_token %}
                         
                         <div class="mb-3">
-                            <label for="{{ form.name.id_for_label }}" class="form-label">Nome</label>
+                            <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
                             {{ form.name|add_class:"form-control" }}
                             {% if form.name.errors %}
                                 <div class="invalid-feedback d-block">{{ form.name.errors }}</div>
@@ -30,7 +30,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="{{ form.instructions.id_for_label }}" class="form-label">Istruzioni</label>
+                            <label for="{{ form.instructions.id_for_label }}" class="form-label">Instructions</label>
                             {{ form.instructions|add_class:"form-control" }}
                             {% if form.instructions.errors %}
                                 <div class="invalid-feedback d-block">{{ form.instructions.errors }}</div>
@@ -47,10 +47,10 @@
 
                         <div class="d-flex justify-content-between">
                             <a href="{% url 'agent:list' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left"></i> Indietro
+                                <i class="fas fa-arrow-left"></i> Back
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Salva
+                                <i class="fas fa-save"></i> Save
                             </button>
                         </div>
                     </form>

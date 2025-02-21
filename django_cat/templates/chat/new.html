@@ -1,17 +1,18 @@
 {% extends "base/base.html" %}
-{% block title %}Nuova Chat{% endblock %}
+
+{% block title %}New Chat{% endblock %}
 
 {% block contenuto %}
-<h2>Crea nuova chat</h2>
-<p>Seleziona le librerie da utilizzare in questa chat:</p>
+<h2>Create new chat</h2>
+<p>Select the libraries to use in this chat:</p>
 
 <form method="post" class="mb-4">
     {% csrf_token %}
     
     <div class="mb-3">
         <div class="d-flex justify-content-between mb-2">
-            <button type="button" class="btn btn-secondary btn-sm" id="selectNone">Deseleziona tutto</button>
-            <button type="button" class="btn btn-secondary btn-sm" id="selectAll">Seleziona tutto</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="selectNone">Deselect all</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="selectAll">Select all</button>
         </div>
         
         <div class="list-group">
@@ -19,8 +20,8 @@
         </div>
     </div>
 
-    <button type="submit" class="btn btn-success">Crea Chat</button>
-    <a href="{% url 'chat:list' %}" class="btn btn-secondary">Annulla</a>
+    <button type="submit" class="btn btn-success">Create Chat</button>
+    <a href="{% url 'chat:list' %}" class="btn btn-secondary">Cancel</a>
 </form>
 
 <script>
