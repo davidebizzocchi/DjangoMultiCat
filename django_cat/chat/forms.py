@@ -24,10 +24,9 @@ class ChatCreateForm(forms.Form):
         super().__init__(*args, **kwargs)
 
         self.fields['agent'].choices = [("default", "Default")] + [
-            (agent.agent_id, agent.name) for agent in Agent.objects.only("agent_id", "name").filter(user=user)
+            (agent.agent_id, agent.name) for agent in Agent.objects.filter(user=user).only("agent_id", "name")
         ]
 
-        # ic([form.__dict__ for form in self.agent])
         self.fields['libraries'].choices = [
             (library.library_id, library.name) for library in Library.objects.only("library_id", "name").filter(user=user)
         ]
