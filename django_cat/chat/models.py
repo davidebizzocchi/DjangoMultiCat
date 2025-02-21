@@ -13,7 +13,7 @@ from agent.models import Agent
 class Chat(BaseUserModel):
     messages: QuerySet["Message"]
 
-    agent = models.ForeignKey(Agent, on_delete=models.CASCADE, related_name='chats', null=True, blank=True, default=None)
+    agent = models.ForeignKey(Agent, on_delete=models.SET(Agent.get_default), related_name='chats', null=True, blank=True, default=None)
 
     title = models.CharField(max_length=255, default="Nuova Chat")
     chat_id = models.CharField(max_length=255, unique=True, default=uuid.uuid4)
@@ -35,7 +35,7 @@ class Chat(BaseUserModel):
         if isinstance(message, Message):
             message = message.text
 
-        return self.client.send(message, chat_id=self.chat_id)
+        return self.client.send(message, chat_id=self.chat_id, agent_id=self.agent.agent_id)
     
     def stream(self):
         """Stream messages from this specific chat"""
@@ -63,7 +63,9 @@ class Chat(BaseUserModel):
         
         if not self.pk:
             first_save = True
-            self.agent = Agent.get_default(self.user)
+
+        if self.agent is None:
+            self.agent = Agent.get_default()
         
         super().save(*args, **kwargs)
 
