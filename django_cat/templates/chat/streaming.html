@@ -1139,7 +1139,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     function send_delete_thread(thread_id) {
         send_data(
             "{% url 'chat:api:thread-delete' thread_id=0 %}".replace("0", thread_id),
-            "POST",
+            "DELETE",
             {
             },
             function (response) {
