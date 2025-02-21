@@ -126,11 +126,17 @@ class Cat(CatClient):
 
         return "completition"
 
-    def send(self, message, chat_id="default", *args, **kwargs):
+    def send(self, message, chat_id="default", agent_id=None, *args, **kwargs):
+        from chat.models import Chat
         """Send prompt to ws with specific chat_id"""
         self._reset_new_message(chat_id)
         self._check_ws_connection()
-        return super().send(message, chat_id=chat_id, *args, **kwargs)
+
+        # Retrive the agent_id is not passed
+        if agent_id is None:
+            agent_id = Chat.objects.select_related("agent").only("agent__agent_id").get(chat_id=chat_id).agent.agent_id
+
+        return super().send(message, chat_id=chat_id, agent_id=agent_id, *args, **kwargs)
 
     def on_message(self, message):
         """Callback for message received"""
@@ -529,7 +535,7 @@ class Cat(CatClient):
     def create_agent(self, agent: Union[AgentRequest, AgentComplete]):
         from agent.models import Agent
 
-        if isinstance(agent, AgentRequest) or isinstance(agent, Agent) or isinstance(agent, AgentComplete):
+        if isinstance(agent, Agent) or isinstance(agent, AgentRequest) or  isinstance(agent, AgentComplete):
             response = self.agents.create_agent(
                 data=agent.model_dump()
             )
