@@ -252,13 +252,15 @@ def create_thread(request, data: ThreadCreateSchema):
     user = request.user
 
     if data.agent == "default":
-        agent = Agent.get_default(user)
+        agent = Agent.get_default()
     else:
         agent = Agent.objects.get(agent_id=data.agent, user=user)
 
     chat = Chat.objects.create(user=user, agent=agent)
+
     if data.name is not None:
         chat.title = data.name
+        chat.save()
         
     if data.libraries is not None:
         if isinstance(data.libraries, str):
