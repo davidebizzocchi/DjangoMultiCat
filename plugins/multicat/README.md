@@ -81,7 +81,7 @@ Key features of the Django interface:
 
 ## Roadmap
 
-- [ ] Multi-agent conversation support
+- [x] Multi-agent conversation support
 - [x] Web interface integration
 - [ ] Manage Tool
 - [ ] Tool creation endpoint
