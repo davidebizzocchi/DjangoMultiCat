@@ -1,7 +1,12 @@
 <div class="chat-content-panel">
     <div class="chat-header">
-        <div class="header-content-wrapper">
-            <div class="title-container">
+        <div class="header-content-wrapper justify-content-start align-items-center">
+            <div class="ms-4 mt-3 p-2 w-25 rounded-3 border-secondary cursor-pointer transition" style="max-width: 300px;" onmouseover="$(this).addClass('shadow')" onmouseleave="$(this).removeClass('shadow border')">
+                <div class="text-center">
+                    <h5 class="fw-bold text-white">{{ agent.name }}</h5>
+                </div>
+            </div>
+            <div class="title-container" style="position: absolute; left: 50%; transform: translateX(-50%); width: fit-content;">
                 <div
                     style="flex: 1 1 0%; min-width: 0px; display: flex; place-content: center; z-index: 12; margin-top: 10px;">
                     <div class="chat-session-title" tabindex="0" style="outline: none;">
