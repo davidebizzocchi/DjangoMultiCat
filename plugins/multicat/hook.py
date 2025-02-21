@@ -52,7 +52,7 @@ def after_cat_bootstrap(cat: CheshireCat):
         metadata={}
     )
 
-@hook(priority=99)
+@hook(priority=0)
 def agent_prompt_prefix(prefix, cat):
     if isinstance(cat, SonStrayCat):
         return  cat.get_instructions() or prefix
