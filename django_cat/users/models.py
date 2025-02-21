@@ -46,6 +46,10 @@ class UserProfile(models.Model):
     def password(self):
         return self.user.password
     
+    @staticmethod
+    def get_admin() -> "UserProfile":
+        return UserProfile.objects.get(user__username="admin")
+    
     def delete(self):
         self.user.delete()
 
