@@ -53,8 +53,9 @@ class ChatStreamView(ChatMixin, LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        if isinstance(self.object, Chat):
+        if isinstance(self.object, Chat):  # otherwise it's a new chat: dict
             context['chat_messages'] = Message.objects.filter(chat=self.object)
+            context["agent"] = self.object.agent
 
         context["form"] = ChatCreateForm(user=self.usr)
         context["create_thread"] = False
@@ -66,7 +67,7 @@ class ChatCreateView(ChatStreamView):
 
     def get_object(self, *args, **kwargs):
         return {
-                "chat_id": "new",
+            "chat_id": "new",
         }
      
     def pre_dispatch_login(self, *args, **kwargs):
@@ -84,8 +85,6 @@ class ChatCreateView(ChatStreamView):
         context["create_thread"] = True
         context["create_thread_immediately"] = False
         context["force_create_thread"] = Chat.objects.filter(user=self.usr).count() == 0
-
-        ic(context)
 
         return context
 

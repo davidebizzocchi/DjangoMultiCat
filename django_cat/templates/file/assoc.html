@@ -1,17 +1,17 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Superlearn{% endblock %}
+{% block title %}Your file{% endblock %}
 
 {% block contenuto %}
-<h1>Associazioni al tuo file</h1>
+<h1>File Associations</h1>
 
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
     {{ form.as_p }}
-    <button type="submit">Salva</button>
+    <button type="submit">Save</button>
 </form>
 
-<a href="{% url 'file:list' %}" class="btn btn-success btn-sm">Torna ai files</a>
+<a href="{% url 'file:list' %}" class="btn btn-success btn-sm">Back to files</a>
 {% endblock %}
 

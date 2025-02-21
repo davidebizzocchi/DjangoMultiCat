@@ -165,7 +165,7 @@ DATABASES = {
 
 AUTHENTICATION_BACKENDS = [
     'users.auth.UsernameAuthenticationBackend',
-    'django.contrib.auth.backends.ModelBackend',  # mantieni anche il backend predefinito se necessario
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 # Login/Logout redirect URLs

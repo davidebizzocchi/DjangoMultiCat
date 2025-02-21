@@ -1,6 +1,6 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Superlearn{% endblock %}
+{% block title %}Upload a file{% endblock %}
 
 {% block contenuto %}
 <form method="post" enctype="multipart/form-data">
@@ -10,5 +10,5 @@
     <button type="submit">Upload</button>
 </form>
 
-<a href="{% url 'file:list' %}" class="btn btn-success btn-sm">Torna ai files</a>
+<a href="{% url 'file:list' %}" class="btn btn-success btn-sm">Back to files</a>
 {% endblock %}

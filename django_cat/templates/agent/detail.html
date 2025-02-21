@@ -13,17 +13,17 @@
             </h3>
             <div class="btn-group">
                 <a href="{% url 'agent:update' agent.agent_id %}" class="btn btn-primary">
-                    <i class="fas fa-edit"></i> Modifica
+                    <i class="fas fa-edit"></i> Edit
                 </a>
                 {% if not agent.is_default %}
                 <a href="{% url 'agent:delete' agent.agent_id %}" class="btn btn-danger">
-                    <i class="fas fa-trash"></i> Elimina
+                    <i class="fas fa-trash"></i> Delete
                 </a>
                 {% endif %}
             </div>
         </div>
         <div class="card-body">
-            <h5 class="card-title">Istruzioni</h5>
+            <h5 class="card-title">Instructions</h5>
             <p class="card-text">{{ agent.instructions|linebreaks }}</p>
 
             <h5 class="card-title mt-4">Metadata</h5>
@@ -31,14 +31,14 @@
 
             <div class="text-muted mt-3">
                 <small>
-                    <i class="fas fa-clock"></i> Creato il: {{ agent.created_at|date:"d/m/Y H:i" }}<br>
-                    <i class="fas fa-history"></i> Ultimo aggiornamento: {{ agent.updated_at|date:"d/m/Y H:i" }}
+                    <i class="fas fa-clock"></i> Created on: {{ agent.created_at|date:"d/m/Y H:i" }}<br>
+                    <i class="fas fa-history"></i> Last update: {{ agent.updated_at|date:"d/m/Y H:i" }}
                 </small>
             </div>
         </div>
         <div class="card-footer">
             <a href="{% url 'agent:list' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Torna alla lista
+                <i class="fas fa-arrow-left"></i> Back to list
             </a>
         </div>
     </div>

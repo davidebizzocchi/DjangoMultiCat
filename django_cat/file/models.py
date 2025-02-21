@@ -57,10 +57,10 @@ class File(BaseUserModel):
     PENDING_UPLOAD = 'pending_upload'
     READY = 'ready'
     STATUS_CHOICES = [
-        (PENDING_CONFIG, 'In configurazione'),
-        (PENDING_PROCESS, 'Post processing'),  # Nuovo stato
-        (PENDING_UPLOAD, 'In caricamento'),
-        (READY, 'Pronto'),
+        (PENDING_CONFIG, 'Configuring'),
+        (PENDING_PROCESS, 'Post processing'), 
+        (PENDING_UPLOAD, 'Uploading'),
+        (READY, 'Ready'),
     ]
     
     status = models.CharField(
@@ -244,6 +244,7 @@ class File(BaseUserModel):
 
     @classmethod
     def calculate_file_hash(self, file: Path) -> str:
+        """Calculate file hash for deduplication"""
         hasher = hashlib.md5()
         with open(file, "rb") as f:
             while chunk := f.read(8192):
@@ -261,14 +262,14 @@ class File(BaseUserModel):
     
     def save_processed_file(self, new_path: Path | str):
         """
-        Salva il file processato e aggiorna il percorso
+        Save the processed file and update path
         """
         self.file = FileObject(path=new_path, size=self.file.size)
         self.save(update_fields=['file'])
     
     def apply_config_file(self, use_page_separator=False):
         """
-        Processa il file in base alla configurazione di ingestione e salva il risultato
+        Process file based on ingestion configuration and save result
         """
         if not self.ingestion_config.is_ocr:
             return
@@ -306,7 +307,7 @@ class File(BaseUserModel):
             self.save_processed_file(new_path)
                 
         except Exception as e:
-            raise ValueError(f"Errore nel processing del file: {str(e)}")
+            raise ValueError(f"Error processing file: {str(e)}")
 
     def call_llm(self, prompt: str):
         token = self.client.count_token(prompt)
@@ -326,7 +327,7 @@ class File(BaseUserModel):
 
     def post_process(self):
         """
-        Esegue elaborazioni post-configurazione prima dell'upload in base al tipo selezionato
+        Execute post-configuration processing before upload based on selected type
         """
         if not self.ingestion_config.needs_post_process:
             return
@@ -383,16 +384,15 @@ class File(BaseUserModel):
                 
 
         except Exception as e:
-            raise ValueError(f"Errore nel post-processing del file: {str(e)}")
+            raise ValueError(f"Error in post-processing: {str(e)}")
         finally:
             pass
 
     def save(self, *args, **kwargs):
         """
-        Esegue azioni al salvataggio del modello
-
-        Se l'hash non è definito, lo genera.
-        Imposta come titolo il nome del file (inclusa estensione)
+        Execute actions on model save
+        If hash not defined, generate it.
+        Set file name (including extension) as title
         """
         if not self.pk:
             self.wait_ingest()
@@ -409,8 +409,8 @@ class File(BaseUserModel):
 
     def delete(self):
         """
-        Esegue azioni alla cancellazione del modello.
-        Cancella il file principale e tutti i file processati associati.
+        Execute actions on model delete.
+        Delete main file and all associated processed files.
         """
         # Elimina il file dal cat
         ic(self.client.delete_file(self))

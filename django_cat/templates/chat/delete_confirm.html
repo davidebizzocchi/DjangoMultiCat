@@ -1,17 +1,18 @@
 {% extends "base/base.html" %}
-{% block title %}Sei sicuro?{% endblock %}
+
+{% block title %}Are you sure?{% endblock %}
 
 {% block contenuto %}
 <div class="card w-96 bg-base-100 shadow-xl mx-auto mt-10">
     <div class="card-body">
-        <h2 class="card-title text-error">Conferma Eliminazione</h2>
-        <p>Sei sicuro di voler eliminare questa chat?</p>
-        <p class="text-sm opacity-70">Questa azione non può essere annullata.</p>
+        <h2 class="card-title text-error">Confirm Delete</h2>
+        <p>Are you sure you want to delete this chat?</p>
+        <p class="text-sm opacity-70">This action cannot be undone.</p>
         <div class="card-actions justify-end mt-4">
-            <a href="{% url 'chat:list' %}" class="btn btn-secondary">Annulla</a>
+            <a href="{% url 'chat:list' %}" class="btn btn-secondary">Cancel</a>
             <form method="post" action="{% url 'chat:delete' chat.chat_id %}" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Elimina</button>
+                <button type="submit" class="btn btn-danger">Delete</button>
             </form>
         </div>
     </div>

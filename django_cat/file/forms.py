@@ -34,44 +34,44 @@ class FileUploadForm(forms.Form):
     file = MultipleFileField()
     ingestion_type = forms.ChoiceField(
         choices=[
-            (IngestionType.NORMAL.value, 'Normale'),
+            (IngestionType.NORMAL.value, 'Normal'),
             (IngestionType.OCR.value, 'OCR'),
         ],
         initial=IngestionType.NORMAL.value,
-        label="Tipo di ingestione",
+        label="Ingestion Type",
     )
     page_mode = forms.ChoiceField(
         choices=[
-            (PageMode.SINGLE.value, 'Pagina Singola'),
-            (PageMode.DOUBLE.value, 'Doppia Pagina'),
+            (PageMode.SINGLE.value, 'Single Page'),
+            (PageMode.DOUBLE.value, 'Double Page'),
         ],
         initial=PageMode.SINGLE.value,
-        label="Modalità pagina",
+        label="Page Mode",
     )
     post_process = forms.ChoiceField(
         choices=[
-            (PostProcessType.NONE.value, 'Nessuno'),
-            (PostProcessType.SUMMARY.value, 'Riassunto'),
-            (PostProcessType.FIX_OCR.value, 'Correzione OCR'),
-            (PostProcessType.KEYWORDS.value, 'Parole chiave'),
-            (PostProcessType.BOTH.value, 'Entrambi'),
+            (PostProcessType.NONE.value, 'None'),
+            (PostProcessType.SUMMARY.value, 'Summary'),
+            (PostProcessType.FIX_OCR.value, 'OCR Fix'),
+            (PostProcessType.KEYWORDS.value, 'Keywords'),
+            (PostProcessType.BOTH.value, 'Both'),
         ],
         initial=PostProcessType.NONE.value,
         label="Post Processing",
-        help_text="Elaborazione aggiuntiva del testo"
+        help_text="Additional text processing"
     )
     post_process_context = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 3}),
         required=False,
-        label="Contesto Post Processing",
-        help_text="Fornisci informazioni aggiuntive per guidare l'elaborazione (opzionale)"
+        label="Post Processing Context",
+        help_text="Provide additional information to guide processing (optional)"
     )
 
     libraries = forms.MultipleChoiceField(
         choices=[],  # Will be populated in __init__
         required=False,
-        label="Librerie",
-        help_text="Seleziona le librerie in cui salvare il file",
+        label="Libraries",
+        help_text="Select libraries where to save the file",
         widget=forms.CheckboxSelectMultiple
     )
     
@@ -92,7 +92,7 @@ class FileUploadForm(forms.Form):
         self.fields["libraries"].help_text = (
             ""
             if Library.objects.filter(user=self.user).exists()
-            else "Non hai ancora creato nessuna Libreria."
+            else "You haven't created any Libraries yet."
         )
 
         if self._is_instanced:
@@ -190,9 +190,10 @@ class FileUploadForm(forms.Form):
     
     def save_file(self, file, file_path: Path):
         """
-        Funzione per salvare il file nel filesystem e restituire il suo percorso.
-        Crea le directory necessarie se non esistono.
+        Function to save the file in the filesystem and return its path.
+        Creates necessary directories if they don't exist.
         """
+        
         file_path.parent.mkdir(parents=True, exist_ok=True)
         
         with open(file_path, "wb") as f:

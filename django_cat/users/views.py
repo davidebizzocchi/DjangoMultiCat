@@ -17,11 +17,11 @@ from django.utils.decorators import method_decorator
 class RegisterUserView(UserPassesTestMixin, CreateView):
     form_class = UserRegistrationForm
     template_name = 'users/register.html'
-    success_url = reverse_lazy('home')  # Cambia 'home' con il tuo URL di destinazione
+    success_url = reverse_lazy('home')  # Change 'home' with your destination URL
     redirect_authenticated_user = True
 
     def test_func(self):
-        # Ritorna True solo se l'utente NON è autenticato
+        # Returns True only if user is NOT authenticated
         ic(not self.request.user.is_authenticated)
         return not self.request.user.is_authenticated
 

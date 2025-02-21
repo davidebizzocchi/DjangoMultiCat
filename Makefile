@@ -5,8 +5,8 @@ BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
 .PHONY: help activate requirements
 
-help:	## Print this help 
-	@echo "\nCommand to simplify the use of docker in LOCAL and PROD env\n"
+help:  ## Print this help 
+	@echo "\nCommands to simplify the use of docker in LOCAL and PROD env\n"
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
 activate:	## Acvtivate venv
@@ -41,17 +41,17 @@ requirements-load-cat:
 wait-docker:
 	@if ! docker info > /dev/null 2>&1; then \
 		if [ -e "/Applications/Docker.app" ]; then \
-			echo "Docker non è in esecuzione. Avvio Docker Desktop..."; \
+			echo "Docker is not running. Starting Docker Desktop..."; \
 			open -a Docker; \
-			echo "Attendo che Docker sia pronto..."; \
+			echo "Waiting for Docker to be ready..."; \
 			until docker info > /dev/null 2>&1; do \
 				sleep 2; \
 			done; \
-			echo "Docker è pronto!"; \
+			echo "Docker is ready!"; \
 		else \
-			echo "ATTENZIONE: Docker.app non trovato nel percorso standard."; \
-			echo "Assicurati che Docker sia installato e configurato correttamente."; \
-			echo "Se non sei su MacOS, oppure funziona lo stesso, ignora questo messaggio!."; \
+			echo "WARNING: Docker.app not found in standard path."; \
+			echo "Make sure Docker is installed and configured correctly."; \
+			echo "If you're not on MacOS, or if it works anyway, ignore this message!"; \
 		fi; \
 	fi
 
@@ -84,18 +84,18 @@ django-log:
 	@docker logs -f django_cat-app-1
 
 
-remove-migrations:	## Remove migrations
+remove-migrations:  ## Remove migrations
 	@echo "Cleaning migrations directory..."
 	@find . -type d -name "migrations" -exec sh -c 'cd "{}" && find . -type f ! -name "__init__.py" -delete' \;
 	@echo "Migration directory cleaned!"
 
-destroy-database: 	## Destroy local database
+destroy-database:  ## Destroy local database
 	@echo "Destroying Docker volume 'django_cat_postgres_data-local'..."
 	@docker volume rm -f django_cat_postgres_data-local
 	@echo "Docker volume destroyed!"
 
-remove-all:			## Remove migrations and DB local
-	@echo "Remove migrations and DB local"
+remove-all:  ## Remove migrations and local DB
+	@echo "Removing migrations and local DB"
 	@$(MAKE) remove-migrations
 	@$(MAKE) destroy-database
 
@@ -193,11 +193,11 @@ merge-and-close:
 
 check-uncommitted:
 	@if [ -n "$$(git status --porcelain)" ]; then \
-		echo "Errore: Ci sono modifiche non committate. Esegui git status per vedere i dettagli."; \
+		echo "Error: There are uncommitted changes. Run git status to see details."; \
 		exit 1; \
 	fi
 
-release: ## Esegui una nuova release
+release: ## Execute a new release
 	@$(MAKE) -s check-uncommitted
 	@$(MAKE) -s merge-and-close
-	@echo "Release completata con successo"
+	@echo "Release completed successfully"

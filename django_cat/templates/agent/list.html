@@ -1,12 +1,12 @@
 {% extends "base/base.html" %}
-{% block title %}Agenti{% endblock %}
+{% block title %}Agents{% endblock %}
 
 {% block contenuto %}
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>I tuoi agenti</h2>
+        <h2>Your agents</h2>
         <a href="{% url 'agent:create' %}" class="btn btn-success">
-            <i class="fas fa-plus"></i> Nuovo Agente
+            <i class="fas fa-plus"></i> New Agent
         </a>
     </div>
 
@@ -41,7 +41,7 @@
             </div>
         </div>
         {% empty %}
-        <p class="text-center text-muted">Non hai ancora creato agenti.</p>
+        <p class="text-center text-muted">You haven't created any agents yet.</p>
         {% endfor %}
     </div>
 </div>

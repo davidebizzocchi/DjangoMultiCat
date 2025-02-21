@@ -1,11 +1,11 @@
 {% extends "base/base.html" %}
-{% block title %}Le mie Librerie{% endblock %}
+{% block title %}My Libraries{% endblock %}
 
 {% block contenuto %}
-<h2>Le tue librerie</h2>
+<h2>Your libraries</h2>
     
 <form method="get" action="{% url 'library:new' %}" class="mb-4">
-    <button type="submit" class="btn btn-success">Nuova Libreria</button>
+    <button type="submit" class="btn btn-success">New Library</button>
 </form>
 
 <div class="list-group">
@@ -15,11 +15,11 @@
             {{ library.name }}
         </a>
         <a href="{% url 'library:delete' library.library_id %}" class="btn btn-danger btn-sm">
-            Elimina
+            Delete
         </a>
     </div>
     {% empty %}
-    <p>Non hai ancora creato nessuna libreria.</p>
+    <p>You haven't created any libraries yet.</p>
     {% endfor %}
 </div>
 {% endblock %}

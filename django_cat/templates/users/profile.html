@@ -1,6 +1,6 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Profilo{% endblock %}
+{% block title %}Profile{% endblock %}
 
 {% block contenuto %}
 <div class="container mt-5">
@@ -8,12 +8,12 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h2>Profilo Utente</h2>
+                    <h2>User Profile</h2>
                 </div>
                 <div class="card-body">
                     <p><strong>Username:</strong> {{ username }}</p>
                     <p><strong>Cheshire ID:</strong> {{ cheshire_id }}</p>
-                    <button class="btn btn-danger mt-3" onclick="confirmDelete()">Cancella Account</button>
+                    <button class="btn btn-danger mt-3" onclick="confirmDelete()">Delete Account</button>
                 </div>
             </div>
         </div>

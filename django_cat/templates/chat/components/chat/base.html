@@ -1,7 +1,12 @@
 <div class="chat-content-panel">
     <div class="chat-header">
-        <div class="header-content-wrapper">
-            <div class="title-container">
+        <div class="header-content-wrapper justify-content-start align-items-center">
+            <div class="ms-4 mt-3 p-2 w-25 rounded-3 border-secondary cursor-pointer transition" style="max-width: 200px; z-index: 1000; background-color: var(--dsr-main);" onmouseover="$(this).addClass('shadow-lg')" onmouseleave="$(this).removeClass('shadow-lg border')">
+                <div class="text-center">
+                    <h5 class="fw-bold text-white">{{ agent.name }}</h5>
+                </div>
+            </div>
+            <div class="title-container" style="position: absolute; left: 50%; transform: translateX(-50%); width: fit-content;">
                 <div
                     style="flex: 1 1 0%; min-width: 0px; display: flex; place-content: center; z-index: 12; margin-top: 10px;">
                     <div class="chat-session-title" tabindex="0" style="outline: none;">
@@ -58,7 +63,7 @@
                                 <path
                                     d="M14.537 2.932c0-.396-.34-.717-.759-.717s-.758.32-.758.717v3.786c0 .396.34.717.758.717.42 0 .76-.321.76-.717V2.932z"
                                     fill="currentColor"></path>
-                            </svg><span>Nuova Chat</span></div>
+                            </svg><span>New Chat</span></div>
                     </div>
                     <div class="chat-input-container">
                         <div class="input-controls-wrapper">

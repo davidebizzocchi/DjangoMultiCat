@@ -3,6 +3,47 @@
 
 
 type: issue
+New patch version: v0.0.50
+## Release v0.0.50-b733210
+
+### Information
+- **Source branch**: 64-issue-streaming-add-agent-name
+- **Target branch**: dev
+- **Issue**: [#64](https://github.com/davidebizzocchi/DjangoCat/issues/64)
+- **Type**: issue
+- **Previous version**: v0.0.49-c5d63cf
+- **New version**: v0.0.50-b733210
+- **Code change statistics**:  55 files changed, 590 insertions(+), 387 deletions(-)
+
+### Commits
+- b733210 - translate to english (davidebizzocchi)
+- 32f7760 - chat list show agent (davidebizzocchi)
+- 8c1ec99 - align plugin (davidebizzocchi)
+- 4cf63e6 - add agent name in streaming (davidebizzocchi)
+- 93a46e5 - ChatStreamView add "agent" in context (davidebizzocchi)
+- 697b990 - userprofile get admin (davidebizzocchi)
+- 1273e07 - streaming fix endpoint (davidebizzocchi)
+- 045fc9a - client send (message) accept agent_id (davidebizzocchi)
+- 0a6c8e0 - fix ChatCreateForm (davidebizzocchi)
+- 46fc530 - fix chat thread-create endpoint (davidebizzocchi)
+- 76320b2 - chat not deleted with agent (davidebizzocchi)
+- a054e04 - update agent model (davidebizzocchi)
+- 01d3f48 - align plugin (davidebizzocchi)
+- e76e159 - align plugin (davidebizzocchi)
+- d2ef863 - fix form (davidebizzocchi)
+- e6818bd - streaming agent (davidebizzocchi)
+- f128fec - chat update ChatCreateForm (davidebizzocchi)
+- 26e5b8c - agent api update thread-create endpoint (davidebizzocchi)
+- ce933e2 - __str__ agent model (davidebizzocchi)
+- 1b2cdd0 - new agent template (davidebizzocchi)
+- 3e314ba - clean chat api (davidebizzocchi)
+- 603cca5 - agent manager (davidebizzocchi)
+- 2ea3f6e - chat form (davidebizzocchi)
+
+---
+
+
+type: issue
 New patch version: v0.0.49
 ## Release v0.0.49-c5d63cf
 

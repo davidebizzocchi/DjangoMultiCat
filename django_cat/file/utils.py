@@ -56,17 +56,17 @@ def open_file_by_type(file_path: Path) -> Union[BinaryIO, TextIO, Image.Image]:
 
 def get_image_from_file(file_path: Path) -> Union[Image.Image, List[Image.Image]]:
     """
-    Converte un file in una o più immagini PIL.
-    Supporta PDF e immagini comuni.
+    Converts a file into one or more PIL images.
+    Supports PDF and common images.
     
     Args:
-        file_path: Percorso del file
+        file_path: Path to the file
         
     Returns:
-        Una singola immagine o lista di immagini
+        Single image or list of images
         
     Raises:
-        ValueError: Se il file non può essere convertito in immagine
+        ValueError: If file cannot be converted to image
     """
     suffix = file_path.suffix.lower()
 
@@ -78,23 +78,23 @@ def get_image_from_file(file_path: Path) -> Union[Image.Image, List[Image.Image]
         elif suffix in {'.jpg', '.jpeg', '.png', '.tiff', '.bmp'}:
             return Image.open(file_path)
         else:
-            raise ValueError(f"Formato file non supportato: {suffix}")
+            raise ValueError(f"Unsupported file format: {suffix}")
     except Exception as e:
-        raise ValueError(f"Errore nella conversione del file: {str(e)}")
+        raise ValueError(f"Error converting file: {str(e)}")
 
 def process_image_ocr(img: Image.Image, is_double_page: bool = False) -> List[str]:
     """
-    Processa un'immagine con OCR e ritorna una lista di testi estratti
+    Processes an image with OCR and returns a list of extracted texts
     
     Args:
-        img (Image.Image): Immagine da processare
-        is_double_page (bool): Se True, divide l'immagine in due pagine
+        img (Image.Image): Image to process
+        is_double_page (bool): If True, splits the image into two pages
         
     Returns:
-        List[str]: Lista dei testi estratti (uno per pagina)
+        List[str]: List of extracted texts (one per page)
     """
     def clean_text(text: str) -> str:
-        """Pulisce il testo OCR"""
+        """Cleans the OCR text"""
         return re.sub(r'\s+', ' ', text).strip()
     
     if is_double_page:
@@ -107,11 +107,11 @@ def process_image_ocr(img: Image.Image, is_double_page: bool = False) -> List[st
 
 def save_processed_text(text: str, original_path: Path) -> Path:
     """
-    Salva il testo processato come file txt nella stessa directory del file originale
+    Saves the processed text as a txt file in the same directory as the original file
     """
     output_path = original_path.with_suffix('.txt')
     
-    # Se il file esiste già, aggiungi un contatore
+    # If the file already exists, add a counter
     counter = 1
     while output_path.exists():
         output_path = original_path.with_name(f"{original_path.stem}_{counter}.txt")
@@ -124,14 +124,14 @@ def save_processed_text(text: str, original_path: Path) -> Path:
 
 def next_file_path(file_path: Path) -> Path:
     """
-    Genera un percorso univoco per un file in una directory.
-    Se il file esiste già, aggiunge un contatore.
+    Generates a unique path for a file in a directory.
+    If the file already exists, adds a counter.
     
     Args:
-        file_path: Percorso del file originale
+        file_path: Path to the original file
         
     Returns:
-        Path: percorso nuovo file
+        Path: new file path
     """
 
     counter = 1
@@ -141,12 +141,12 @@ def next_file_path(file_path: Path) -> Path:
     
 def update_processed_text(text: str, original_path: Path) -> None:
     """
-    Aggiorna il file di testo processato con il nuovo testo.
-    Se il file non esiste, lo crea.
+    Updates the processed text file with the new text.
+    If the file does not exist, creates it.
     
     Args:
-        text: Testo da scrivere
-        original_path: Percorso del file originale
+        text: Text to write
+        original_path: Path to the original file
         
     Returns:
         None
@@ -157,16 +157,16 @@ def update_processed_text(text: str, original_path: Path) -> None:
 
 def extract_and_validate_json(text: str, retries=3) -> dict:
     """
-    Estrae e valida JSON dal testo, gestendo più tentativi se necessario.
+    Extracts and validates JSON from text, handling multiple attempts if necessary.
     
     Args:
-        text: Testo contenente JSON
-        retries: Numero di tentativi di parsing
+        text: Text containing JSON
+        retries: Number of parsing attempts
         
     Returns:
-        dict: JSON validato
+        dict: Validated JSON
     """
-    # Prova a trovare JSON tra graffe
+    # Try to find JSON between braces
     json_pattern = r'\{[^{}]*\}'
     matches = re.finditer(json_pattern, text)
     
@@ -179,5 +179,5 @@ def extract_and_validate_json(text: str, retries=3) -> dict:
         except json.JSONDecodeError:
             continue
             
-    # Se non trova JSON valido, ritorna dizionario con tutto il testo
+    # If no valid JSON is found, return dictionary with all text
     return {"new_text": text}

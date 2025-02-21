@@ -8,11 +8,8 @@ from chat.models import Chat, Message
 import json
 from icecream import ic
 from cheshire_cat.client import Cat
-from django.conf import settings
-import os
-from pathlib import Path
-import glob
 from django.shortcuts import get_object_or_404
+from agent.models import Agent
 from library.models import Library
 
 router = Router(tags=["Chat"])
@@ -23,6 +20,34 @@ class MessageIn(Schema):
 
 class TextIn(Schema):
     text: str
+
+# MiniThreadSchema now represents a Chat summary; 'title' is managed via an optional attribute on Chat
+class MiniThreadSchema(Schema):
+    thread_id: str
+    title: str
+    date: str
+
+class MessageStreamPayloadSchema(Schema):
+    message: str
+
+class LimitValueSchema(Schema):
+    limit: int = 100
+
+class StartLimitValueSchemaSchema(Schema):
+    limit: int = 10
+    start: int = 0
+
+class ThreadValueSchema(Schema):
+    thread_id: str
+
+class RenameValueSchema(Schema):
+    name: str
+    thread_id: str
+
+class ThreadCreateSchema(Schema):
+    name: Optional[str] = None
+    agent: str = "default"
+    libraries: Optional[Union[List[str], str]] = None
 
 
 def get_user_client(user) -> Cat:
@@ -146,36 +171,6 @@ def wipe_chat(request, chat_id: str):
         "message": "Chat memory wiped successfully"
     })
 
-
-# --- ENDPOINTS INTEGRATI (basati sul modello Chat) ---
-
-# MiniThreadSchema now represents a Chat summary; 'title' is managed via an optional attribute on Chat
-class MiniThreadSchema(Schema):
-    thread_id: str
-    title: str
-    date: str
-
-class MessageStreamPayloadSchema(Schema):
-    message: str
-
-class LimitValueSchema(Schema):
-    limit: int = 100
-
-class StartLimitValueSchemaSchema(Schema):
-    limit: int = 10
-    start: int = 0
-
-class ThreadValueSchema(Schema):
-    thread_id: str
-
-class RenameValueSchema(Schema):
-    name: str
-    thread_id: str
-
-class ThreadCreateSchema(Schema):
-    name: Optional[str] = None
-    libraries: Optional[Union[List[str], str]] = None
-
 @router.delete("threads/{thread_id}/", response=dict, url_name="thread-delete")
 def thread_delete(request, thread_id: str):
 
@@ -251,29 +246,21 @@ def get_thread_url(request, data: ThreadValueSchema):
         "url": reverse("chat:chat", kwargs={"chat_id": chat.chat_id}),
     }
 
-# Questo endpoint è duplicato, già definito sopra (thread_rename) ma lo lasciamo per compatibilità
-@router.post("threads/rename", url_name="thread-rename")
-def rename_thread(request, data: RenameValueSchema):
-    chat = get_object_or_404(Chat, chat_id=data.thread_id, user=request.user)
-    setattr(chat, "title", data.name)
-    chat.save()
-    return JsonResponse({"success": True})
-
-# Analogamente, questo è per la cancellazione di un thread, già gestito in thread_delete
-@router.post("threads/delete", url_name="thread-delete")
-def delete_thread(request, data: ThreadValueSchema):
-    chat = get_object_or_404(Chat, chat_id=data.thread_id, user=request.user)
-    chat.delete()
-    return JsonResponse({"success": True})
-
 @router.post("threads/create", url_name="thread-create")
 def create_thread(request, data: ThreadCreateSchema):
     ic("create_thread", data)
     user = request.user
 
-    chat = Chat.objects.create(user=user)
+    if data.agent == "default":
+        agent = Agent.get_default()
+    else:
+        agent = Agent.objects.get(agent_id=data.agent, user=user)
+
+    chat = Chat.objects.create(user=user, agent=agent)
+
     if data.name is not None:
         chat.title = data.name
+        chat.save()
         
     if data.libraries is not None:
         if isinstance(data.libraries, str):

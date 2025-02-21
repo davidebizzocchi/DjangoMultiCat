@@ -9,7 +9,7 @@ class UsernameAuthenticationBackend(BaseBackend):
     """
     def authenticate(self, request, username=None, **kwargs):
         try:
-            # Cerca l'utente con lo username fornito
+            # Find user with provided username
             user = User.objects.get(username=username)
             return user
         except User.DoesNotExist:

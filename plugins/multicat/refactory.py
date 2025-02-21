@@ -149,6 +149,11 @@ class SonStrayCat(MyStrayCat):
         else:
             new_agent_id = id
 
+            # If already exists, update the agent
+            if new_agent_id in self.agents:
+                self.agents[new_agent_id] = Agent(id=new_agent_id, **kwargs)
+                return self.agents[new_agent_id]
+
         # Check if the agent already exists
         while new_agent_id in self.agents:
             new_agent_id = str(uuid.uuid4())
@@ -272,6 +277,11 @@ class FatherStrayCat(StrayCat):
             new_agent_id = str(uuid.uuid4())
         else:
             new_agent_id = id
+
+            # If already exists, update the agent
+            if new_agent_id in self.agents:
+                self.agents[new_agent_id] = Agent(id=new_agent_id, **kwargs)
+                return self.agents[new_agent_id]
 
         # Check if the agent already exists
         while new_agent_id in self.agents:

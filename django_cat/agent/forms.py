@@ -29,10 +29,10 @@ class AgentForm(forms.ModelForm):
             if isinstance(metadata, str):
                 metadata = json.loads(metadata)
             if not isinstance(metadata, dict):
-                raise forms.ValidationError("Il metadata deve essere un oggetto JSON valido")
+                raise forms.ValidationError("Metadata must be a valid JSON object")
             return metadata
         except json.JSONDecodeError:
-            raise forms.ValidationError("JSON non valido. Verifica la sintassi")
+            raise forms.ValidationError("Invalid JSON. Please check the syntax")
 
     def save(self, commit=True):
         agent = super().save(commit=False)

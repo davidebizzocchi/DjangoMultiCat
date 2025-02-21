@@ -46,6 +46,10 @@ class UserProfile(models.Model):
     def password(self):
         return self.user.password
     
+    @staticmethod
+    def get_admin() -> "UserProfile":
+        return UserProfile.objects.get(user__username="admin")
+    
     def delete(self):
         self.user.delete()
 
@@ -61,4 +65,4 @@ def create_user_cheshire_cat(sender, instance: UserProfile, created: bool, **kwa
 @receiver(pre_delete, sender=UserProfile)
 def delete_user_chesshire_cat(sender, instance: UserProfile, **kwargs):
     if delete_user(instance) == False:
-        raise RequestAborted(f"CHESHIRE_CAT: User with id {instance.cheschire_id} could not be deleted")
+        raise RequestAborted(f"CHESHIRE_CAT: User with ID {instance.cheschire_id} could not be deleted")

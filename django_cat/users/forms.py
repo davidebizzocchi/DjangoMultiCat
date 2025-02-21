@@ -10,7 +10,7 @@ class UserRegistrationForm(forms.ModelForm):
         fields = ['username']
 
 class LoginForm(AuthenticationForm):
-    # Rimuoviamo il campo password
+    # Remove password field
     password = None
     
     def __init__(self, *args, **kwargs):
@@ -18,7 +18,7 @@ class LoginForm(AuthenticationForm):
         if 'password' in self.fields:
             del self.fields['password']
         self.fields['username'].widget.attrs.update({
-            'placeholder': 'Inserisci username',
+            'placeholder': 'Enter username',
             'class': 'form-control'
         })
         
