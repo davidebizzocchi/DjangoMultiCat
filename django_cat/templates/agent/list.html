@@ -30,10 +30,10 @@
                 {% endif %}
             </div>
             <div class="btn-group">
+                {% if not agent.is_default %}
                 <a href="{% url 'agent:update' agent.agent_id %}" class="btn btn-outline-primary btn-sm">
                     <i class="fas fa-edit"></i>
                 </a>
-                {% if not agent.is_default %}
                 <a href="{% url 'agent:delete' agent.agent_id %}" class="btn btn-outline-danger btn-sm">
                     <i class="fas fa-trash"></i>
                 </a>
