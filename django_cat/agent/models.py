@@ -1,5 +1,7 @@
 from typing import Any, Union
 from django.db import models
+from django.db.models import Q
+
 from django.dispatch import receiver
 from cheshire_cat.types import AgentRequest, Agent as AgentModel
 from common.utils import BaseUserModel
@@ -13,6 +15,11 @@ class AgentManager(models.Manager):
     def filter(self, *args, **kwargs):
         """Never return the default agent"""
         return super().filter(*args, **kwargs).exclude(agent_id="default")
+    
+    def filter_include_default(self, *args, **kwargs):
+        """Return all agents including the default agent"""
+        query = Q(*args, **kwargs) | Q(agent_id="default")
+        return super().filter(query)
 
 class Agent(BaseUserModel):
     agent_id = models.CharField(max_length=255, null=True, blank=True, default=None)
@@ -102,5 +109,7 @@ class Agent(BaseUserModel):
 def create_agents_on_server_start(sender, **kwargs):
     for agent in Agent.objects.all():
         agent.create_agent()
+
+    Agent.get_default()
     
     ic("Agents created on server start")
