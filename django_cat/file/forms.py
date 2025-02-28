@@ -100,6 +100,11 @@ class FileUploadForm(forms.Form):
                 self.instance.libraries.values_list("library_id", flat=True)
             )
             self.fields.pop("file")
+            self.fields.pop("ingestion_type")
+            self.fields.pop("page_mode")
+            self.fields.pop("post_process")
+            self.fields.pop("post_process_context")
+            ic(self.fields.keys())
 
     @property
     def _is_instanced(self):
@@ -193,7 +198,7 @@ class FileUploadForm(forms.Form):
         Function to save the file in the filesystem and return its path.
         Creates necessary directories if they don't exist.
         """
-        
+
         file_path.parent.mkdir(parents=True, exist_ok=True)
         
         with open(file_path, "wb") as f:
