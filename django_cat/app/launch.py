@@ -51,5 +51,7 @@ def main():
     # for app_label in getattr(settings, "YOUR_APP", []):
         # call_main_in_thread(app_label)
 
+    import app.config
+    
     ic(server_start)
     server_start.send(sender=None)

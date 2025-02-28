@@ -1,2 +1,4 @@
 media/
 apiopen
+
+app/config.py
