@@ -11,7 +11,7 @@ from decouple import config
 import io
 import uuid
 
-from cheshire_cat.types import AgentRequest, ChatContent, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification, DocReadingProgress
+from cheshire_cat.types import AgentRequest, CatMessage, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification, DocReadingProgress
 from cheshire_cat.types import Agent as AgentComplete
 from openai import OpenAI
 
@@ -71,7 +71,7 @@ class Cat(CatClient):
         if not hasattr(self, '_initialized') or not self._initialized:
             # str is chat_id
             self._chat_queues: Dict[str, Queue] = {}
-            self._message_contents: Dict[str, ChatContent] = {}
+            self._message_contents: Dict[str, CatMessage] = {}
             self._stream_active: Dict[str, bool] = {}
             self._is_startup = False
             self.AUDIO_MAX_SIZE = 25 * 1024 * 1024  # 25MB in bytes
@@ -140,9 +140,10 @@ class Cat(CatClient):
 
     def on_message(self, message):
         """Callback for message received"""
-        # ic(message)
 
         msg_json = json.loads(message)
+
+        # ic(msg_json, type(msg_json))
         # ic.enable()
         # print("\n\n\n\n")
         # ic(msg_json)
@@ -161,18 +162,21 @@ class Cat(CatClient):
         """Handle messages for specific chats"""
         msg_type = message.get("type", None)
         chat_id = message.get("chat_id", "default")
+
+        ic(message)
         
         if msg_type == "chat_token":
             message = message.get("content", {})
-            chat_id = message.get("chat_id", chat_id)
+            content = message.get("content", "")
+            chat_id = message.get("chat_id", "default")
 
-            chat_message = ChatToken(**message)
+            stream_message = ChatToken(text=content, chat_id=chat_id)
 
             if self._stream_active.get(chat_id, False):
-                self._chat_queues[chat_id].put(chat_message)
+                self._chat_queues[chat_id].put(stream_message)
         
         elif msg_type == "chat":
-            self._message_contents[chat_id] = ChatContent(**message)
+            self._message_contents[chat_id] = CatMessage(**message)
             self.end_stream(chat_id)
         
         elif msg_type == "json-notification":
@@ -228,10 +232,10 @@ class Cat(CatClient):
         # Modifica qui: yield from invece di una semplice chiamata
         yield from self._stream(chat_id)
 
-    def get_message_content(self, chat_id: str = "default") -> ChatContent:
+    def get_message_content(self, chat_id: str = "default") -> CatMessage:
         return self._message_contents.get(chat_id)
     
-    def wait_message_content(self, chat_id: str = "default") -> ChatContent:
+    def wait_message_content(self, chat_id: str = "default") -> CatMessage:
         while self._message_contents.get(chat_id) is None:
             time.sleep(0.1)
 
