@@ -17,11 +17,11 @@ from cat.log import log
 @endpoint.get(path="/memory/working_memories", prefix="")
 async def get_working_memories_list(
     request: Request,
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
 ) -> Dict:
-    log.debug(f"User ID: {stray.user_id}")
+    log.debug(f"User ID: {cat.user_id}")
     log.debug(f"Getting list of working memories")
-    result = {"working_memories": list(stray.chat_list)}
+    result = {"working_memories": list(cat.chat_list)}
     log.debug(f"Found {len(result['working_memories'])} working memories")
     return result
 
@@ -30,17 +30,17 @@ async def get_working_memories_list(
 async def get_working_memory(
     request: Request,
     chat_id: str, 
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
 ) -> Dict:
-    log.debug(f"User ID: {stray.user_id}")
+    log.debug(f"User ID: {cat.user_id}")
     log.debug(f"Getting working memory for chat_id: {chat_id}")
-    if chat_id not in stray.chat_list:
+    if chat_id not in cat.chat_list:
         log.debug(f"Working memory {chat_id} not found")
         raise HTTPException(
             status_code=404,
             detail={"error": f"Working memory {chat_id} does not exist."}
         )
-    result = {"history": stray.get_son(chat_id).history}
+    result = {"history": cat.get_son(chat_id).history}
     log.debug(f"Returned history with {len(result['history'])} messages for chat_id: {chat_id}")
     return result
 
@@ -49,17 +49,17 @@ async def get_working_memory(
 async def delete_working_memory(
     request: Request,
     chat_id: str,
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.DELETE)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.DELETE)),
 ) -> Dict:
-    log.debug(f"User ID: {stray.user_id}")
+    log.debug(f"User ID: {cat.user_id}")
     log.debug(f"Attempting to delete working memory for chat_id: {chat_id}")
-    if chat_id not in stray.chat_list:
+    if chat_id not in cat.chat_list:
         log.debug(f"Working memory {chat_id} not found for deletion")
         return {
             "deleted": False,
             "message": "There is no working memory"
         }
-    stray_son = stray.get_son(chat_id)
+    stray_son = cat.get_son(chat_id)
     del stray_son
     log.debug(f"Successfully deleted working memory for chat_id: {chat_id}")
     return {

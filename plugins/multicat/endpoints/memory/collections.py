@@ -28,13 +28,13 @@ async def update_points_metadata(
     request: Request,
     metadata: MetadataUpdate,
     collection_id: str = "declarative",
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.WRITE)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.WRITE)),
 ) -> Dict:
-    log.debug(f"User ID: {stray.user_id}")
+    log.debug(f"User ID: {cat.user_id}")
     log.debug(f"Updating points metadata for collection: {collection_id}")
     log.debug(f"Search criteria: {metadata.search}")
     log.debug(f"Update data: {metadata.update}")
-    vector_memory = stray.memory.vectors
+    vector_memory = cat.memory.vectors
     collection = vector_memory.collections.get(collection_id)
     
     if not collection:
@@ -85,11 +85,11 @@ async def get_points_by_metadata(
     request: Request,
     collection_id: str,
     metadata: Dict = {},
-    stray=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
+    cat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
 ) -> Dict:
     """Get points in a collection by metadata filter"""
     
-    vector_memory = stray.memory.vectors
+    vector_memory = cat.memory.vectors
     collection = vector_memory.collections.get(collection_id)
     
     if not collection:
@@ -134,12 +134,12 @@ async def get_points_metadata_only(
     request: Request,
     collection_id: str,
     metadata: Dict = {},
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
 ) -> Dict:
-    log.debug(f"User ID: {stray.user_id}")
+    log.debug(f"User ID: {cat.user_id}")
     log.debug(f"Getting points by metadata for collection: {collection_id}")
     log.debug(f"Metadata filter: {metadata}")
-    vector_memory = stray.memory.vectors
+    vector_memory = cat.memory.vectors
     collection = vector_memory.collections.get(collection_id)
     
     if not collection:
@@ -183,13 +183,13 @@ async def edit_chat_to_memories_from_metadata(
     mode: str = Query(..., description="Mode of operation: 'add' or 'remove'"),
     search_metadata: Dict = {},
     chats_id: List[str] = [],
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.WRITE)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.WRITE)),
 ) -> Dict:
-    log.debug(f"User ID: {stray.user_id}")
+    log.debug(f"User ID: {cat.user_id}")
     log.debug(f"Editing chat IDs in collection: {collection_id}")
     log.debug(f"Mode: {mode}, Search metadata: {search_metadata}")
     log.debug(f"Chat IDs to {mode}: {chats_id}")
-    vector_memory = stray.memory.vectors
+    vector_memory = cat.memory.vectors
     collection = vector_memory.collections.get(collection_id)
     
     if not collection:

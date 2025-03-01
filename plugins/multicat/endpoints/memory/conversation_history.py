@@ -17,11 +17,11 @@ from cat.log import log
 @endpoint.get(path="/memory/conversation_history", prefix="")
 async def get_conversation_history(
     request: Request,
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
 ) -> Dict:
-    log.debug(f"User ID: {stray.user_id}")
+    log.debug(f"User ID: {cat.user_id}")
     log.debug(f"Getting conversation history")
-    result = {"history": stray.working_memory.history}
+    result = {"history": cat.working_memory.history}
     log.debug(f"Returned history with {len(result['history'])} messages")
     return result
 
@@ -30,13 +30,13 @@ async def get_conversation_history(
 async def wipe_vector_memory_by_chat(
     request: Request,
     chat_id: str,
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.DELETE)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.DELETE)),
 ) -> Dict:
-    log.debug(f"User ID: {stray.user_id}")
+    log.debug(f"User ID: {cat.user_id}")
     log.debug(f"Wiping vector memory for chat_id: {chat_id}")
     
-    if chat_id in stray.chat_list:
-        stray.get_son(chat_id).history = []
+    if chat_id in cat.chat_list:
+        cat.get_son(chat_id).history = []
         log.debug(f"Successfully wiped history for chat_id: {chat_id}")
     
     return {

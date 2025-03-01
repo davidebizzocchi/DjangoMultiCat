@@ -32,22 +32,22 @@ class AgentRequestResponse(AgentUpdateRequest):
 @endpoint.get(path="/agents", prefix="")
 async def list_agents(
     request: Request,
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.READ)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.READ)),
 ) -> Dict:
     """List all available agents"""
         
     return {
-        "agents": list(stray.agents.values())
+        "agents": list(cat.agents.values())
     }
 
 @endpoint.get(path="/agents/{agent_id}", prefix="")
 async def retrieve_agent(
     request: Request,
     agent_id: str,
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.READ)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.READ)),
 ) -> Dict:
     """Get information about a specific agent"""
-    agent = stray.get_agent_by_id(agent_id)
+    agent = cat.get_agent_by_id(agent_id)
     
     if agent is None:
         raise HTTPException(
@@ -63,11 +63,11 @@ async def retrieve_agent(
 async def create_agent(
     request: Request,
     data: AgentRequestResponse,
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.WRITE)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.WRITE)),
 ) -> Dict:
     """Create a new agent"""
     
-    new_agent = stray.create_agent(
+    new_agent = cat.create_agent(
         id=data.id,
         name=data.name or "",
         instructions=data.instructions or "",
@@ -84,13 +84,13 @@ async def update_agent(
     request: Request,
     data: AgentUpdateRequest,
     agent_id: str = "default",
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.WRITE)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.WRITE)),
 ) -> Dict:
-    log.debug(f"User ID: {stray.user_id}")
+    log.debug(f"User ID: {cat.user_id}")
     log.debug(f"Updating agents: {agent_id}")
     log.debug(f"New agent instructions: {data.instructions}")
 
-    agent: Agent = stray.get_agent_by_id(agent_id)
+    agent: Agent = cat.get_agent_by_id(agent_id)
 
     if agent is None:
         raise HTTPException(
@@ -116,7 +116,7 @@ async def update_agent(
 async def delete_agent(
     request: Request,
     agent_id: str,
-    stray: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.WRITE)),
+    cat: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.WRITE)),
 ) -> Dict:
     """Delete an existing agent"""
     if agent_id == "default":
@@ -125,13 +125,13 @@ async def delete_agent(
             detail={"error": "Cannot delete default agent"}
         )
     
-    if agent_id not in stray.agents:
+    if agent_id not in cat.agents:
         raise HTTPException(
             status_code=404,
             detail={"error": "Agent not found"}
         )
     
-    del stray.agents[agent_id]
+    del cat.agents[agent_id]
     
     return {
         "success": True,
