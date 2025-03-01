@@ -1364,7 +1364,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         user_msg.populate(user_text)
 
         let asst_msg = create_asst_msg();
-        asst_msg.find("div.think-container").removeClass("collapse");
+        asst_msg.find("div.think-container").addClass("collapse show");
 
         let loader = create_message_loader(asst_msg);
         let exist_loader = true;

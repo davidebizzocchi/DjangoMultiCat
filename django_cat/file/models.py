@@ -323,7 +323,7 @@ class File(BaseUserModel):
 
         chat_id = self.client.chat_completition(prompt)
 
-        return self.client.wait_message_content(chat_id).content
+        return self.client.wait_message_content(chat_id).text
 
     def post_process(self):
         """

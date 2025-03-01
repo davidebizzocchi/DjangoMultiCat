@@ -73,11 +73,11 @@ def message_generator(message, chat, user):
     
     # Stream responses from specific chat
     for token in chat.stream():
-        yield f"data: {json.dumps({'data': token.content})}\n\n"
+        yield f"data: {json.dumps({'data': token.text})}\n\n"
     
     # Save assistant response
     Message.objects.create(
-        text=chat.wait_message_content().content,  
+        text=chat.wait_message_content().text,  
         sender=Message.Sender.ASSISTANT,
         chat=chat
     )
