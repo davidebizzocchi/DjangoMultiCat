@@ -5,7 +5,7 @@ from cat.looking_glass.cheshire_cat import CheshireCat
 from cat.looking_glass import prompts
 
 from cat.plugins.multicat.types import Agent
-from cat.plugins.multicat.refactory import SonStrayCat
+from cat.plugins.multicat.refactory.stray_cat.son import SonStrayCat
 
 from cat.log import log
 
