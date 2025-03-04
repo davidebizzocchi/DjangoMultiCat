@@ -149,13 +149,10 @@ class File(BaseUserModel):
                 # Estrae la parte prima del primo punto
                 source_id = notification.source.split('.', 1)[0] if '.' in notification.source else notification.source
                 if file_id == source_id:
-                    ic(notification.status)
                     if notification.status == "progress":
                         self.config_progress = notification.perc_read
                         self.save(update_fields=['config_progress'])
                         
-                        ic(self.config_progress, notification.perc_read)
-
                         if callback_on_step is not None:
                             callback_on_step(int(notification.perc_read))
 

@@ -6,7 +6,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-from users.forms import UserRegistrationForm, LoginForm  # Aggiungere LoginForm all'import
+from users.forms import UserRegistrationForm, LoginForm  # Add LoginForm to import
 from users.models import UserProfile
 
 from icecream import ic
@@ -22,7 +22,6 @@ class RegisterUserView(UserPassesTestMixin, CreateView):
 
     def test_func(self):
         # Returns True only if user is NOT authenticated
-        ic(not self.request.user.is_authenticated)
         return not self.request.user.is_authenticated
 
     def handle_no_permission(self):
@@ -31,14 +30,13 @@ class RegisterUserView(UserPassesTestMixin, CreateView):
     def form_valid(self, form):
         # Create user without saving to DB
         user: User = form.save(commit=False)
-        ic(user)
         user.set_unusable_password()
         user.save()
         
         # Create UserProfile
         UserProfile.objects.create(user=user)
         
-        # Auto-login dopo la registrazione con backend specificato
+        # Auto-login after registration with specified backend
         authenticate(self.request, username=user.username)
         login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
         
@@ -48,12 +46,11 @@ class UserLoginView(LoginView):
     template_name = 'users/login.html'
     success_url = reverse_lazy('home')
     redirect_authenticated_user = True
-    form_class = LoginForm  # Cambiato da UserRegistrationForm a LoginForm
+    form_class = LoginForm  # Changed from UserRegistrationForm to LoginForm
 
     def form_valid(self, form):
         username = form.cleaned_data.get('username')
-        # Ignoriamo la password e usiamo solo lo username
-        ic(username)
+        # We ignore the password and use only the username
         user = authenticate(self.request, username=username)
         if user is not None:
             login(self.request, user)
@@ -64,7 +61,7 @@ class UserLogoutView(LoginRequiredMixin, LogoutView):
     template_name = 'users/logout.html'
     next_page = reverse_lazy('home')
     http_method_names = ["get", "post"]
-    login_url = reverse_lazy('users:login')  # opzionale
+    login_url = reverse_lazy('users:login')  # optional
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
@@ -77,7 +74,7 @@ class UserProfileView(LoginRequiredMixin, TemplateView):
         user_profile: UserProfile = request.user.userprofile
         context = {
             'username': request.user.username,
-            'cheshire_id': user_profile.cheschire_id
+            'cheshire_id': user_profile.cheshire_id
         }
         return render(request, self.template_name, context)
 
@@ -102,5 +99,4 @@ class UserListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['users'] = User.objects.all()
-        ic(context)
         return context
