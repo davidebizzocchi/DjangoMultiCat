@@ -9,7 +9,7 @@ from cheshire_cat.client import connect_user
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    cheschire_id = models.CharField(unique=True, null=True, blank=True)
+    cheshire_id = models.CharField(unique=True, null=True, blank=True)
 
     def __str__(self):
         """UserProfile name"""
@@ -20,19 +20,18 @@ class UserProfile(models.Model):
         self.user.is_staff = True
         self.user.save()
 
-    @property
     def set_id(self):
-        self.cheschire_id = get_user_id(self.username)
+        self.cheshire_id = get_user_id(self.username)
         self.save()
-        return self.cheschire_id
+        return self.cheshire_id
 
     def set_manual_id(self, id):
-        self.cheschire_id = id
+        self.cheshire_id = id
         self.save()
 
     @property
     def client(self):
-        return connect_user(self.cheschire_id)
+        return connect_user(self.cheshire_id)
 
     @property
     def is_active(self):
@@ -65,4 +64,4 @@ def create_user_cheshire_cat(sender, instance: UserProfile, created: bool, **kwa
 @receiver(pre_delete, sender=UserProfile)
 def delete_user_chesshire_cat(sender, instance: UserProfile, **kwargs):
     if delete_user(instance) == False:
-        raise RequestAborted(f"CHESHIRE_CAT: User with ID {instance.cheschire_id} could not be deleted")
+        raise RequestAborted(f"CHESHIRE_CAT: User with ID {instance.cheshire_id} could not be deleted.")
