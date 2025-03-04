@@ -2,6 +2,24 @@
 
 
 
+type: feature
+## Release v0.1.0-6b88221
+
+### Information
+- **Source branch**: 60-feature-multi-agent-support
+- **Target branch**: dev
+- **Issue**: [#60](https://github.com/davidebizzocchi/DjangoCat/issues/60)
+- **Type**: feature
+- **Previous version**: v0.0.50-b733210
+- **New version**: v0.1.0-6b88221
+- **Code change statistics**: 
+
+### Commits
+
+
+---
+
+
 type: issue
 New patch version: v0.0.50
 ## Release v0.0.50-b733210
