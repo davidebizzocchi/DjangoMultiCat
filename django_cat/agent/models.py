@@ -2,11 +2,8 @@ from typing import Any, Union
 from django.db import models
 from django.db.models import Q
 
-from django.dispatch import receiver
 from cheshire_cat.types import AgentRequest, Agent as AgentModel
 from common.utils import BaseUserModel
-
-from app.signals import server_start
 
 from icecream import ic
 
@@ -105,11 +102,3 @@ class Agent(BaseUserModel):
     def __str__(self):
         return f"{self.name} ({self.agent_id})"
     
-@receiver(server_start)
-def create_agents_on_server_start(sender, **kwargs):
-    for agent in Agent.objects.all():
-        agent.create_agent()
-
-    Agent.get_default()
-    
-    ic("Agents created on server start")
