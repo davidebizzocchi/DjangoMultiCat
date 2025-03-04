@@ -32,7 +32,6 @@ END_STREAM = object()
 
 class Cat(CatClient):
     _instances = {}
-    # _ref_counts = {}  # New: reference counter
 
     def __new__(cls, *args, **kwargs):
         config = kwargs.get('config')
@@ -50,22 +49,6 @@ class Cat(CatClient):
         
         # cls._ref_counts[user_id] += 1  # Increment counter
         return cls._instances[user_id]
-
-    # def __del__(self):
-    #     """Manages websocket closure only when there are no more references"""
-    #     if hasattr(self, 'config'):  # Verify that the instance has been initialized
-    #         user_id = self.config.user_id
-    #         if user_id in self._ref_counts:
-    #             self._ref_counts[user_id] -= 1
-                
-    #             # Close the websocket only if there are no more references
-    #             if self._ref_counts[user_id] <= 0:
-    #                 if user_id in self._instances:
-    #                     del self._instances[user_id]
-    #                 if user_id in self._ref_counts:
-    #                     del self._ref_counts[user_id]
-    #                 if hasattr(self, 'ws') and self.is_ws_connected:
-    #                     self.ws.close()
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self, '_initialized') or not self._initialized:
