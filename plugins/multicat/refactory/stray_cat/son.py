@@ -14,6 +14,8 @@ from cat.looking_glass.stray_cat import MSG_TYPES
 # Common
 from cat.plugins.multicat.refactory.stray_cat.common import CommonStrayCat
 
+from cat.plugins.multicat.agents.crud import manager as agent_manager
+
 
 stray_cat_attr = {k: v for k, v in StrayCat.__dict__.items()}
 MyStrayCat: StrayCat = type("MyStrayCat", StrayCat.__bases__, stray_cat_attr)
@@ -49,7 +51,6 @@ class SonStrayCat(MyStrayCat, CommonStrayCat):
 
 
     def __send_ws_json(self, data: Any):
-        log.error(f"Sending data to chat {self.chat_id}")
         return self._stray_cat.__send_ws_json(data)
     
     def send_ws_message(self, content: str, msg_type: MSG_TYPES = "notification"):
@@ -103,9 +104,10 @@ class SonStrayCat(MyStrayCat, CommonStrayCat):
     def is_default_agent(self):
         return self.agent_id == "default"
 
-    def get_instructions(self):        
-        if self.agent_id in self.agents and not self.is_default_agent():
-            return self.agents[self.agent_id].instructions
+    def get_instructions(self):
+        agent = agent_manager.get_agent(self.agent_id).cast()
+        if agent is not None:
+            return agent.instructions if not self.is_default_agent() else None
         
         return None
 

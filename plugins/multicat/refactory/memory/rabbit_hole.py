@@ -1,3 +1,4 @@
+import time
 from cat.rabbit_hole import RabbitHole
 
 from cat.plugins.multicat.decorators import option, get_true_class

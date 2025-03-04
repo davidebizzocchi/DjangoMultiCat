@@ -17,7 +17,7 @@ from cat.looking_glass.stray_cat import StrayCat
 from cat.log import log
 
 from cat.plugins.multicat.types import Agent
-# from ..types import Agent
+from cat.plugins.multicat.agents.crud import manager as agent_manager
 
 
 class AgentUpdateRequest(BaseModel):
@@ -28,6 +28,9 @@ class AgentUpdateRequest(BaseModel):
 class AgentRequestResponse(AgentUpdateRequest):
     id: str = "default"
 
+class AgentCreateRequest(AgentUpdateRequest):
+    id: Optional[str] = "default"
+
 
 @endpoint.get(path="/agents", prefix="")
 async def list_agents(
@@ -37,7 +40,7 @@ async def list_agents(
     """List all available agents"""
         
     return {
-        "agents": list(cat.agents.values())
+        "agents": list(cat.agents())
     }
 
 @endpoint.get(path="/agents/{agent_id}", prefix="")
@@ -56,13 +59,13 @@ async def retrieve_agent(
         )
     
     return {
-        "agent": AgentRequestResponse(**agent.model_dump())
+        "agent": AgentRequestResponse.model_validate(agent)
     }
 
 @endpoint.post(path="/agents", prefix="")
 async def create_agent(
     request: Request,
-    data: AgentRequestResponse,
+    data: AgentCreateRequest,
     cat: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.WRITE)),
 ) -> Dict:
     """Create a new agent"""
@@ -76,7 +79,7 @@ async def create_agent(
     
     return {
         "success": True,
-        "agent": AgentRequestResponse(**new_agent.model_dump())
+        "agent": AgentRequestResponse.model_validate(new_agent)
     }
 
 @endpoint.endpoint(path="/agents/{agent_id}", prefix="", methods=["PATCH"])
@@ -90,7 +93,7 @@ async def update_agent(
     log.debug(f"Updating agents: {agent_id}")
     log.debug(f"New agent instructions: {data.instructions}")
 
-    agent: Agent = cat.get_agent_by_id(agent_id)
+    agent: Agent = cat.get_agent_by_id(agent_id).cast()
 
     if agent is None:
         raise HTTPException(
@@ -107,9 +110,11 @@ async def update_agent(
     if data.metadata is not None:
         agent.metadata = data.metadata
 
+    agent = cat.update_agent(agent)
+
     return {
         "success": True,
-        "agent": AgentRequestResponse(**agent.model_dump())
+        "agent": AgentRequestResponse.model_validate(agent)
     }
 
 @endpoint.endpoint(path="/agents/{agent_id}", prefix="", methods=["DELETE"])
@@ -131,7 +136,7 @@ async def delete_agent(
             detail={"error": "Agent not found"}
         )
     
-    del cat.agents[agent_id]
+    cat.delete_agent(agent_id)
     
     return {
         "success": True,

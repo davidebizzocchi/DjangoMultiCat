@@ -96,9 +96,7 @@ class FatherStrayCat(StrayCat, CommonStrayCat):
     def __build_why(self):
         return self.get_beloved_son().__build_why()
     
-    def __call__(self, message_dict):
-        log.error(f"FatherStrayCat called with {message_dict}")
-        
+    def __call__(self, message_dict):        
         message_dict["user_id"] = self.user_id
 
         user_message = UserMessage.model_validate(message_dict)
