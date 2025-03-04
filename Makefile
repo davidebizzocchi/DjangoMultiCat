@@ -83,6 +83,8 @@ shell-django:		## Open a django shell in LOCAL
 django-log:
 	@docker logs -f django_cat-app-1
 
+init-db:
+	@docker exec -it django_cat-app-1 python manage.py init_db
 
 remove-migrations:  ## Remove migrations
 	@echo "Cleaning migrations directory..."
