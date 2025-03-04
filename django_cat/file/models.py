@@ -182,12 +182,6 @@ class File(BaseUserModel):
 
         ic(self.client.upload_file(self, metadata))
         
-        # with open(self.file.path, 'rb') as f:
-        #     self.client.rabbit_hole.upload_file(
-        #         file=f.read(),  # Pass bytes directly
-        #         metadata=metadata
-        #     )
-
     def wait_upload(self):
         """
         Wait for file to be ready before uploading.
