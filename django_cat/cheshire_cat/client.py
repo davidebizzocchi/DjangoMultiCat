@@ -32,7 +32,7 @@ END_STREAM = object()
 
 class Cat(CatClient):
     _instances = {}
-    # _ref_counts = {}  # Nuovo: contatore dei riferimenti
+    # _ref_counts = {}  # New: reference counter
 
     def __new__(cls, *args, **kwargs):
         config = kwargs.get('config')
@@ -46,19 +46,19 @@ class Cat(CatClient):
             instance = super().__new__(cls)
             instance._initialized = False
             cls._instances[user_id] = instance
-            # cls._ref_counts[user_id] = 0  # Inizializza il contatore
+            # cls._ref_counts[user_id] = 0  # Initialize counter
         
-        # cls._ref_counts[user_id] += 1  # Incrementa il contatore
+        # cls._ref_counts[user_id] += 1  # Increment counter
         return cls._instances[user_id]
 
     # def __del__(self):
-    #     """Gestisce la chiusura del websocket solo quando non ci sono più riferimenti"""
-    #     if hasattr(self, 'config'):  # Verifica che l'istanza sia stata inizializzata
+    #     """Manages websocket closure only when there are no more references"""
+    #     if hasattr(self, 'config'):  # Verify that the instance has been initialized
     #         user_id = self.config.user_id
     #         if user_id in self._ref_counts:
     #             self._ref_counts[user_id] -= 1
                 
-    #             # Chiudi il websocket solo se non ci sono più riferimenti
+    #             # Close the websocket only if there are no more references
     #             if self._ref_counts[user_id] <= 0:
     #                 if user_id in self._instances:
     #                     del self._instances[user_id]
@@ -121,7 +121,7 @@ class Cat(CatClient):
         return len(encoding.encode(message))
     
     def chat_completition(self, message: str):
-        """Send a message to the completition chat"""
+        """Send a message to the completion chat"""
         self.send(message=message, chat_id="completition")
 
         return "completition"
@@ -132,7 +132,7 @@ class Cat(CatClient):
         self._reset_new_message(chat_id)
         self._check_ws_connection()
 
-        # Retrive the agent_id is not passed
+        # Retrieve the agent_id if not passed
         if agent_id is None:
             agent_id = Chat.objects.select_related("agent").only("agent__agent_id").get(chat_id=chat_id).agent.agent_id
 
@@ -142,12 +142,6 @@ class Cat(CatClient):
         """Callback for message received"""
 
         msg_json = json.loads(message)
-
-        # ic(msg_json, type(msg_json))
-        # ic.enable()
-        # print("\n\n\n\n")
-        # ic(msg_json)
-        # print("\n\n\n\n")
         self._on_message(msg_json)
 
     def _reset_new_message(self, chat_id="default"):
@@ -162,8 +156,6 @@ class Cat(CatClient):
         """Handle messages for specific chats"""
         msg_type = message.get("type", None)
         chat_id = message.get("chat_id", "default")
-
-        ic(message)
         
         if msg_type == "chat_token":
             message = message.get("content", {})
@@ -181,11 +173,10 @@ class Cat(CatClient):
         
         elif msg_type == "json-notification":
             content = message.get("content", {})
-            ic("json-notification", message, content)
             if content.get("type") == "doc-reading-progress":
                 progress = DocReadingProgress(**content)
-                ic(progress)
-                # Notifica gli handler registrati con i loro argomenti
+
+                # Notify the registered handlers with their arguments
                 handlers = list(self._notification_handlers.values())
                 for handler in handlers:
                     handler(progress)
@@ -196,7 +187,7 @@ class Cat(CatClient):
             # You can add specific handling for other message types here
             ic(f"Received generic message: {generic_message}")
 
-            # Ferma tutte le stream
+            # Stop all streams
             if generic_message.type == "error":
                 self.end_stream(chat_id)
 
@@ -213,11 +204,12 @@ class Cat(CatClient):
             chat_queque = self._chat_queues[chat_id]
             try:
                 token = chat_queque.get(block=True)
-                # ic(token is END_STREAM, self._stream_active.get(chat_id, False))
-                if token is END_STREAM:  # segnale di terminazione
+
+                if token is END_STREAM:  # termination signal
                     break
                 yield token
-                continue  # Continuiamo ad ascoltare se la coda è vuota
+
+                continue  # Continue listening if the queue is empty
             except Exception as e:
                 ic(f"Stream error for chat {chat_id}: {e}")
                 break
@@ -229,7 +221,7 @@ class Cat(CatClient):
             yield f"Error: {chat_id} this chat is not active"
             return
         
-        # Modifica qui: yield from invece di una semplice chiamata
+        # Change here: yield from instead of a simple call
         yield from self._stream(chat_id)
 
     def get_message_content(self, chat_id: str = "default") -> CatMessage:
@@ -304,7 +296,7 @@ class Cat(CatClient):
             yield collection["name"]
 
     def wipe_chat_episodic(self, chat_id: str):
-        # è corretto che la chiave sia "chat"!
+        # it is correct that the key is "chat"!
         return self.memory.wipe_memory_points_by_metadata(
             collection_id="episodic",
             body={"chat": chat_id}
@@ -356,22 +348,22 @@ class Cat(CatClient):
             del self._notification_handlers[handler_id]
 
     def unregister_all_notification_handlers(self):
-        """Rimuove tutti gli handler registrati"""
+        """Removes all registered handlers"""
         self._notification_handlers.clear()
 
     def _cleanup_old_notifications(self):
-        """Rimuove le notifiche più vecchie di TTL secondi"""
+        """Removes notifications older than TTL seconds"""
         current_time = time.time()
         while self._notifications and (current_time - self._notifications[0].received_at) > self._notification_ttl:
             self._notifications.popleft()
 
     def _add_notification(self, notification: Notification):
-        """Aggiunge una nuova notifica e pulisce quelle vecchie"""
+        """Adds a new notification and cleans up old ones"""
         self._cleanup_old_notifications()
         self._notifications.append(notification)
 
     def get_recent_notifications(self):
-        """Restituisce le notifiche recenti dopo aver pulito quelle vecchie"""
+        """Returns recent notifications after cleaning up old ones"""
         self._cleanup_old_notifications()
         return list(self._notifications)
     
@@ -379,9 +371,8 @@ class Cat(CatClient):
         url =  f"http://{HOST}:{PORT}/rabbithole/"
         
         with open(file.file.path.absolute(), "rb") as f:
-            # ic(f, file.file.path.absolute(), mimetypes.guess_type(file.file.path.absolute())[0])
             files = {"file": (
-                str(file.file.path.name),  # Usa il file_id con l'estensione
+                str(file.file.path.name),  # Use the file_id with the extension
                 f,
                 mimetypes.guess_type(file.file.path.absolute())[0]
             )}
@@ -397,7 +388,7 @@ class Cat(CatClient):
                 files=files,
                 data=payload,
                 headers={
-                    "user_id": file.userprofile.cheschire_id  # Aggiungi l'user_id nell'header
+                    "user_id": file.userprofile.cheshire_id  # Add the user_id in the header
                 },
             ).json()
     
@@ -422,7 +413,7 @@ class Cat(CatClient):
 
         return list(
             Chat.objects.filter(
-                libraries__associations__file=file  # Naviga attraverso le relazioni
+                libraries__associations__file=file  # Navigate through the relationships
             ).values_list(
                 'chat_id', flat=True
             ).distinct()
@@ -438,9 +429,7 @@ class Cat(CatClient):
             dict: Response from the API with update status
         """
         chat_ids = self.get_file_chats(file)
-        
-        ic(chat_ids)
-        
+                
         metadata = {
             "search": {"file_id": str(file.file_id)},
             "update": {"chats_id": chat_ids}
@@ -551,7 +540,6 @@ class Cat(CatClient):
             return False
 
         if response.get("success", False):
-            ic(response["agent"])
             return AgentComplete.model_validate(response["agent"])
         
         return None
@@ -560,14 +548,13 @@ class Cat(CatClient):
         response = self.agents.retrieve_agent(agent_id=agent_id)
 
         if response.get("success", False):
-            ic(response["agent"])
             return AgentComplete.model_validate(response["agent"])
         
         return None
     
     def list_agents(self):
         response = self.agents.list_agents()
-        return list(AgentComplete.model_validate(**agent) for agent in response["agents"])
+        return list(AgentComplete.model_validate(agent) for agent in response["agents"])
         
     def delete_agent(self, agent_id: str):
         response = self.agents.delete_agent(agent_id=agent_id)
@@ -591,7 +578,21 @@ class Cat(CatClient):
             return AgentComplete.model_validate(response["agent"])
         
         return None
+    
+    def sync_agents(self):
+        from agent.models import Agent
+        """One-way: django - cat, this because cat don't know what user has created an agent"""
+        
+        agents = self.list_agents()
+        ids = [agent.id for agent in agents]
+        ids.append("default")
 
+        queryset = Agent.objects.exclude(agent_id__in=ids)
+
+        for agent in queryset.all():
+            self.create_agent(agent)
+
+        return queryset.count()
 
 
 @wait_cat
@@ -620,8 +621,11 @@ def connect_user(user_id) -> Cat:
 
 @wait_cat
 def create_user(user):
-    ic(get_user_id(user.username))
-    if get_user_id(user.username) is not None:
+    user_id = get_user_id(user.username)
+    ic("creating user with:", user_id)
+
+    if user_id is not None:
+        user.set_manual_id(user_id)
         return True
     
     url = f"http://{HOST}:{PORT}/users/"
@@ -649,7 +653,7 @@ def create_user(user):
 
 @wait_cat
 def delete_user(user):
-    url = f"http://{HOST}:{PORT}/users/{user.cheschire_id}/"
+    url = f"http://{HOST}:{PORT}/users/{user.cheshire_id}/"
 
     response = requests.delete(url)
     if response.status_code == 200:
