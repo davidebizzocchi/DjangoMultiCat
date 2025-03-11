@@ -2,6 +2,31 @@
 
 
 
+type: issue_tool
+## Release v0.1.0-6b88221
+
+### Information
+- **Source branch**: 67-issue_tool-count-files
+- **Target branch**: dev
+- **Issue**: [#67](https://github.com/davidebizzocchi/DjangoCat/issues/67)
+- **Type**: issue_tool
+- **Previous version**: v0.1.0-6b88221
+- **New version**: v0.1.0-6b88221
+- **Code change statistics**:  11 files changed, 298 insertions(+), 37 deletions(-)
+
+### Commits
+- ff2661d - align plugin (davidebizzocchi)
+- cf7ef15 - align plugin (davidebizzocchi)
+- 358ab76 - align plugin (davidebizzocchi)
+- 66ef215 - align plugin (davidebizzocchi)
+- 3d1a77d - fix file delete library associations (davidebizzocchi)
+- 2b0c578 - chat api send entire message content if no token has been send (davidebizzocchi)
+- b322e86 - delete comment (davidebizzocchi)
+- 0bf91e4 - client delete comment (davidebizzocchi)
+
+---
+
+
 type: feature
 ## Release v0.1.0-6b88221
 

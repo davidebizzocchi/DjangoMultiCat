@@ -105,8 +105,9 @@ class SonStrayCat(MyStrayCat, CommonStrayCat):
         return self.agent_id == "default"
 
     def get_instructions(self):
-        agent = agent_manager.get_agent(self.agent_id).cast()
+        agent = agent_manager.get_agent(self.agent_id)
         if agent is not None:
+            agent.cast()
             return agent.instructions if not self.is_default_agent() else None
         
         return None

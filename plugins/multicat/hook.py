@@ -36,7 +36,12 @@ def before_cat_recalls_declarative_memories(declarative_recall_config: dict, cat
     if not declarative_recall_config.get("metadata"):
         declarative_recall_config["metadata"] = {}
 
-    declarative_recall_config["metadata"]["user_id"] = cat.user_id
+    metadata = declarative_recall_config["metadata"]
+
+    metadata["user_id"] = cat.user_id
+
+    if "chats_id" not in metadata and cat.chat_id != "default":
+        metadata["chats_id"] = [cat.chat_id]
 
     return declarative_recall_config
 

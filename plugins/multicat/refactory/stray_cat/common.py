@@ -45,3 +45,8 @@ class CommonStrayCat():
     
     def delete_agent(self, agent: Union[str, Agent]):
         return agent_manager.delete_agent(agent)
+
+
+    # Files
+    def get_file_list(self):
+        return self.memory.vectors.collections["declarative"].get_all_file_names(self.chat_id if self.chat_id != "default" else None)

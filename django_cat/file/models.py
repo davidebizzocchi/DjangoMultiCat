@@ -119,7 +119,8 @@ class File(BaseUserModel):
             library = self._get_library_from_id(library)
 
         if self.check_assoc(library):
-            return FileLibraryAssociation.objects.filter(file=self, library=library).delete()
+            for assoc in FileLibraryAssociation.objects.filter(file=self, library=library):
+                assoc.delete()
         
     def assoc_library_list(self, libraries: list):
         for library in libraries:
@@ -182,12 +183,6 @@ class File(BaseUserModel):
 
         ic(self.client.upload_file(self, metadata))
         
-        # with open(self.file.path, 'rb') as f:
-        #     self.client.rabbit_hole.upload_file(
-        #         file=f.read(),  # Pass bytes directly
-        #         metadata=metadata
-        #     )
-
     def wait_upload(self):
         """
         Wait for file to be ready before uploading.
