@@ -15,8 +15,10 @@ activate:	## Acvtivate venv
 requirements:	## Create requirements.txt from requirements.in
 
 	@rm -f docker/local/requirements.txt
+	@rm -f docker/prod/requirements.txt
 	
 	uv pip compile requirements/local.in -o docker/local/requirements.txt
+	uv pip compile requirements/prod.in -o docker/prod/requirements.txt
 
 	source .venv/bin/activate && uv pip install -r docker/local/requirements.txt
 
