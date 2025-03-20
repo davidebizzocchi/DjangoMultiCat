@@ -1,0 +1,104 @@
+# docker-compose.local.yml
+
+services:
+  cheshire-cat-core:
+    # build:
+    #   context: ../../core/core
+    container_name: cheshire_cat_core
+    image: cheshire-cat-core:latest
+
+    env_file:
+      - ../../env/local/.env
+    depends_on:
+      - cheshire-cat-vector-memory
+    ports:
+      - ${CCAT_CORE_PORT:-1865}:80
+      - 5678:5678 # only for development purposes (take away in production)
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # This add an entry to /etc/hosts file in the container mapping host.docker.internal to the host machine IP addr, allowing the container to access services running on the host, not only on Win and Mac but also Linux. See https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host and https://docs.docker.com/reference/cli/docker/container/run/#add-host
+    environment:
+      # Timezone
+      - TZ=${CCAT_TIMEZONE:-UTC}
+    volumes:
+      - ../../core/core:/app
+      - ../../plugins:/app/cat/plugins
+      - ../../config.json:/app/cat/data/metadata.json
+
+      - long_term_memory:/app/cat/data
+      - cheschire_cat_models:/app/cat/models
+    command:
+      - python
+      - "-m"
+      - "cat.main"
+    restart: unless-stopped
+
+  cheshire-cat-vector-memory:
+    image: qdrant/qdrant:latest
+    container_name: cheshire_cat_vector_memory
+    expose:
+      - 6333
+    volumes:
+      - long_term_memory:/qdrant/storage
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ../../
+      dockerfile: docker/local/Dockerfile  # Use specific Dockerfiles for development 
+    image: django_cat-app:local
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../../env/local/.env
+    volumes:
+      - ./../../django_cat:/code
+    command: sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --no-input --clear &&
+             gunicorn app.wsgi:application --bind 0.0.0.0:8000 --timeout 120 --worker-class gevent"
+    depends_on:
+      - db
+      - cheshire-cat-core
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # networks:
+    #   - app_network
+
+  db:
+    image: postgres:17.0-alpine3.20
+    volumes:
+      - postgres_data-local:/var/lib/postgresql/data/
+    env_file:
+      - ../../env/local/.db
+
+  mailhog:
+    image: richarvey/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  nginx-superlearn:
+    image: supelearn.azurecr.io/superlearn-nginx:prod
+    restart: always
+    volumes:
+      - static_volume:/staticfiles
+      - uploads:/uploads
+#    ports:
+#      - 8123:80
+    depends_on:
+      - app-superlearn
+
+ 
+volumes:
+  postgres_data-local:
+  long_term_memory:
+  cheschire_cat_models:
+    name: cheschire_cat_models
+
+
+networks:
+  default:
+    external: true
+    name: service-network
