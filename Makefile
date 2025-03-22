@@ -22,6 +22,12 @@ requirements:	## Create requirements.txt from requirements.in
 
 	source .venv/bin/activate && uv pip install -r docker/local/requirements.txt
 
+build-django:
+	@docker buildx build --platform linux/amd64 -f docker/prod/Dockerfile --tag nonnodave/cat-for-all:django-prod --push .
+
+build-nginx:
+	@docker buildx build --platform linux/amd64 -f docker/prod/nginx/Dockerfile --tag nonnodave/cat-for-all:nginx-django --push docker/prod/nginx
+
 build-local-cat:
 	docker build -t cheshire-cat-core:latest -f core/core/Dockerfile core/core
 	@echo "Image cheshire-cat-core:latest builded and tagged: cheshire-cat-core:latest"
