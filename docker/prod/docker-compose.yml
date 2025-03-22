@@ -19,6 +19,8 @@ services:
       # Timezone
       - TZ=${CCAT_TIMEZONE:-UTC}
     volumes:
+      - ./plugins:/app/cat/plugins
+
       - long_term_memory:/app/cat/data
       - cheschire_cat_models:/app/cat/models
       - static_volume_cat:/app/cat/static
