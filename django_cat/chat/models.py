@@ -39,7 +39,7 @@ class Chat(BaseUserModel):
     
     def stream(self):
         """Stream messages from this specific chat"""
-        return self.client.stream(chat_id=self.chat_id)
+        yield from self.client.stream(chat_id=self.chat_id)
         
     def wait_message_content(self):
         """Wait and return last message content for this specific chat"""
