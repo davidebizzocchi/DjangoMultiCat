@@ -83,6 +83,7 @@ volumes:
   long_term_memory:
   cheschire_cat_models:
     name: cheschire_cat_models
+    external: true
 
 
 networks:
