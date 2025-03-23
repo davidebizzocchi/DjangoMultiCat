@@ -85,7 +85,7 @@ def message_generator(message, chat, user):
 
     # Get final message text and related files (file_id)
     final_message_text = final_message.text
-    related_file_ids = final_message.why.get_fileid_from_memory("declarative")
+    related_file_info = final_message.why.get_file_info_from_memory("declarative")
 
     # If no tokens were sent, send final message
     if not send_tokens:
@@ -99,8 +99,8 @@ def message_generator(message, chat, user):
     )
 
     # Yield annotations for each related file
-    for file in related_file_ids:
-        yield f"data: {json.dumps({'annotations': user_msg.build_single_file_annotation(file, save=True)})}\n\n" 
+    for file_info in related_file_info:
+        yield f"data: {json.dumps({'annotations': user_msg.build_single_file_annotation(file_info, save=True)})}\n\n"
 
     yield "event: Done\ndata: {}\n\n"
 

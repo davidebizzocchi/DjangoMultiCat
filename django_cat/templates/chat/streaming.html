@@ -504,8 +504,6 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     }
 
 
-
-
     $(document).ready(function () {
 
         console.log("WE ARE READY TO GO!");
@@ -1020,13 +1018,13 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             console.log("add multiple annotations", annots);
             annots.forEach(annot => {
                 if (typeof annot == "object" && annot !== null)
-                    this.add_annotation(annot.file_id, annot.filename, annot.link, annot.preview);
+                    this.add_annotation(annot.file_id, annot.filename, annot.link, annot.preview, annot.score);
                 if (Array.isArray(annot))
-                    this.add_annotation(annot[0], annot[1], annot[2], annot[3]);
+                    this.add_annotation(annot[0], annot[1], annot[2], annot[3], annot[4]);
             });
         }
 
-        msg.add_annotation = function (file_id, name, link, preview) {
+        msg.add_annotation = function (file_id, name, link, preview, score) {
             // Show the annotations wrapper of the message
             this.find("div.annotations-wrapper").show();
 
@@ -1045,6 +1043,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
                     new_annot.number = this.last_annotations_number;
                     new_annot.name = name;
                     new_annot.preview = preview;
+                    new_annot.score = score;
 
                     this.annotations[file_id] = new_annot;
                 }
@@ -1070,8 +1069,11 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             if (annot.link === "") annot_html.find("div.annotation-file > a").removeClass("text-primary").addClass("text-muted disabled");
             else annot_html.find("span.annotation-number").removeClass("bg-secondary").addClass("bg-primary");
 
+            annot_html.find("span.annotation-score").text(annot.score);
+
             annot_html.find("a.annotation-link").attr("href", annot.preview);
 
+            annot_html.show();
             this.find("div.annotations-container").append(annot_html);
 
             return this;
@@ -1630,7 +1632,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         function handle_message_annotations(payload) {
             console.log("ANNOTATIONS", payload);
             asst_msg.add_annotation(
-                payload.file_id, payload.filename, payload.link, payload.preview
+                payload.file_id, payload.filename, payload.link, payload.preview, payload.score
             );
         }
     }

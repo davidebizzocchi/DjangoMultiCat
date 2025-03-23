@@ -1,11 +1,17 @@
-<div id="proto-annot" class="chat-message-annot d-flex align-items-center p-2 border rounded shadow-sm bg-light">
-    <span class="annotation-number badge bg-secondary me-2">COMPLETE</span>
+<div id="proto-annot" class="chat-message-annot p-2 border rounded shadow-sm bg-light" style="display: none;">
+    <div class="d-flex align-items-center">
+        <span class="annotation-number badge bg-secondary me-2">COMPLETE</span>
 
-    <div class="annotation-file flex-grow-1">
-        <a href="#" class="text-decoration-underline text-primary" target="_blank">COMPLETE</a>
+        <div class="annotation-file flex-grow-1">
+            <a href="#" class="text-decoration-underline text-primary" target="_blank">COMPLETE</a>
+        </div>
+
+        <a class="annotation-link text-primary btn p-1" href="" target="_blank">
+            <i class="fa-solid fa-up-right-from-square"></i>
+        </a>
     </div>
-
-    <a class="annotation-link text-primary btn p-1" href="" target="_blank">
-        <i class="fa-solid fa-up-right-from-square"></i>
-    </a>
+    
+    <div class="d-flex align-items-center">
+        <p class="m-0 text-muted fw-bold">Score: <span class="annotation-score text-primary">0.0</span>%</p>
+    </div>
 </div>

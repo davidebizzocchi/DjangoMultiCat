@@ -190,7 +190,7 @@ class MessageWhy(BaseModelDict):
     memory: dict
     model_interactions: List[LLMModelInteraction | EmbedderModelInteraction]
 
-    def get_fileid_from_memory(self, memory_name: str = "declarative", unique=True) -> List[str]:
+    def get_file_info_from_memory(self, memory_name: str = "declarative", unique=True) -> List[str]:
         """
         Extract file IDs from memory based on the memory name.
 
@@ -205,16 +205,41 @@ class MessageWhy(BaseModelDict):
             A list of file IDs extracted from the specified memory.
         """
 
+        class HashableTuple:
+            def __init__(self, *args):
+                self.tuple_data = tuple(args)
+
+            def __hash__(self):
+                # Use only the first element for hashing
+                return hash(self.tuple_data[0])
+
+            def __eq__(self, other):
+                # Compare only the first element for equality
+                return self.tuple_data[0] == other.tuple_data[0]
+            
+            @property
+            def original(self):
+                return self.tuple_data
+
+            def __repr__(self):
+                return f"HashableTuple({self.tuple_data})"
+
         if memory_name not in self.memory:
             return []
-        
+
         file_ids = set() if unique else []
 
         for mem_point in self.memory[memory_name]:
             metadata = mem_point.get("metadata", {})
             if "file_id" in metadata:
-
-                file_ids.add(metadata["file_id"]) if unique else file_ids.append(metadata["file_id"])
+                if unique:
+                    file_ids.add(
+                        HashableTuple(metadata["file_id"], mem_point["score"])
+                    )
+                else:
+                    file_ids.append(
+                        HashableTuple(metadata["file_id"], mem_point["score"])
+                    )
 
         return file_ids
         

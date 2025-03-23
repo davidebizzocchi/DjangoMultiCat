@@ -184,11 +184,20 @@ class Message(models.Model):
             sender=self.Sender.ASSISTANT
         ).order_by('-timestamp').first()
 
-    def build_single_file_annotation(self, file: str | File, save=False):
+    def build_single_file_annotation(self, info: tuple | str | File, save=False):
         """Build annotations for a single file"""
+
+        score = 0.0
+        if hasattr(info, "original"):
+            info = info.original
+
+        if isinstance(info, tuple):
+            file = info[0]
+            score = round(info[1], 4) * 100
+
         if isinstance(file, str):
             file = File.objects.only("id", "title", "file_id").get(file_id=file)
-        
+
         if not isinstance(file, File):
             raise ValueError("Invalid file type")
 
@@ -197,6 +206,7 @@ class Message(models.Model):
             "filename": file.title,
             "link": reverse("file:assoc", kwargs={"file_id": file.file_id}),
             "preview": file.link,
+            "score": score,
         }
 
         if save:
