@@ -1,13 +1,15 @@
-from django.db import models
-
 import uuid
-from common.utils import BaseUserModel
-from library.models import Library
-from icecream import ic
+
+from django.db import models
 from django.utils import timezone
 from django.db.models import QuerySet
 
+from common.utils import BaseUserModel
+from library.models import Library
 from agent.models import Agent
+from file.models import File
+
+from icecream import ic
 
 
 class Chat(BaseUserModel):
@@ -170,6 +172,8 @@ class Message(models.Model):
     )
     timestamp = models.DateTimeField(auto_now_add=True)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='messages')
+
+    annotations = models.ManyToManyField(File, related_name='messages', blank=True)
 
     @classmethod
     def get_last_assistant_message(self, user):
