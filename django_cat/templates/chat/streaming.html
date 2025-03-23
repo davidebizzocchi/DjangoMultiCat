@@ -261,6 +261,8 @@
         max-height: 30vh;
         overflow-y: auto;
         overflow-x: hidden;
+
+        --bs-btn-hover-bg: rgba(var(--bs-secondary-rgb), 0.3);
     }
 </style>
 {% endblock%}
@@ -448,6 +450,8 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     const class_chat_history_date_group = "history-date-group";
     const class_chat_message_action_button = "_chat-message-action_";
     const class_assistant_chat_message = "code-block-wrapper";
+
+    const class_button_toggle_annotations = "_toggle_annotations_container_"
     
     /* VARIABILES */
     let popup_chat_action_active = false;
@@ -766,6 +770,26 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             target.closest("div.think-wrapper").find("div.think-container").toggleClass("show");
             target.attr("aria-expanded") == "true" ? target.attr("aria-expanded", "false") : target.attr("aria-expanded", "true");
         });
+    
+        chat_bubble_dom.on("click", "button." + class_button_toggle_annotations, function (event) {
+            let target = $(event.currentTarget);
+            let annot_container = target.closest("div.container").find("div.annotations-container");
+            let timeout = 500;  // ms
+
+            // Change the arrow
+            target.find("i").toggleClass("fa-chevron-right").toggleClass("fa-chevron-down");
+
+            if (annot_container.hasClass("hidden")) {
+                annot_container.removeClass("hidden");
+                annot_container.fadeIn(timeout);
+            } else {
+                setTimeout(() => {
+                    annot_container.addClass("hidden");
+                }, timeout);
+
+                annot_container.fadeOut(timeout);
+            }
+        });
     });
 
     /* FUNCTIONS */
@@ -968,7 +992,9 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         message.appendTo(chat_messages_dom);
 
         message.populate = function (text) {
-            user ? populate_user_message(message, text) : populate_asst_message(message, text)
+            user ? populate_user_message(message, text) : populate_asst_message(message, text);
+
+            return message;
         }
 
         message.set = function (data) {
