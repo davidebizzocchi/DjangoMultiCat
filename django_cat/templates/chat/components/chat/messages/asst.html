@@ -4,6 +4,7 @@
         {% include 'chat/components/general/logo_svg.html' %}
     </div>
 
+    <!-- Think Wrapper -->
     <div class="ds-markdown--block think-wrapper mb-2" style="--ds-md-zoom: 1.143; display: none;">
         <div class="d-flex align-items-center pb-2 mb-2">
             <button class="btn btn-sm btn-outline-secondary me-2 collapse-think rounded-pill"" type="button">
@@ -30,7 +31,24 @@
             <div class="think-content"></div>
         </div>
     </div>
+
+    <!-- Markdown response Wrapper -->
     <div class="ds-markdown ds-markdown--block" style="--ds-md-zoom: 1.143;"></div>
+
+    <!-- Annotations Wrapper -->
+    <div class="annotations-wrapper container p-3" style="display: none;">
+        <div class="d-flex align-items-center justify-content-start">
+            <button class="_toggle_annotations_container_ btn p-1 border-0 me-2">
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <h5 class="fw-bold mb-2 mb-0">📂 Files</h5>        
+        </div>
+
+        <div class="annotations-container d-flex flex-column gap-2 p-2">
+            <p class="text-secondary m-0">Scroll down to view all files. <i class="fa fa-arrow-down"></i></p>
+        <!-- ANNOTATIONS -->
+        </div>
+    </div>
 
     <div class="ds-flex" style="margin-top: 12px; height: 20px; align-items: center; gap: 12px;">
         <div class="ds-flex action-buttons-group" style="align-items: center; gap: 12px;">
