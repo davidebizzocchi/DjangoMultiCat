@@ -1,20 +1,24 @@
+{% load poll_extras %}
+
 <div class="chat-content-panel">
     <div class="chat-header">
-        <div class="header-content-wrapper justify-content-start align-items-center">
-            <div class="ms-4 mt-3 p-2 w-25 rounded-3 border-secondary cursor-pointer transition" style="max-width: 200px; z-index: 1000; background-color: var(--dsr-main);" onmouseover="$(this).addClass('shadow-lg')" onmouseleave="$(this).removeClass('shadow-lg border')">
-                <div class="text-center">
-                    <h5 class="fw-bold text-white">{{ agent.name }}</h5>
-                </div>
-            </div>
-            <div class="title-container" style="position: absolute; left: 50%; transform: translateX(-50%); width: fit-content;">
-                <div
-                    style="flex: 1 1 0%; min-width: 0px; display: flex; place-content: center; z-index: 12; margin-top: 10px;">
-                    <div class="chat-session-title" tabindex="0" style="outline: none;">
-                        {{ thread.name }}
+        <div class="header-content-wrapper justify-content-start align-items-center p-0 shadow">
+
+            <div id="headerNames" class="d-flex justify-content-evenly align-items-center pb-2" style="height: 70px; width: 100%;">
+                <div id="agentName" class="cursor-pointer transition" style="width: 33%; z-index: 1000;">
+                    <div class="text-center d-flex justify-content-center align-items-center rounded-3 mt-2 p-2 row">
+                        <small class="text-secondary">Agent</small>
+                        <h6 class="fw-bold m-0">{{ agent.name|capitalize }}</h6>
                     </div>
                 </div>
-                <div class="title-divider"></div>
+                <div id="chatName" class="cursor-pointer transition" style="width: 34%; z-index: 1000;">
+                    <div class="text-center d-flex justify-content-center align-items-center rounded-3 mt-2 p-2 row">
+                        <small class="text-secondary">Chat</small>
+                        <h6 id="thread-name-header" class="fw-bold m-0">{{ thread.name }}</h6>
+                    </div>
+                </div>
             </div>
+
             <div class="header-controls">
                 <div class="ds-icon header-icon close-icon"
                     style="font-size: 24px; width: 24px; height: 24px; color: rgb(205, 212, 223);"><svg width="28"

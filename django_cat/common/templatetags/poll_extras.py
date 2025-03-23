@@ -29,3 +29,11 @@ def current_version():
 @register.filter(name="add_class")
 def add_class(field, css_class):
     return field.as_widget(attrs={"class": css_class})
+
+@register.filter(name="capitalize")
+def capitalize(value):
+    # Capitalize the first letter of a string if is not empty
+    if isinstance(value, str):
+        if len(value) > 0:
+            return value[0].upper() + value[1:]
+    return value
