@@ -11,6 +11,8 @@ from cheshire_cat.client import Cat
 from django.shortcuts import get_object_or_404
 from agent.models import Agent
 from library.models import Library
+from file.models import File as FileModel
+
 
 router = Router(tags=["Chat"])
 
@@ -77,18 +79,42 @@ def message_generator(message, chat, user):
         send_tokens = True
         yield f"data: {json.dumps({'data': token.text})}\n\n"
     
-    final_message_text = chat.wait_message_content().text
+    # Get final message (CatMessage)
+    final_message = chat.wait_message_content()
 
+    # Get final message text and related files (file_id)
+    final_message_text = final_message.text
+    related_file_ids = final_message.why.get_fileid_from_memory("declarative")
+
+    related_files = FileModel.objects.only("id", "title", "file_id").filter(file_id__in=related_file_ids).all()
+
+    # Yield annotations for each related file
+    for file in related_files:
+        yield f"data: {json.dumps({
+            'annotations': {
+                "file_id": file.file_id,
+                "filename": file.title,
+                "link": reverse("file:assoc", kwargs={"file_id": file.file_id}),
+                "preview": file.link,
+            }
+        })}\n\n"
+
+    # If no tokens were sent, send final message
     if not send_tokens:
         yield f"data: {json.dumps({'data': final_message_text})}\n\n"
 
     # Save assistant response
-    Message.objects.create(
+    user_msg = Message.objects.create(
         text=final_message_text,  
         sender=Message.Sender.ASSISTANT,
-        chat=chat
+        chat=chat,
     )
-    
+
+    # Associate file to assistant response
+    user_msg.annotations.set(
+        FileModel.objects.filter(file_id__in=related_file_ids).values_list("pk", flat=True)
+    )
+
     yield "event: Done\ndata: {}\n\n"
 
 @router.post("/stream-api", url_name="stream-api")
