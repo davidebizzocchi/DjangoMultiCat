@@ -28,6 +28,16 @@ build-django:
 build-nginx:
 	@docker buildx build --platform linux/amd64 -f docker/prod/nginx/Dockerfile --tag nonnodave/cat-for-all:nginx-django --push docker/prod/nginx
 
+update-prod:
+	@echo "Building nginx"
+	$(MAKE) build-django
+
+	@echo "Building django"
+	$(MAKE) build-nginx
+
+	@echo "Updating contabo"
+	@ssh my_contabo_1 "cd /home/amministratore/docker/django_cat; ./update.sh"
+
 build-local-cat:
 	docker build -t cheshire-cat-core:latest -f core/core/Dockerfile core/core
 	@echo "Image cheshire-cat-core:latest builded and tagged: cheshire-cat-core:latest"
