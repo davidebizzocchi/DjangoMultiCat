@@ -444,6 +444,8 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     let actual_chat_group_date_value = null;
     let actual_chat_item_count = 0;
 
+    let last_user_text = "";
+
     console.log("buttons", buttons_dom, sidebar_button_dom);
 
     /* OVVERIDE */
@@ -653,7 +655,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             // TOODO: Execute the action
 
             if (action == "send-msg" && send_message_dom.is_active()) {
-                send_message(event);
+                send_message();
             }
             // TODO: add others
             else {
@@ -696,7 +698,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             if (event.key === "Enter") {
                 event.preventDefault();
 
-                send_message(event);
+                send_message();
             }
         });
     
@@ -745,7 +747,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             let target = $(event.target);
 
             input_textarea_dom.val(target.text().trim());
-            send_message(event);
+            send_message();
         });
     
         // Show/hide think content of asst messages
@@ -1367,44 +1369,42 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 
     /* STREAM */
 
-    function send_message(e) {
+    function send_message(input=null, from_user_message=null, save_user_message=true, save_assistant_message=true) {
+        /*
+            PARAMS
+
+            input: string || null, default: null
+             if null use the textarea (default) value
+             if not null, specify the message to send
+
+            from_user_message: user_message_dom || null, default: null
+             if not null, specify a spefic (user) message to user as input
+
+            save_user_message: boolean, default: true
+             if true, specify the server to save the user message
+
+            save_assistant_message: boolean, default: true
+             if true, specify the server to sve the assistant message
+        */
+
         console.log("Form submission started");
 
-        // Nascondi i prompt al primo messaggio
-        prompts_wrapper_dom.hide();
+        let user_text = (input === null) ? input_textarea_dom.val(): input;
 
-        let user_text = input_textarea_dom.val();
+        let user_msg = undefined;
 
-        startLoadingState();
+        if (from_user_message !== null)
+        {
+            user_text = from_user_message.text();
+            user_msg = from_user_message;   
+        } else {
+            user_msg = create_user_msg();
+            user_msg.populate(user_text);
+        }
 
-        let responses = $("#responses");
-        // let userMsg = $("#msg-proto").clone(true);
-        // userMsg.removeAttr("id");
-        // userMsg.addClass("user-msg");
+        user_text = user_text.trim();
 
-        // userMsg.find("b").text("User : ");
-        // userMsg.find("div.message").text(`${data.get('message')}`);
-        // userMsg.show();
-        // responses.append(userMsg);
-
-        // let assMsg = $("#msg-proto").clone(true);
-        // userMsg.removeAttr("id");
-        // userMsg.addClass("assistant-msg");
-
-        // assMsg.find("b").text("Assistant : ");
-        // assMsg.show();
-        // assMsg.testo = "";
-        // responses.append(assMsg);
-
-        // let userMsg = $("#msg-user-proto").clone(true);
-        // userMsg.removeAttr("id");
-        // userMsg.find("div.message").text(`${data.get('message')}`);
-        // userMsg.show();
-        // responses.append(userMsg);
-        
-        let user_msg = create_user_msg();
-
-        user_msg.populate(user_text)
+        last_user_text = user_text;
 
         let asst_msg = create_asst_msg();
         asst_msg.find("div.think-container").addClass("collapse show");
@@ -1412,21 +1412,21 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         let loader = create_message_loader(asst_msg);
         let exist_loader = true;
 
-        // asst_msg.append(
-        //     populate_user_message({
-        //         text: data.get('message'),
-        //         time: new Date().toLocaleTimeString()
-        //     })
-        // )
+        let wait_response = setTimeout(() => {
+            source.close();
+            endLoadingState();
 
+            create_error_banner("Server error, please try again...");
+            
+            if (exist_loader) loader.remove();
+            asst_msg.remove();
+            user_msg.remove();
+            
+        }, 10 * 1000);
 
-        // let assMsg = $("#msg-assistant-proto").clone(true);
-        // assMsg.removeAttr("id");
-        // assMsg.show();
-        // assMsg.testo = "";
-        // responses.append(assMsg);
+        startLoadingState();
 
-        console.log("Sending request to:", e.target);
+        console.log("Sending message streaming request for:", user_text);
         const source = new SSE("{% url 'chat:api:thread-stream' thread.chat_id %}", {
             method: 'POST',
             headers: {
@@ -1437,53 +1437,23 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             //     "message": user_text
             // },
             payload: JSON.stringify({
-                "message": user_text
+                "message": user_text,
+                // "save_user_message": save_user_message,
+                // "save_assistant_message": save_assistant_message
             })
         });
 
         source.addEventListener('message', function (e) {
-            // console.log("datas:", e.data)
             const payload = JSON.parse(e.data);
-            // console.log("Message received:", payload.data);            
 
-            if (payload.data) {
+            if (payload.data !== undefined)
+                handle_chat_message(payload.data);
 
-                // Tolto il loader
-                if (exist_loader) {
-                    loader.remove();
-                    exist_loader = false;
-                }
+            if (payload.attributes !== undefined)
+                handle_message_attr(payload.attributes);
 
-                asst_msg.populate(payload.data)
-                // asst_msg.testo += payload.data;
-                // asst_msg.find("div.message").html(convertToHTML(assMsg.testo));
-            }
-
-            // if (payload.annotations) {
-            //     let annot = payload.annotations;
-            //     assMsg.testo.replace(annot.text, "");
-                
-            //     // Sostituisco il testo dell'annotatione nel messaggio
-            //     assMsg.testo = assMsg.testo.replace(annot.text, "");
-            //     assMsg.find("div.message").html(convertToHTML(assMsg.testo));
-
-            //     // Creo il div per l'annotatione
-            //     let div = assMsg.find("div.annotations")
-            //     div.show();
-
-            //     // Paragrafo per il link
-            //     let par = div.find("p.annot").clone(true);
-            //     par.show();
-            //     par.removeAttr("id");
-            //     par.find("a").attr("href", annot.link);
-            //     par.find("a").find("b").text(annot.filename);
-            //     div.append(par);
-                
-            //     // Update annotations
-            //     update_file_list();
-            // }
-
-            scroll_chat_to_bottom();
+            if (payload.annotations !== undefined)
+                handle_message_annotations(payload.annotations);
         });
 
         source.addEventListener('RunCreated', function (e) {
@@ -1509,6 +1479,12 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             endLoadingState();
         });
 
+        source.addEventListener('Attributes', function (e) {
+            e.source.close();
+            endLoadingState();
+        });
+
+
         source.addEventListener('Done', function (e) {
             e.source.close();
             endLoadingState();
@@ -1528,6 +1504,32 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         });
 
         source.stream();
+
+        // Message handlers
+        function handle_chat_message(text) {
+                // Tolgo il loader
+                if (exist_loader) {
+                    loader.remove();
+                    exist_loader = false;
+                    clearTimeout(wait_response);
+                }
+
+                asst_msg.populate(text);
+
+                scroll_chat_to_bottom();
+        }
+
+        function handle_message_attr(payload) {
+            let attrs = JSON.parse(payload);
+            asst_msg.set(attrs);
+        }
+
+        function handle_message_annotations(payload) {
+            console.log("ANNOTATIONS", payload);
+            asst_msg.add_annotation(
+                payload.text, payload.filename, payload.link
+            );
+        }
     }
 
     function startLoadingState() {
