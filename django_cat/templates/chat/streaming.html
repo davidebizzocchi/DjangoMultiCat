@@ -436,9 +436,11 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     const scroll_down_icon_dom = $("#scrool-down-icon");
     const popup_chat_actions_dom = $("#popup-chat-actions");
 
+    const chat_header_name_text = $("#thread-name-header");
+
     const chat_container_dom = $("div.message-container");
-    const chat_messages_dom = $("div.message-text");  // qui i messaggi
-    const chat_bubble_dom = $("div.message-bubble");  // questo scrolla!!
+    const chat_messages_dom = $("div.message-text");  // here messages
+    const chat_bubble_dom = $("div.message-bubble");  // this scroll!!
 
     const input_group_dom = $("div.input-group-wrapper");
     const input_textarea_dom = input_group_dom.find("#chat-input");
@@ -1522,6 +1524,9 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         }
 
         user_text = user_text.trim();
+
+        if (chat_messages_dom.length === 1)
+            chat_header_name_text.text(user_text);
 
         last_user_text = user_text;
 

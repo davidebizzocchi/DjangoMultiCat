@@ -149,7 +149,7 @@ class Chat(BaseUserModel):
 
         if self.title == "New Chat":
             if self.messages.count() > 0:
-                self.title = self.messages.first().text[:20]
+                self.title = self.messages.first().text
                 self.save()
        
         return self.title
