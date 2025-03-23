@@ -1,9 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save, pre_delete
-from django.dispatch import receiver
-from cheshire_cat.client import create_user, delete_user, get_user_id
-from django.core.exceptions import RequestAborted
+from cheshire_cat.client import get_user_id
 from cheshire_cat.client import connect_user
 
 
@@ -55,18 +52,3 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
     
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance: User, created: bool, **kwargs):
-    if created:
-        UserProfile.objects.create(user=instance)
-
-@receiver(post_save, sender=UserProfile)
-def create_user_cheshire_cat(sender, instance: UserProfile, created: bool, **kwargs):
-    if created:
-        create_user(instance)
-
-
-@receiver(pre_delete, sender=UserProfile)
-def delete_user_chesshire_cat(sender, instance: UserProfile, **kwargs):
-    if delete_user(instance) == False:
-        raise RequestAborted(f"CHESHIRE_CAT: User with ID {instance.cheshire_id} could not be deleted.")
