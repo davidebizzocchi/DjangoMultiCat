@@ -284,3 +284,15 @@ def create_thread(request, data: ThreadCreateSchema):
         "success": True,
         "url": reverse("chat:chat", kwargs={"chat_id": chat.chat_id})
         })
+
+@router.get("threads/{thread_id}/info", url_name="thread-info")
+def thread_info(request, thread_id: str):
+    chat = get_object_or_404(Chat, chat_id=thread_id, user=request.user)
+
+    return {
+        "thread_id": chat.chat_id,
+        "url": reverse("chat:chat", kwargs={"chat_id": chat.chat_id}),
+        "title": chat.title,
+        "agent": chat.agent.name,
+        "libraries": [library.name for library in chat.libraries.only("name").all()]
+    }
