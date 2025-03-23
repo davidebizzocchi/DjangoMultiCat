@@ -30,10 +30,10 @@ build-nginx:
 
 update-prod:
 	@echo "Building nginx"
-	$(MAKE) build-django
+	$(MAKE) build-nginx
 
 	@echo "Building django"
-	$(MAKE) build-nginx
+	$(MAKE) build-django
 
 	@echo "Updating contabo"
 	@ssh my_contabo_1 "cd /home/amministratore/docker/django_cat; ./update.sh"
