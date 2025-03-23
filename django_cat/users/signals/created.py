@@ -14,27 +14,31 @@ def create_user_profile(sender, instance: User, created: bool, **kwargs):
         UserProfile.objects.create(user=instance)
 
         # Send email to admins
-        send_mail(
-                subject=f"New user: {instance.username}",
-                message=f"""
-Nuovo utente registrato:\n
-username : {instance.username},
-pk: {instance.pk},
-                """,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=settings.ADMIN_EMAILS,
-                fail_silently=False,
-            )
+        if settings.SEND_NEW_USER_MAIL:
+            send_mail(
+                    subject=f"[{settings.ENVIRONMENT_TYPE}] New user: {instance.username}",
+                    message=f"""
+New user signup:\n
+Environment: {settings.ENVIRONMENT_TYPE}
+Username: {instance.username}
+PK: {instance.pk}
+                    """,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=settings.ADMIN_EMAILS,
+                    fail_silently=False,
+                )
 
 @receiver(pre_delete, sender=User)
 def deleted_user(sender, instance: User, **kwargs):
     # Send email to admins
+    if settings.SEND_DELETED_USER_MAIL:
         send_mail(
-                subject=f"User deleted: {instance.username}",
+                subject=f"[{settings.ENVIRONMENT_TYPE}] User deleted: {instance.username}",
                 message=f"""
-L'utente ha cancellato il suo account:\n
-username : {instance.username},
-pk: {instance.pk},
+User deleted their account:\n
+Environment: {settings.ENVIRONMENT_TYPE}
+Username: {instance.username}
+PK: {instance.pk}
                 """,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=settings.ADMIN_EMAILS,

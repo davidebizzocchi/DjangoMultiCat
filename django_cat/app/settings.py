@@ -226,6 +226,8 @@ CONN_MAX_AGE = 0  # default is 0 https://docs.djangoproject.com/en/5.0/ref/datab
 
 ADMIN_EMAILS = config("ADMIN_EMAILS", cast=str).strip().split(" ")
 
+SEND_NEW_USER_MAIL = config("SEND_NEW_USER_MAIL", cast=bool, default=False)
+SEND_DELETED_USER_MAIL = config("SEND_DELETED_USER_MAIL", cast=bool, default=False)
 
 
 # Password validation
