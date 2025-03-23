@@ -39,6 +39,7 @@ urlpatterns = [
     path('XYZ2024-admin/', admin.site.urls),
     path("", include("common.urls")),
     
+    path('accounts/', include('allauth.urls')),
     path("users/", include("users.urls", namespace="users")),
     
     path("chat/", include("chat.urls", namespace="chat")),

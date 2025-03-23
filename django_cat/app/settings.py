@@ -14,6 +14,7 @@ from pathlib import Path
 from decouple import config
 import os
 from django.contrib.messages import constants as messages
+from django.urls import reverse_lazy
 
 
 ENVIRONMENT_TYPE = config("ENVIRONMENT_TYPE", default="none")
@@ -95,6 +96,13 @@ INSTALLED_APPS = [
     "library",
     "file",
     "agent",
+
+    # AllAuth
+    "allauth",
+    "allauth.account",
+    # Google Account
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
 
 MIDDLEWARE = [
@@ -105,6 +113,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -114,6 +124,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         "DIRS": [
             os.path.join(BASE_DIR, "templates"),
+            os.path.join(BASE_DIR, "templates", "allauth"),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -148,9 +159,65 @@ DATABASES = {
 # EMAIL_BACKEND= "django.core.mail.backends.console.EmailBackend"
 
 AUTHENTICATION_BACKENDS = [
-    'users.auth.UsernameAuthenticationBackend',
     'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    "allauth.account.auth_backends.AuthenticationBackend",
+
+    'users.auth.UsernameAuthenticationBackend',
 ]
+
+# ALLAUTH Accounts
+
+ACCOUNT_EMAIL_NOTIFICATIONS = config("ACCOUNT_EMAIL_NOTIFICATIONS", cast=bool)
+ACCOUNT_EMAIL_VERIFICATION = config("ACCOUNT_EMAIL_VERIFICATION", cast=str)
+ACCOUNT_REAUTHENTICATION_REQUIRED = config(
+    "ACCOUNT_REAUTHENTICATION_REQUIRED", default=False, cast=bool
+)
+ACCOUNT_REAUTHENTICATION_TIMEOUT = config(
+    "ACCOUNT_REAUTHENTICATION_TIMEOUT", default=300, cast=int
+)
+
+# AUTH_USER_MODEL = "users.CustomUser"
+
+# ACCOUNT_USER_MODEL_USERNAME_FIELD = True
+# ACCOUNT_SIGNUP_FIELDS = ["username"]
+# ACCOUNT_LOGIN_METHODS = {"username"}
+
+ACCOUNT_PASSWORD_CHANGE_REDIRECT_URL = reverse_lazy("home")
+
+# ACCOUNT_FORMS = {"signup": "users.forms.UserRegistrationForm"}
+
+# Allauth Google Account
+# SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+
+# SOCIALACCOUNT_FORMS = {"signup": "users.forms.SocialRegistrationForm"}
+# ACCOUNT_ADAPTER = 'users.adapter.MySocialAccountAdapter'
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": config("GOOGLE_CLIENT_ID"),
+            "secret": config("GOOGLE_SECRET"),
+            "key": "",
+        },
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+        # Comporta che se ci registra in locale con la stessa mail di google,
+        # al login con google, si acceda allo stesso account
+        "EMAIL_AUTHENTICATION": True,
+        "OAUTH_PKCE_ENABLED": True,
+        "FETCH_USERINFO" : True
+
+    }
+}
 
 # Login/Logout redirect URLs
 LOGIN_REDIRECT_URL = 'home'
