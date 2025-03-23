@@ -190,6 +190,35 @@ class MessageWhy(BaseModelDict):
     memory: dict
     model_interactions: List[LLMModelInteraction | EmbedderModelInteraction]
 
+    def get_fileid_from_memory(self, memory_name: str = "declarative", unique=True) -> List[str]:
+        """
+        Extract file IDs from memory based on the memory name.
+
+        Parameters
+        ----------
+        memory_name : str, default="declarative"
+            The name of the memory to extract file IDs from.
+
+        Returns
+        -------
+        List[str]
+            A list of file IDs extracted from the specified memory.
+        """
+
+        if memory_name not in self.memory:
+            return []
+        
+        file_ids = set() if unique else []
+
+        for mem_point in self.memory[memory_name]:
+            metadata = mem_point.get("metadata", {})
+            if "file_id" in metadata:
+
+                file_ids.add(metadata["file_id"]) if unique else file_ids.append(metadata["file_id"])
+
+        return file_ids
+        
+
 class Message(BaseModelDict):
     """
     Base class for working memory history entries.
