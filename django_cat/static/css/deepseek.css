@@ -3356,7 +3356,7 @@ body.dark .ds-tooltip {
 }
 
 .chat-history-item {
-    height: 38px;
+    min-height: 38px;
     color: var(--dsr-text-1);
     background-color: var(--dsr-side-bg);
     cursor: pointer;
