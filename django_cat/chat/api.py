@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import List, Optional, Union
 from django.urls import reverse
 from ninja import Router, File
@@ -86,19 +87,6 @@ def message_generator(message, chat, user):
     final_message_text = final_message.text
     related_file_ids = final_message.why.get_fileid_from_memory("declarative")
 
-    related_files = FileModel.objects.only("id", "title", "file_id").filter(file_id__in=related_file_ids).all()
-
-    # Yield annotations for each related file
-    for file in related_files:
-        yield f"data: {json.dumps({
-            'annotations': {
-                "file_id": file.file_id,
-                "filename": file.title,
-                "link": reverse("file:assoc", kwargs={"file_id": file.file_id}),
-                "preview": file.link,
-            }
-        })}\n\n"
-
     # If no tokens were sent, send final message
     if not send_tokens:
         yield f"data: {json.dumps({'data': final_message_text})}\n\n"
@@ -110,10 +98,9 @@ def message_generator(message, chat, user):
         chat=chat,
     )
 
-    # Associate file to assistant response
-    user_msg.annotations.set(
-        FileModel.objects.filter(file_id__in=related_file_ids).values_list("pk", flat=True)
-    )
+    # Yield annotations for each related file
+    for file in related_file_ids:
+        yield f"data: {json.dumps({'annotations': user_msg.build_single_file_annotation(file, save=True)})}\n\n" 
 
     yield "event: Done\ndata: {}\n\n"
 
@@ -243,11 +230,12 @@ def message_list(request, thread_id: str, data: LimitValueSchema):
         "thread_id": thread_id,
         "messages": [
             {
-                "text": m.text,
-                "timestamp": m.timestamp.isoformat(),
-                "sender": m.sender,
+                "text": msg.text,
+                "timestamp": msg.timestamp.isoformat(),
+                "sender": msg.sender,
+                "annotations": msg.annotations
             }
-            for m in messages
+            for msg in messages
         ]
     }
 

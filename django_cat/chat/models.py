@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.db.models import QuerySet
 
@@ -173,7 +174,7 @@ class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='messages')
 
-    annotations = models.ManyToManyField(File, related_name='messages', blank=True)
+    annotations = models.JSONField(default=list, blank=True)
 
     @classmethod
     def get_last_assistant_message(self, user):
@@ -182,7 +183,36 @@ class Message(models.Model):
             user=user,
             sender=self.Sender.ASSISTANT
         ).order_by('-timestamp').first()
-    
+
+    def build_single_file_annotation(self, file: str | File, save=False):
+        """Build annotations for a single file"""
+        if isinstance(file, str):
+            file = File.objects.only("id", "title", "file_id").get(file_id=file)
+        
+        if not isinstance(file, File):
+            raise ValueError("Invalid file type")
+
+        annotations = {
+            "file_id": file.file_id,
+            "filename": file.title,
+            "link": reverse("file:assoc", kwargs={"file_id": file.file_id}),
+            "preview": file.link,
+        }
+
+        if save:
+            self.annotations.append(annotations)
+            self.save()
+
+        return annotations
+
+    def build_multiple_files_annotation(self, files: list[str | File], save=False):
+        """Build annotations for multiple files"""
+        annotations = []
+        for file in files:
+            annotations.append(
+                self.build_single_file_annotation(file, save=False)
+            )
+
     def send(self):
         """Send message to cat"""
         return self.chat.send_message(self.text)
