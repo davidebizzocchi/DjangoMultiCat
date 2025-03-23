@@ -255,6 +255,13 @@
     .cursor-pointer {
         cursor: pointer;
     }
+
+    /* Annotations */
+    div.annotations-container {
+        max-height: 30vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
 </style>
 {% endblock%}
 
@@ -357,6 +364,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 
 {% include 'chat/components/chat/messages/user.html' %}
 {% include 'chat/components/chat/messages/asst.html' %}
+{% include 'chat/components/chat/messages/annot.html' %}
 
 {% include 'chat/components/sidebar/history/date_group.html' %}
 {% include 'chat/components/sidebar/history/chat_item.html' %}
@@ -391,6 +399,8 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     /* HTML */
     const HTML_USER_MESSAGE = $("#proto-user-msg");
     const HTML_ASST_MESSAGE = $("#proto-asst-msg");
+    const HTML_ANNOT_ELEMENT = $("#proto-annot");
+
     const HTML_DATE_GROUP = $("#proto-history-group");
     const HTML_CHAT_ITEM = $("#proto-cat-item");
     const HTML_CHANGE_NAME = $("#proto-change-name");  // for thread change name
@@ -810,20 +820,16 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 
     function show_old_messages(response) {
         let messages = response.messages;
-        console.log("SHOW OLD MESSAGES!", messages);
-        
+
         messages.forEach(msg => {
             if (msg.sender == "user") {
-                create_user_msg().populate(msg.text);
+                create_user_msg().populate(msg.text).set({"timestamp": msg.timestamp});
             } else {
-                create_asst_msg().populate(msg.text);
+                create_asst_msg().populate(msg.text).set({"timestamp": msg.timestamp}).add_multiple_annotations(msg.annotations);
             }
 
             scroll_chat_to_bottom();
         });
-
-        if (messages.length == 0)
-            prompts_wrapper_dom.show();
     }
 
     function fetch_old_messages() {
@@ -960,8 +966,14 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         message.testo = "";
         message.show();
         message.appendTo(chat_messages_dom);
+
         message.populate = function (text) {
             user ? populate_user_message(message, text) : populate_asst_message(message, text)
+        }
+
+        message.set = function (data) {
+            add_data(message, data);
+            return message;
         }
 
         return message;
@@ -973,7 +985,72 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 
     function create_asst_msg() {
         let msg = create_msg(false);
-        // add_data(msg, {"think_started": "not-started"});
+
+        // [text, Object{number, name, link}]
+        msg.annotations = {};
+        msg.last_annotations_number = 0;
+
+        msg.add_multiple_annotations = function (annots) {
+            console.log("add multiple annotations", annots);
+            annots.forEach(annot => {
+                if (typeof annot == "object" && annot !== null)
+                    this.add_annotation(annot.file_id, annot.filename, annot.link, annot.preview);
+                if (Array.isArray(annot))
+                    this.add_annotation(annot[0], annot[1], annot[2], annot[3]);
+            });
+        }
+
+        msg.add_annotation = function (file_id, name, link, preview) {
+            // Show the annotations wrapper of the message
+            this.find("div.annotations-wrapper").show();
+
+            let annot_number = this.last_annotations_number;
+
+            if (this.annotations[file_id] !== undefined) {
+                annot_number = this.annotations[file_id].number;
+            }
+
+            if (this.annotations[file_id] === undefined) {
+                if (link) {
+                    this.last_annotations_number++;
+
+                    let new_annot = {};
+                    new_annot.link = link;
+                    new_annot.number = this.last_annotations_number;
+                    new_annot.name = name;
+                    new_annot.preview = preview;
+
+                    this.annotations[file_id] = new_annot;
+                }
+            }
+
+            if (annot_number !== this.last_annotations_number && link)
+                this.update_annot_html(file_id);
+
+            return this;
+        }
+
+        msg.update_annot_html = function(new_annot) {
+            let annot = this.annotations[new_annot];
+
+            if (annot === undefined) return;
+
+            let annot_html = HTML_ANNOT_ELEMENT.clone(true);
+            annot_html.removeAttr("id");
+
+            annot_html.find("span.annotation-number").text(annot.number);
+            annot_html.find("div.annotation-file > a").text(annot.name).attr("href", annot.link);
+
+            if (annot.link === "") annot_html.find("div.annotation-file > a").removeClass("text-primary").addClass("text-muted disabled");
+            else annot_html.find("span.annotation-number").removeClass("bg-secondary").addClass("bg-primary");
+
+            annot_html.find("a.annotation-link").attr("href", annot.preview);
+
+            this.find("div.annotations-container").append(annot_html);
+
+            return this;
+        }
+
         return msg;
     }
 
@@ -1527,7 +1604,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         function handle_message_annotations(payload) {
             console.log("ANNOTATIONS", payload);
             asst_msg.add_annotation(
-                payload.text, payload.filename, payload.link
+                payload.file_id, payload.filename, payload.link, payload.preview
             );
         }
     }
