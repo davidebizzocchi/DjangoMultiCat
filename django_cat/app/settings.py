@@ -155,9 +155,6 @@ DATABASES = {
     }
 }
 
-# Email configuration
-# EMAIL_BACKEND= "django.core.mail.backends.console.EmailBackend"
-
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 
@@ -168,7 +165,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # ALLAUTH Accounts
-
 ACCOUNT_EMAIL_NOTIFICATIONS = config("ACCOUNT_EMAIL_NOTIFICATIONS", cast=bool)
 ACCOUNT_EMAIL_VERIFICATION = config("ACCOUNT_EMAIL_VERIFICATION", cast=str)
 ACCOUNT_REAUTHENTICATION_REQUIRED = config(
@@ -178,23 +174,14 @@ ACCOUNT_REAUTHENTICATION_TIMEOUT = config(
     "ACCOUNT_REAUTHENTICATION_TIMEOUT", default=300, cast=int
 )
 
-# AUTH_USER_MODEL = "users.CustomUser"
-
 # ACCOUNT_USER_MODEL_USERNAME_FIELD = True
 # ACCOUNT_SIGNUP_FIELDS = ["username"]
 # ACCOUNT_LOGIN_METHODS = {"username"}
 
 ACCOUNT_PASSWORD_CHANGE_REDIRECT_URL = reverse_lazy("home")
 
-# ACCOUNT_FORMS = {"signup": "users.forms.UserRegistrationForm"}
-
 # Allauth Google Account
-# SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_AUTO_SIGNUP = True
-
-
-# SOCIALACCOUNT_FORMS = {"signup": "users.forms.SocialRegistrationForm"}
-# ACCOUNT_ADAPTER = 'users.adapter.MySocialAccountAdapter'
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -224,6 +211,7 @@ LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = 'users:login'
 LOGOUT_REDIRECT_URL = 'home'
 
+# Email configuration
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = config("EMAIL_HOST", default="localhost")
 EMAIL_PORT = config("EMAIL_PORT", default=25, cast=int)
@@ -235,6 +223,9 @@ EMAIL_USE_SSL = config("EMAIL_USE_SSL", cast=bool)
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 # Imposta il timeout di connessione per il server Django (in secondi)
 CONN_MAX_AGE = 0  # default is 0 https://docs.djangoproject.com/en/5.0/ref/databases/
+
+ADMIN_EMAILS = config("ADMIN_EMAILS", cast=str).strip().split(" ")
+
 
 
 # Password validation
@@ -294,3 +285,21 @@ MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
 
 UPLOADS_ROOT = MEDIA_ROOT / "uploads"
+
+# Debug Toolbar
+INTERNAL_IPS = ["127.0.0.1", "0.0.0.0", "localhost"]
+if DEBUG:
+    import socket
+
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS += [ip[:-1] + "1" for ip in ips]
+
+if config("TOOLBAR_DEBUG", cast=bool, default=DEBUG):
+    INSTALLED_APPS = [
+        *INSTALLED_APPS,
+        "debug_toolbar",
+    ]
+    MIDDLEWARE = [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+        *MIDDLEWARE,
+    ]

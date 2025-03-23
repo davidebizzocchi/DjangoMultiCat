@@ -41,9 +41,12 @@ django==5.1.7
     # via
     #   -r requirements/base.in
     #   django-allauth
+    #   django-debug-toolbar
     #   django-ninja
     #   sentry-sdk
 django-allauth==65.5.0
+    # via -r requirements/base.in
+django-debug-toolbar==5.1.0
     # via -r requirements/base.in
 django-ninja==1.3.0
     # via -r requirements/base.in
@@ -137,7 +140,9 @@ sniffio==1.3.1
 soupsieve==2.6
     # via beautifulsoup4
 sqlparse==0.5.3
-    # via django
+    # via
+    #   django
+    #   django-debug-toolbar
 tiktoken==0.9.0
     # via -r requirements/base.in
 tqdm==4.67.1

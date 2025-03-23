@@ -14,10 +14,14 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from decouple import config
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 from app.static_view import Error403View, Error404View, Error500View
 
@@ -25,6 +29,7 @@ from ninja import NinjaAPI
 from chat.api import router as chat_router
 from file.api import router as file_router
 from agent.api import router as agent_router
+
 
 api = NinjaAPI()
 api.add_router("/chat/", chat_router)
@@ -53,3 +58,6 @@ urlpatterns = [
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+# Django toolbar
+if config("TOOLBAR_DEBUG", cast=bool, default=settings.DEBUG):
+    urlpatterns = debug_toolbar_urls() + urlpatterns
