@@ -18,3 +18,6 @@ Pillow
 tiktoken
 openai
 #docling
+
+django-allauth
+django-allauth[socialaccount]

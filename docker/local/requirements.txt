@@ -2,13 +2,15 @@
 #    uv pip compile requirements/local.in -o docker/local/requirements.txt
 annotated-types==0.7.0
     # via pydantic
-anyio==4.8.0
+anyio==4.9.0
     # via
     #   groq
     #   httpx
     #   openai
 asgiref==3.8.1
-    # via django
+    # via
+    #   django
+    #   django-allauth
 asttokens==3.0.0
     # via icecream
 beautifulsoup4==4.13.3
@@ -19,6 +21,8 @@ certifi==2025.1.31
     #   httpx
     #   requests
     #   sentry-sdk
+cffi==1.17.1
+    # via cryptography
 charset-normalizer==3.4.1
     # via requests
 cheshire-cat-api==1.4.9
@@ -27,15 +31,20 @@ click==8.1.8
     # via gtts
 colorama==0.4.6
     # via icecream
+cryptography==44.0.2
+    # via pyjwt
 distro==1.9.0
     # via
     #   groq
     #   openai
-django==5.1.6
+django==5.1.7
     # via
     #   -r requirements/base.in
+    #   django-allauth
     #   django-ninja
     #   sentry-sdk
+django-allauth==65.5.0
+    # via -r requirements/base.in
 django-ninja==1.3.0
     # via -r requirements/base.in
 django-widget-tweaks==1.5.0
@@ -46,7 +55,7 @@ email-validator==2.2.0
     # via -r requirements/base.in
 executing==2.2.0
     # via icecream
-groq==0.18.0
+groq==0.20.0
     # via -r requirements/base.in
 gtts==2.5.4
     # via -r requirements/base.in
@@ -66,11 +75,13 @@ idna==3.10
     #   email-validator
     #   httpx
     #   requests
-jiter==0.8.2
+jiter==0.9.0
     # via openai
 markdown2==2.5.3
     # via -r requirements/base.in
-openai==1.63.2
+oauthlib==3.2.2
+    # via requests-oauthlib
+openai==1.68.2
     # via -r requirements/base.in
 packaging==24.2
     # via pytesseract
@@ -83,6 +94,8 @@ pillow==11.1.0
     #   pytesseract
 psycopg2-binary==2.9.10
     # via -r requirements/base.in
+pycparser==2.22
+    # via cffi
 pydantic==2.10.6
     # via
     #   cheshire-cat-api
@@ -93,6 +106,8 @@ pydantic-core==2.27.2
     # via pydantic
 pygments==2.19.1
     # via icecream
+pyjwt==2.10.1
+    # via django-allauth
 pytesseract==0.3.13
     # via -r requirements/base.in
 python-dateutil==2.9.0.post0
@@ -104,9 +119,13 @@ regex==2024.11.6
 requests==2.32.3
     # via
     #   -r requirements/base.in
+    #   django-allauth
     #   gtts
+    #   requests-oauthlib
     #   tiktoken
-sentry-sdk==2.22.0
+requests-oauthlib==2.0.0
+    # via django-allauth
+sentry-sdk==2.24.0
     # via -r requirements/base.in
 six==1.17.0
     # via python-dateutil
@@ -130,7 +149,7 @@ typing-extensions==4.12.2
     #   openai
     #   pydantic
     #   pydantic-core
-urllib3==2.2.2
+urllib3==2.0.7
     # via
     #   cheshire-cat-api
     #   requests

@@ -8,7 +8,9 @@ anyio==4.9.0
     #   httpx
     #   openai
 asgiref==3.8.1
-    # via django
+    # via
+    #   django
+    #   django-allauth
 asttokens==3.0.0
     # via icecream
 beautifulsoup4==4.13.3
@@ -20,7 +22,7 @@ certifi==2025.1.31
     #   requests
     #   sentry-sdk
 cffi==1.17.1
-    # via sounddevice
+    # via cryptography
 charset-normalizer==3.4.1
     # via requests
 cheshire-cat-api==1.4.9
@@ -29,6 +31,8 @@ click==8.1.8
     # via gtts
 colorama==0.4.6
     # via icecream
+cryptography==44.0.2
+    # via pyjwt
 distro==1.9.0
     # via
     #   groq
@@ -36,8 +40,11 @@ distro==1.9.0
 django==5.1.7
     # via
     #   -r requirements/base.in
+    #   django-allauth
     #   django-ninja
     #   sentry-sdk
+django-allauth==65.5.0
+    # via -r requirements/base.in
 django-ninja==1.3.0
     # via -r requirements/base.in
 django-widget-tweaks==1.5.0
@@ -78,9 +85,9 @@ jiter==0.9.0
     # via openai
 markdown2==2.5.3
     # via -r requirements/base.in
-numpy==2.2.4
-    # via openai
-openai==1.68.0
+oauthlib==3.2.2
+    # via requests-oauthlib
+openai==1.68.2
     # via -r requirements/base.in
 packaging==24.2
     # via
@@ -107,6 +114,8 @@ pydantic-core==2.27.2
     # via pydantic
 pygments==2.19.1
     # via icecream
+pyjwt==2.10.1
+    # via django-allauth
 pytesseract==0.3.13
     # via -r requirements/base.in
 python-dateutil==2.9.0.post0
@@ -118,9 +127,13 @@ regex==2024.11.6
 requests==2.32.3
     # via
     #   -r requirements/base.in
+    #   django-allauth
     #   gtts
+    #   requests-oauthlib
     #   tiktoken
-sentry-sdk==2.23.1
+requests-oauthlib==2.0.0
+    # via django-allauth
+sentry-sdk==2.24.0
     # via -r requirements/base.in
 setuptools==77.0.3
     # via
@@ -133,8 +146,6 @@ sniffio==1.3.1
     #   anyio
     #   groq
     #   openai
-sounddevice==0.5.1
-    # via openai
 soupsieve==2.6
     # via beautifulsoup4
 sqlparse==0.5.3
