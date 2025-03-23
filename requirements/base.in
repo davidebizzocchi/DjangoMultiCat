@@ -21,3 +21,5 @@ openai
 
 django-allauth
 django-allauth[socialaccount]
+
+django-debug-toolbar

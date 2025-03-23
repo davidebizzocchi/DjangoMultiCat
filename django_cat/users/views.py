@@ -6,6 +6,8 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+
 from users.forms import UserRegistrationForm, LoginForm  # Add LoginForm to import
 from users.models import UserProfile
 
@@ -14,7 +16,16 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 
-class RegisterUserView(UserPassesTestMixin, CreateView):
+
+class AllauthGoogleMixin:
+    def post(self, request, *args, **kwargs):
+        if request.POST.get("action", "none") == "google":
+            adapter = GoogleOAuth2Adapter(request)
+            return adapter.get_provider().redirect_from_request(request)
+        
+        return super().post(request, *args, **kwargs)
+
+class RegisterUserView(AllauthGoogleMixin, UserPassesTestMixin, CreateView):
     form_class = UserRegistrationForm
     template_name = 'users/register.html'
     success_url = reverse_lazy('home')  # Change 'home' with your destination URL
@@ -39,7 +50,7 @@ class RegisterUserView(UserPassesTestMixin, CreateView):
         
         return super().form_valid(form)
 
-class UserLoginView(LoginView):
+class UserLoginView(AllauthGoogleMixin, LoginView):
     template_name = 'users/login.html'
     success_url = reverse_lazy('home')
     redirect_authenticated_user = True

@@ -1,0 +1,26 @@
+<div class="text-center my-5">
+    <h4 class="text-primary mb-4 fw-bold">Oppure</h4>
+
+    <div class="d-flex justify-content-center">
+        <form action="" method="post">
+            <input type="hidden" name="action" value="google">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-success d-flex align-items-center justify-content-center shadow-lg rounded-3" 
+                    style="width: 350px; padding: 16px 28px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/768px-Google_%22G%22_logo.svg.png" 
+                     alt="Google" 
+                     class="me-3" 
+                     style="width: 32px; height: 32px;">
+                <span class="fw-bold fs-5 text-success">Continua con Google</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .btn-outline-success:hover {
+        transform: translateY(-4px);
+        transition: transform 0.2s ease;
+        background-color: white;
+    }
+</style>
