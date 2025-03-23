@@ -1525,8 +1525,11 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 
         user_text = user_text.trim();
 
-        if (chat_messages_dom.length === 1)
+        if (chat_messages_dom.length === 1) {
             chat_header_name_text.text(user_text);
+            find_thread_item(THREAD_ID).find("div.chat-title-text").text(user_text);
+        }
+            
 
         last_user_text = user_text;
 
