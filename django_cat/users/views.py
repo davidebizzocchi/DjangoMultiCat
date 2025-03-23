@@ -32,10 +32,7 @@ class RegisterUserView(UserPassesTestMixin, CreateView):
         user: User = form.save(commit=False)
         user.set_unusable_password()
         user.save()
-        
-        # Create UserProfile
-        UserProfile.objects.create(user=user)
-        
+
         # Auto-login after registration with specified backend
         authenticate(self.request, username=user.username)
         login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
