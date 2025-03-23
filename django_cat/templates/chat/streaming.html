@@ -653,14 +653,19 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         });
 
         // Chat message action buttons
-        $("body").on("click", "div._chat-message-action_", function (event) {
+        $("body").on("click", "div." + class_chat_message_action_button, function (event) {
             let target = $(event.currentTarget);
             let action = target.data("action");
-            let text = target.closest("div.code-content").text();
+            let text = target.closest("div.code-content").text()
+
+            // If requested copy of an assistant message
+            if (text === "")
+                text = target.closest("div.message-actions").find("div.ds-markdown").text();
 
             console.log("HAI PREMUTO TASTO AZIONE MESSAGGI", action, text);
 
             if (action == "copy") {
+                create_error_banner("Text copied successfully.");
                 navigator.clipboard.writeText(text).then(function () {
                     console.log('Async: Copying to clipboard was successful!');
                 }, function (err) {
