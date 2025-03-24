@@ -67,6 +67,9 @@ class User(AbstractUser):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     cheshire_id = models.CharField(unique=True, null=True, blank=True)
+    configured = models.BooleanField(default=False)
+
+    name = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         """UserProfile name"""
