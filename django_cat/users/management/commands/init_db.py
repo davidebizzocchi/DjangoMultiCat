@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from users.models import User, UserProfile
+from allauth.account.models import EmailAddress
 from agent.utils import sync_agent_with_cat
 
 class Command(BaseCommand):
@@ -8,8 +9,15 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # Create admin user
         admin, created = User.objects.get_or_create(
-            username='admin',
+            email='admin@gmail.com',
             defaults={'password': 'admin'}
+        )
+
+        EmailAddress.objects.get_or_create(
+            email=admin.email,
+            user=admin,
+            primary=True,
+            verified=True
         )
 
         if created:

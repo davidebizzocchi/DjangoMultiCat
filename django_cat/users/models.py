@@ -67,7 +67,7 @@ class User(AbstractUser):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     cheshire_id = models.CharField(unique=True, null=True, blank=True)
-    configured = models.BooleanField(default=False)
+    configured = models.BooleanField(default=False, blank=True)
 
     name = models.CharField(max_length=100, blank=True, null=True)
 
@@ -111,7 +111,7 @@ class UserProfile(models.Model):
     
     @staticmethod
     def get_admin() -> "UserProfile":
-        return UserProfile.objects.get(user__username="admin")
+        return UserProfile.objects.get(user__email="admin@gmail.com")
     
     def delete(self):
         self.user.delete()
