@@ -1,29 +1,43 @@
 from django.shortcuts import render, redirect
 from django.views.generic import CreateView, TemplateView
 from django.urls import reverse_lazy
-from django.contrib.auth.models import User
+from users.models import User
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.account.auth_backends import AuthenticationBackend
+from allauth.account.models import EmailAddress
 
 from users.forms import UserRegistrationForm, LoginForm  # Add LoginForm to import
 from users.models import UserProfile
 
-from icecream import ic
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 
+from icecream import ic
+
 
 class AllauthGoogleMixin:
+    def __init__(self, *args, **kwargs):
+        self.backend = AuthenticationBackend()
+
+        super().__init__(*args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         if request.POST.get("action", "none") == "google":
             adapter = GoogleOAuth2Adapter(request)
+            # adapter.redirect_uri_protocol = "https"
+
+            # redirect = adapter.get_provider().redirect_from_request(request)
+            # redirect["Location"] = redirect.url.replace("http%", "https%")
+
             return adapter.get_provider().redirect_from_request(request)
         
         return super().post(request, *args, **kwargs)
+
 
 class RegisterUserView(AllauthGoogleMixin, UserPassesTestMixin, CreateView):
     form_class = UserRegistrationForm
@@ -39,16 +53,16 @@ class RegisterUserView(AllauthGoogleMixin, UserPassesTestMixin, CreateView):
         return redirect(self.get_success_url())
 
     def form_valid(self, form):
-        # Create user without saving to DB
-        user: User = form.save(commit=False)
-        user.set_unusable_password()
-        user.save()
+        try:
+            # Auto-login after registration with specified backend
+            user = User.objects.create_user(email=form.cleaned_data.get("email"), password=form.cleaned_data.get("password"))
+            EmailAddress.objects.create(email=form.cleaned_data.get("email"), user=user, primary=True, verified=False)
+            login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
+            return redirect(self.success_url)
 
-        # Auto-login after registration with specified backend
-        authenticate(self.request, username=user.username)
-        login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
-        
-        return super().form_valid(form)
+        except Exception as e:
+            ic(e)
+            return super().form_valid(form)
 
 class UserLoginView(AllauthGoogleMixin, LoginView):
     template_name = 'users/login.html'
@@ -57,11 +71,9 @@ class UserLoginView(AllauthGoogleMixin, LoginView):
     form_class = LoginForm  # Changed from UserRegistrationForm to LoginForm
 
     def form_valid(self, form):
-        username = form.cleaned_data.get('username')
-        # We ignore the password and use only the username
-        user = authenticate(self.request, username=username)
+        user = self.backend.authenticate(self.request, **form.cleaned_data)
         if user is not None:
-            login(self.request, user)
+            login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect(self.success_url)
         return super().form_invalid(form)
 
