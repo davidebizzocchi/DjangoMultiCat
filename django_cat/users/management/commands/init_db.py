@@ -8,10 +8,18 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # Create admin user
-        admin, created = User.objects.get_or_create(
-            email='admin@gmail.com',
-            defaults={'password': 'admin'}
-        )
+
+        admin_kwargs = {
+            'email': "admin@gmail.com",
+            "password": "admin"
+        }
+
+        if User.objects.filter(**admin_kwargs).exists():
+            admin = User.objects.get(**admin_kwargs)
+            created = True
+        else:
+            admin = User.objects.create_user(**admin_kwargs)
+            created = False
 
         EmailAddress.objects.get_or_create(
             email=admin.email,
