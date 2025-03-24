@@ -156,12 +156,10 @@ DATABASES = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
     # `allauth` specific authentication methods, such as login by email
     "allauth.account.auth_backends.AuthenticationBackend",
-
-    'users.auth.UsernameAuthenticationBackend',
 ]
 
 # ALLAUTH Accounts
@@ -174,9 +172,12 @@ ACCOUNT_REAUTHENTICATION_TIMEOUT = config(
     "ACCOUNT_REAUTHENTICATION_TIMEOUT", default=300, cast=int
 )
 
-# ACCOUNT_USER_MODEL_USERNAME_FIELD = True
-# ACCOUNT_SIGNUP_FIELDS = ["username"]
-# ACCOUNT_LOGIN_METHODS = {"username"}
+AUTH_USER_MODEL = "users.User"
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+ACCOUNT_LOGIN_METHODS = {"email"}
+
 
 ACCOUNT_PASSWORD_CHANGE_REDIRECT_URL = reverse_lazy("home")
 
@@ -205,6 +206,8 @@ SOCIALACCOUNT_PROVIDERS = {
 
     }
 }
+
+# DEFAULT_HTTP_PROTOCOL = "https"
 
 # Login/Logout redirect URLs
 LOGIN_REDIRECT_URL = 'home'
