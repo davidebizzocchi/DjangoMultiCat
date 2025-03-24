@@ -1,36 +1,66 @@
 from django import forms
-from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate
 
+from users.models import User
+
 
 class UserRegistrationForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Enter password'
+    }))
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Confirm password'
+    }))
+    
     class Meta:
         model = User
-        fields = ['username']
+        fields = ['email', 'password']
+        widgets = {
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter email'
+            }),
+        }
+        
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
+        
+        if password and confirm_password and password != confirm_password:
+            self.add_error('confirm_password', "Passwords don't match")
+        
+        return cleaned_data
 
 class LoginForm(AuthenticationForm):
-    # Remove password field
-    password = None
+    username = forms.EmailField(widget=forms.EmailInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Enter email'
+    }))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Enter password'
+    }))
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if 'password' in self.fields:
-            del self.fields['password']
-        self.fields['username'].widget.attrs.update({
-            'placeholder': 'Enter username',
-            'class': 'form-control'
-        })
         
-    def clean(self):
-        username = self.cleaned_data.get('username')
-        if username:
-            self.user_cache = self.get_user()
-        return self.cleaned_data
-
-    def get_user(self):
-        return authenticate(
-            self.request,
-            username=self.cleaned_data.get('username'),
-            password=None
-        )
+    # def clean(self):
+    #     email = self.cleaned_data.get('username')
+    #     password = self.cleaned_data.get('password')
+        
+    #     if email and password:
+    #         self.user_cache = authenticate(
+    #             self.request,
+    #             username=email,
+    #             password=password
+    #         )
+    #         if self.user_cache is None:
+    #             raise forms.ValidationError(
+    #                 "Invalid email or password",
+    #                 code='invalid_login'
+    #             )
+    #     return self.cleaned_data
