@@ -1,8 +1,10 @@
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from allauth.socialaccount.models import SocialAccount
 from cheshire_cat.client import get_user_id, connect_user
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -70,6 +72,13 @@ class UserProfile(models.Model):
     configured = models.BooleanField(default=False, blank=True)
 
     name = models.CharField(max_length=100, blank=True, null=True)
+    is_approved = models.BooleanField(default=False)
+
+    avatar_url = models.URLField(blank=True, null=True)
+
+    @property
+    def configured(self):
+        return self.name is not None
 
     def __str__(self):
         """UserProfile name"""
@@ -109,6 +118,14 @@ class UserProfile(models.Model):
     def password(self):
         return self.user.password
     
+    @property
+    def is_staff(self):
+        return self.user.is_staff
+    
+    @property
+    def is_superuser(self):
+        return self.user.is_superuser
+    
     @staticmethod
     def get_admin() -> "UserProfile":
         return UserProfile.objects.get(user__email="admin@gmail.com")
@@ -131,3 +148,15 @@ class UserProfile(models.Model):
             data = account.values("extra_data").first()
             self.avatar_url = data["picture"]
             self.save()
+
+    def initialize(self):
+        """Initialize the user profile."""
+
+        self.avatar_url = settings.DEFAULT_AVATAR_URL
+        self.save(update_fields=["avatar_url"])
+
+    def approve(self, is_approved: bool = True):
+        """Approve user (or revoke approval)"""
+
+        self.is_approved = is_approved
+        self.save(update_fields=["is_approved"])

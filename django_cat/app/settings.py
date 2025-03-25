@@ -180,6 +180,8 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_LOGIN_METHODS = {"email"}
 
+DEFAULT_AVATAR_URL = "https://cheshirecat.ai/wp-content/uploads/2023/10/Logo-Cheshire-Cat.svg"
+
 
 ACCOUNT_PASSWORD_CHANGE_REDIRECT_URL = reverse_lazy("home")
 
