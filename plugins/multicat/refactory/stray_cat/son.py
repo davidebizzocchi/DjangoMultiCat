@@ -138,3 +138,12 @@ class SonStrayCat(MyStrayCat, CommonStrayCat):
 
         updated_cache_item = CacheItem(f"{self.__build_cache_key()}_working_memory", self.working_memory, -1)
         self.cache.insert(updated_cache_item)
+
+    @property
+    def history(self):
+        return self.working_memory.history
+    
+    @history.setter
+    def history(self, value):
+        self.working_memory.history = value
+        self.update_working_memory_cache()

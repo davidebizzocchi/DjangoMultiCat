@@ -15,10 +15,58 @@ from cat.plugins.multicat.refactory.stray_cat.common import CommonStrayCat
 from cat.plugins.multicat.refactory.stray_cat.son import SonStrayCat
 
 
+from cat.cache.in_memory_cache import InMemoryCache
+from cat.cache.cache_item import CacheItem
+
+from cat.plugins.multicat.cache.users import UserFatherCache
+from cat.plugins.multicat.cache.sons import FatherSonCache
+
+CACHE = UserFatherCache()
+
 # Adapt the StrayCat to curate the SonStrayCat (the perfect father)
 @option(StrayCat)
 class FatherStrayCat(StrayCat, CommonStrayCat):
+    sons: "UserFatherCache"
     bevoled_son_chat_id = "default"
+
+    def _get_user_cache(self, user_id: str) -> UserFatherCache:
+        """Get the user cache"""
+
+        value = CACHE.get_value(user_id)
+
+        if value is not None:
+            return value
+        
+        # User item
+        item = CacheItem(
+            key=user_id,
+            value=FatherSonCache(),
+            ttl=3600  # TODO: make it configurable
+        )
+
+        # Set max number of Son fore each Father
+
+        CACHE.insert(item)
+
+        return item.value
+
+    def _add_son_to_cache(self, user_id: str, chat_id: str, value: SonStrayCat):
+        """Add a son to the cache"""
+
+        user_cache = self._get_user_cache(user_id)
+
+        user_cache.insert(
+            CacheItem(
+                key=chat_id,
+                value=value,
+                ttl=3600  # TODO: make it configurable
+            )
+        )
+
+    def delete_son(self, chat_id: str):
+        """Delete a son from the cache"""
+
+        self.cache.delete(chat_id)
 
     def __init__(
         self,
@@ -30,20 +78,22 @@ class FatherStrayCat(StrayCat, CommonStrayCat):
         self.__user_id = user_data.name # TODOV2: use id
         self.__user_data = user_data
 
-        self.stray_sons: Dict[str, SonStrayCat] = {}
+        self.sons = self._get_user_cache(self.user_id)
 
         super().__init__(user_data)
 
     def create_son(self, chat_id: str):
         """Create a new son"""
 
-        self.stray_sons[chat_id] = SonStrayCat(
+        stray = SonStrayCat(
             chat_id,
             self,
             self.user_data,
         )
-        
-        return self.stray_sons[chat_id]
+
+        self._add_son_to_cache(self.user_id, chat_id, stray)
+
+        return stray
     
     def load_working_memory_from_cache(self):
         """Load the working memory of bevoled son from the cache"""
@@ -71,27 +121,25 @@ class FatherStrayCat(StrayCat, CommonStrayCat):
     @property
     def chat_list(self) -> List:
         """Return the list of chat ids"""
-        return list(self.stray_sons.keys())
+        return list(self.sons.items.keys())
     
     def create_bevoled_son(self):
         """Create the beloved son"""
         return self.create_son(self.bevoled_son_chat_id)
     
     def get_son(self, chat_id: str):
-        """Get the son"""
-        if chat_id not in self.stray_sons:
-            return self.create_son(chat_id)
+        """Get son by chat_id or create a new one"""
         
-        return self.stray_sons[chat_id]
-    
+        result = self.sons.get_value(chat_id)
+
+        if result is None:
+            result = self.create_son(chat_id)
+
+        return result
+
     def get_beloved_son(self):
         """Get the beloved son"""
         return self.get_son(self.bevoled_son_chat_id)
-
-    # @property
-    # def working_memory(self) -> WorkingMemory:
-    #     """Return the beloved son"""
-    #     return self.get_beloved_son().working_memory
 
     def __build_why(self):
         return self.get_beloved_son().__build_why()
