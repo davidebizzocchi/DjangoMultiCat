@@ -1,17 +1,19 @@
 from django.shortcuts import render, redirect
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import CreateView, TemplateView, UpdateView, DetailView
 from django.urls import reverse_lazy
 from users.models import User
 from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth import logout, login, authenticate
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth import logout, login
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.account.auth_backends import AuthenticationBackend
 from allauth.account.models import EmailAddress
 
-from users.forms import UserRegistrationForm, LoginForm  # Add LoginForm to import
+from users.forms import UserRegistrationForm, LoginForm, UserProfileConfigurationForm
 from users.models import UserProfile
+
+from common.mixin import LoginRequiredMixin
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
@@ -57,53 +59,63 @@ class RegisterUserView(AllauthGoogleMixin, UserPassesTestMixin, CreateView):
             # Auto-login after registration with specified backend
             user = User.objects.create_user(email=form.cleaned_data.get("email"), password=form.cleaned_data.get("password"))
             EmailAddress.objects.create(email=form.cleaned_data.get("email"), user=user, primary=True, verified=False)
+
             login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect(self.success_url)
 
         except Exception as e:
             ic(e)
-            return super().form_valid(form)
+            return super().form_invalid(form)
 
 class UserLoginView(AllauthGoogleMixin, LoginView):
     template_name = 'users/login.html'
     success_url = reverse_lazy('home')
     redirect_authenticated_user = True
-    form_class = LoginForm  # Changed from UserRegistrationForm to LoginForm
+    form_class = LoginForm
 
     def form_valid(self, form):
         user = self.backend.authenticate(self.request, **form.cleaned_data)
         if user is not None:
             login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect(self.success_url)
+
         return super().form_invalid(form)
 
 class UserLogoutView(LoginRequiredMixin, LogoutView):
     template_name = 'users/logout.html'
     next_page = reverse_lazy('home')
     http_method_names = ["get", "post"]
-    login_url = reverse_lazy('users:login')  # optional
-
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
-
-class UserProfileView(LoginRequiredMixin, TemplateView):
-    template_name = 'users/profile.html'
     login_url = reverse_lazy('users:login')
+
+class UserProfileView(LoginRequiredMixin, UpdateView):
+    template_name = 'users/profile.html'
+    form_class = UserProfileConfigurationForm
+    success_url = reverse_lazy('users:profile')
+    context_object_name = 'user'
     
-    def get(self, request, *args, **kwargs):
-        user_profile: UserProfile = request.user.userprofile
-        context = {
-            'username': request.user.username,
-            'cheshire_id': user_profile.cheshire_id
-        }
-        return render(request, self.template_name, context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        context.update({
+            "email": self.user.email,
+            "name": self.user.name,
+            "is_approved": self.user.is_approved,
+            "configured": self.user.configured,
+            "avatar_url": self.user.avatar_url,
+            "cheshire_id": getattr(self.user, 'cheshire_id', None)
+        })
+
+        return context
+    
+    def get_object(self, queryset = ...):
+        return self.user
 
 @method_decorator(require_http_methods(["POST"]), name='dispatch')
 class DeleteUserView(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
-        user = request.user
+
         logout(request)
-        user.delete()
+        self.usr.delete()
         return JsonResponse({"status": "success", "redirect_url": reverse_lazy('home')})
 
 class UserListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -111,7 +123,7 @@ class UserListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     login_url = reverse_lazy('users:login')
     
     def test_func(self):
-        return self.request.user.is_staff
+        return self.usr.is_staff
     
     def handle_no_permission(self):
         return redirect('home')

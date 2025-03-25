@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate
 
-from users.models import User
+from users.models import User, UserProfile
 
 
 class UserRegistrationForm(forms.ModelForm):
@@ -64,3 +64,9 @@ class LoginForm(AuthenticationForm):
     #                 code='invalid_login'
     #             )
     #     return self.cleaned_data
+
+class UserProfileConfigurationForm(forms.ModelForm):
+
+    class Meta:
+        model = UserProfile
+        fields = ('name', 'avatar_url')
