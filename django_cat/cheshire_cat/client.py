@@ -11,6 +11,7 @@ from decouple import config
 import io
 import uuid
 
+from cheshire_cat.types.cat_types import UserMessage
 from cheshire_cat.types import AgentRequest, CatMessage, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification, DocReadingProgress
 from cheshire_cat.types import Agent as AgentComplete
 from openai import OpenAI
@@ -108,12 +109,36 @@ class Cat(CatClient):
         self.send(message=message, chat_id="completition")
 
         return "completition"
+    
+    def _check_history(self, chat_id):
+        from chat.models import Chat
+        cat_history_len = self.get_chat_history_length(chat_id)
+
+        # Insert only the last 10 messages
+        if cat_history_len > 10:
+            return
+        
+        chat = Chat.objects.get(chat_id=chat_id)
+
+        # Exclude last user message
+        server_history_len = chat.messages.count()
+        if server_history_len <= cat_history_len:
+            return
+
+        last_index = 11
+        if server_history_len < 11:
+            last_index = server_history_len
+
+        for message in chat.messages.order_by("-timestamp").all()[cat_history_len+1:last_index]:
+            self.insert_message_in_history(chat_id, message.cat_model(), index=0)
 
     def send(self, message, chat_id="default", agent_id=None, *args, **kwargs):
         from chat.models import Chat
         """Send prompt to ws with specific chat_id"""
+
         self._reset_new_message(chat_id)
         self._check_ws_connection()
+        self._check_history(chat_id)
 
         # Retrieve the agent_id if not passed
         if agent_id is None:
@@ -301,8 +326,23 @@ class Cat(CatClient):
             ])
         return ChatHistory()
 
+    def get_chat_history_length(self, chat_id: str):
+        response = self.memory.get_conversation_history_length(chat_id)
+        return response.get("length", 0)
+
     def get_chat_list(self):
         return self.memory.get_working_memories_list()
+
+    def insert_message_in_history(self, chat_id: str, message: Union[CatMessage, UserMessage], index: int = 0):
+        response = self.memory.insert_message_in_conversation_history(
+            chat_id=chat_id,
+            message=message,
+            index=index)
+        
+        if response.get("success", False):
+            return True
+        
+        return False
 
     def register_notification_handler(self, handler, *handler_args, **handler_kwargs) -> str:
         """
@@ -576,6 +616,7 @@ class Cat(CatClient):
             self.create_agent(agent)
 
         return queryset.count()
+
 
 
 @wait_cat
