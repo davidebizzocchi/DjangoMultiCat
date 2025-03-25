@@ -3,21 +3,21 @@ from cat.log import log
 
 def add_redirect_logic(cls):
     """
-    Aggiunge la logica di redirezione a una classe esistente.
-    Modifica dinamicamente il comportamento di __new__.
+    Adds redirection logic to an existing class.
+    Dynamically modifies __new__ behavior.
     """
     if hasattr(cls, "_redirect_class"):
         log.debug(f"Redirect logic already added to {cls.__name__}")
         return
 
-    # Aggiungi l'attributo per la classe di redirezione
+    # Add attribute for redirection class
     cls._redirect_class = None
 
-    # Salva il vecchio __new__ per preservare il comportamento originale
+    # Save old __new__ to preserve original behavior
     original_new = cls.__new__
 
     def new_with_redirect(cls, *args, **kwargs):
-        # Reindirizza se _redirect_class è impostata
+        # Redirect if _redirect_class is set
         if cls._redirect_class:
             if cls.__name__ != cls._redirect_class.__name__:
                 log.debug(f"Redirecting {cls.__name__} to {cls._redirect_class.__name__}")
@@ -26,10 +26,10 @@ def add_redirect_logic(cls):
             # return cls._redirect_class
         return original_new(cls)
 
-    # Sostituisci __new__ con la nuova logica
+    # Replace __new__ with new logic
     cls.__new__ = classmethod(new_with_redirect)
 
-    # Aggiungi un metodo per impostare la classe di redirezione
+    # Add method to set redirection class
     @classmethod
     def set_redirect(cls, redirect_class):
         cls._redirect_class = redirect_class
@@ -39,7 +39,7 @@ def add_redirect_logic(cls):
 
 def set_redirect_class(original_class, redirected_class):
     """
-    Set a class redirection for the original class to the redirected class.
+    Set a class redirection from the original class to the redirected class.
     
     Args:
         original_class (type): The class that will be redirected.

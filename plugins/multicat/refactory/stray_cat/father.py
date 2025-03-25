@@ -21,6 +21,7 @@ from cat.cache.cache_item import CacheItem
 from cat.plugins.multicat.cache.users import UserFatherCache
 from cat.plugins.multicat.cache.sons import FatherSonCache
 
+# Cache
 CACHE = UserFatherCache()
 
 # Adapt the StrayCat to curate the SonStrayCat (the perfect father)
