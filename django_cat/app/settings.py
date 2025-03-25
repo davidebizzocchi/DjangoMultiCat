@@ -115,6 +115,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     "allauth.account.middleware.AccountMiddleware",
+
+    "users.middleware.UserApprovalMiddleware",
 ]
 
 ROOT_URLCONF = 'app.urls'
