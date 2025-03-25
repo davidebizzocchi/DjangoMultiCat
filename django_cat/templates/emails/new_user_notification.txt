@@ -1,0 +1,13 @@
+{{ title }}
+========================================
+Environment: {{ environment }}
+
+Username: {{ username }}
+User ID: {{ user_id }}
+Email: {{ email }}
+
+ACTION REQUIRED:
+Approve user: {{ approve_url }}
+Admin panel: {{ admin_url }}
+
+Django Cat

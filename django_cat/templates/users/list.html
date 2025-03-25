@@ -13,6 +13,8 @@
                     <th>Registration date</th>
                     <th>Last login</th>
                     <th>Cheshire ID</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -22,10 +24,22 @@
                     <td>{{ user.date_joined|date:"d/m/Y H:i" }}</td>
                     <td>{{ user.last_login|date:"d/m/Y H:i"|default:"Never" }}</td>
                     <td>{{ user.userprofile.cheshire_id }}</td>
+                    <td>
+                        {% if user.userprofile.is_approved %}
+                            <span class="badge bg-success">Approved</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'users:manage:approve' pk=user.userprofile.id %}" class="btn btn-sm {% if user.userprofile.is_approved %}btn-danger{% else %}btn-primary{% endif %}">
+                            {% if user.userprofile.is_approved %}Revoke{% else %}Approved{% endif %}
+                        </a>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">No users found</td>
+                    <td colspan="6" class="text-center">No users found</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -120,3 +120,22 @@ class UserListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['users'] = User.objects.all()
         return context
+
+class ApproveUserView(LoginRequiredMixin, DetailView):
+    model = UserProfile
+    template_name = 'users/approve.html'
+    context_object_name = 'user'
+
+    is_superuser_required = True
+    is_staff_required = True
+
+    def post(self, request, *args, **kwargs):
+        profile: UserProfile = self.get_object()
+        action = request.POST.get('action')
+
+        if action == 'approve':
+            profile.approve(True)
+        elif action == 'revoke':
+            profile.approve(False)
+
+        return redirect('users:manage:list')
