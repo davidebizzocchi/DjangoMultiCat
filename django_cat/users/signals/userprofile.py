@@ -11,6 +11,8 @@ def create_user_cheshire_cat(sender, instance: UserProfile, created: bool, **kwa
     if created:
         create_user(instance)
 
+        instance.initialize()
+
 
 @receiver(pre_delete, sender=UserProfile)
 def delete_user_chesshire_cat(sender, instance: UserProfile, **kwargs):

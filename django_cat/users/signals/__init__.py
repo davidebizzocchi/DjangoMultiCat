@@ -1,7 +1,7 @@
-import users.signals.created
-import users.signals.cheshire_cat
+import users.signals.user
+import users.signals.userprofile
 
 __all__ = [
-    "created",
-    "cheshire_cat",
+    "user",
+    "userprofile",
 ]
