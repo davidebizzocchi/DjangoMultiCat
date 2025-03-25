@@ -6,6 +6,8 @@ from django.utils import timezone
 from django.db.models import QuerySet
 
 from common.utils import BaseUserModel
+from cheshire_cat.types.cat_types import UserMessage
+from cheshire_cat.types.new_types import CatMessage
 from library.models import Library
 from agent.models import Agent
 from file.models import File
@@ -222,6 +224,15 @@ class Message(models.Model):
             annotations.append(
                 self.build_single_file_annotation(file, save=False)
             )
+
+    def cat_model(self):
+        """Return the message as a cat model"""
+
+        if self.sender == self.Sender.USER:
+            return UserMessage(text=self.text, chat_id=self.chat.chat_id, user_id=self.chat.userprofile.cheshire_id, when=self.timestamp.timestamp())
+        else:
+            return CatMessage(text=self.text, chat_id=self.chat.chat_id, user_id=self.chat.userprofile.cheshire_id, when=self.timestamp.timestamp())
+
 
     def send(self):
         """Send message to cat"""
