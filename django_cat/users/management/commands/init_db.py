@@ -37,6 +37,8 @@ class Command(BaseCommand):
         user_profile, profile_created = UserProfile.objects.get_or_create(user=admin)
 
         if profile_created:
+            user_profile.name = "Admin"
+            user_profile.is_approved = True
             user_profile.set_id()
             user_profile.set_as_superuser()
             user_profile.save()
