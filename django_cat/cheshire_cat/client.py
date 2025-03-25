@@ -27,6 +27,8 @@ import tiktoken
 
 from django.conf import settings
 
+from users.utils import generate_unhashable_password
+
 
 CatConfig = ccat.Config
 END_STREAM = object()
@@ -662,7 +664,7 @@ def create_user(user):
             "STATIC": ["READ"],
             "STATUS": ["READ"]
         },
-        "password": user.password
+        "password": generate_unhashable_password()
     }
     headers = {"Content-Type": "application/json"}
 
