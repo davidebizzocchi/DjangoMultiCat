@@ -312,3 +312,5 @@ if config("TOOLBAR_DEBUG", cast=bool, default=DEBUG):
         "debug_toolbar.middleware.DebugToolbarMiddleware",
         *MIDDLEWARE,
     ]
+
+SITE_URL = config("SITE_URL", default="http://localhost:8000")
