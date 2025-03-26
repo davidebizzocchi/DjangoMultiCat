@@ -1,46 +1,46 @@
 # DjangoCat 😺
 
-**Django Cheshire Cat AI Integration**  
+**Django Cheshire Cat AI Integration**
 
 A powerful Django implementation of the [Cheshire Cat AI](https://github.com/cheshire-cat-ai/core) framework, enabling natural language interactions with your documents through AI-powered conversations.
 
 > [!IMPORTANT]
 >
-> - **Agent Provider**: [Cheshire Cat AI](https://github.com/cheshire-cat-ai/core)  
+> - **Agent Provider**: [Cheshire Cat AI](https://github.com/cheshire-cat-ai/core)
 >   The core framework for building conversational AI agents.
 >
-> - **Plugin**: [MultiCat](https://github.com/davidebizzocchi/multicat)  
+> - **Plugin**: [MultiCat](https://github.com/davidebizzocchi/multicat)
 >   Enables efficient communication with the Cheshire Cat AI framework.
 >
 
-## ✨ Core Features  
+## ✨ Core Features
 
-### **Conversation Engine**  
+### **Conversation Engine**
 
-- 🐱 Full **Cheshire Cat AI** framework integration  
-- 🦹 Pre-installed **[MultiCat](https://github.com/davidebizzocchi/multicat)** plugin  
-- 🤖 **Multi-Agent** system (currently prompt-based)  
-- 💬 Persistent **multi-chat** history  
+- 🐱 Full **[Cheshire Cat AI](https://github.com/cheshire-cat-ai/core)** framework integration
+- 🦹 Pre-installed **[MultiCat](https://github.com/davidebizzocchi/multicat)** plugin
+- 🤖 **Multi-Agent** system (currently prompt-based)
+- 💬 Persistent **multi-chat** history
 
-### **Document Intelligence**  
+### **Document Intelligence**
 
-- 📂 **Library/Collection** organization  
-- 🔍 **Vector similarity search** (RAG)  
-- 📁 File upload & automatic processing  
-- 🗂️ Metadata tagging system  
+- 📂 **Library/Collection** organization
+- 🔍 **Vector similarity search** (RAG)
+- 📁 File upload & automatic processing
+- 🗂️ Metadata tagging system
 
-### **Deployment & Management**  
+### **Deployment & Management**
 
-- 🐳 Dockerized environment (*development use only*)  
-- 🔄 Version control integration  
+- 🐳 Dockerized environment (*development use only*)
+- 🔄 Version control integration
 
 ---
 
-### **Key Capabilities**  
+### **Key Capabilities**
 
-- **Natural document interaction** - Chat with your files using AI  
-- **Structured content management** - Organize documents into collections  
-- **Customizable conversations** - Different agents for different use cases  
+- **Natural document interaction** - Chat with your files using AI
+- **Structured content management** - Organize documents into collections
+- **Customizable conversations** - Different agents for different use cases
 
 ## ⚙️ Prerequisites
 
