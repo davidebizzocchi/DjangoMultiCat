@@ -1,5 +1,7 @@
 # Personal
 
+docker/prod/
+
 plugins/
 
 !plugins/multicat/
