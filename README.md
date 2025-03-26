@@ -24,9 +24,9 @@ A powerful Django implementation of the [Cheshire Cat AI](https://github.com/che
 
 ### **Document Intelligence**
 
-- 📂 **Library/Collection** organization
+- 📂 **Library** organization
 - 🔍 **Vector similarity search** (RAG)
-- 📁 File upload & automatic processing
+- 📁 **File** upload and automatic processing
 - 🗂️ Metadata tagging system
 
 ### **Deployment & Management**
