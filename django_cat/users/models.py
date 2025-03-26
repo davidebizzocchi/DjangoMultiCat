@@ -128,7 +128,7 @@ class UserProfile(models.Model):
     
     @staticmethod
     def get_admin() -> "UserProfile":
-        return UserProfile.objects.get(user__email="admin@gmail.com")
+        return UserProfile.objects.get(pk=1)
     
     def delete(self):
         self.user.delete()
