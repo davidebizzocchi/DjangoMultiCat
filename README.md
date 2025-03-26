@@ -5,13 +5,10 @@
 A powerful Django implementation of the [Cheshire Cat AI](https://github.com/cheshire-cat-ai/core) framework, enabling natural language interactions with your documents through AI-powered conversations.
 
 > [!IMPORTANT]
->
-> - **Agent Provider**: [Cheshire Cat AI](https://github.com/cheshire-cat-ai/core)
->   The core framework for building conversational AI agents.
->
+> - **Agent Provider**: [CheshireCat AI](https://github.com/cheshire-cat-ai/core)
+>   The core framework that powers the system.
 > - **Plugin**: [MultiCat](https://github.com/davidebizzocchi/multicat)
->   Enables efficient communication with the Cheshire Cat AI framework.
->
+>   Enhances CheshireCat AI by enabling multiple capabilities.
 
 ## ✨ Core Features
 
