@@ -2,6 +2,89 @@
 
 
 
+type: dev
+## Release v1.0.0-24e4e10
+
+### Information
+- **Source branch**: dev
+- **Target branch**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Type**: dev
+- **Previous version**: v1.0.0-24e4e10
+- **New version**: v1.0.0-24e4e10
+- **Code change statistics**:  75 files changed, 2181 insertions(+), 561 deletions(-)
+
+### Commits
+- 17edc29 - removed docker/prod (davidebizzocchi)
+- c3054f6 - fix docker prod nginx (davidebizzocchi)
+- cb6d2ec - fix UserProfile get_admin method (davidebizzocchi)
+- 036910e - add SITE_URL in settings (davidebizzocchi)
+- 1473212 - align plugin (davidebizzocchi)
+- 7973c8a - align plugin (davidebizzocchi)
+- 8abe390 - users init_db command (davidebizzocchi)
+- b90d530 - fix header menu (davidebizzocchi)
+- 839fe50 - user update templates and views (davidebizzocchi)
+- 49e1b83 - user approve email, signals and views (davidebizzocchi)
+- b5d5400 - update user signals names (davidebizzocchi)
+- e60add8 - client use generate_unhashable_password for user on cheshire cat (davidebizzocchi)
+- a3c0506 - UserProfile fields: is_approved, name, avatar_url (davidebizzocchi)
+- e3a07f0 - add user approval middleware (davidebizzocchi)
+- a135161 - client _check_history before send message, .insert_message_in_history, .get_chat_history_length (davidebizzocchi)
+- 46d1728 - message model conversion in cat object (davidebizzocchi)
+- 2c192dc - fix init_db (davidebizzocchi)
+- 6eab392 - update init_db command (davidebizzocchi)
+- fa7648b - login and signup user view and template (davidebizzocchi)
+- b3df043 - fix settings (davidebizzocchi)
+- e404328 - update user forms (davidebizzocchi)
+- ff33f75 - users admin (davidebizzocchi)
+- 76f5794 - UserProfile add name, first_loginupdate migrations (davidebizzocchi)
+- a1d95d0 - add env_type in mail user signals (davidebizzocchi)
+- 6e4de8c - CustomUser and recreate migrations (davidebizzocchi)
+- 570ffaf - settings var for send email about user activities (davidebizzocchi)
+- 334c315 - translated (davidebizzocchi)
+- 5053d3b - v1 (davidebizzocchi)
+- 24e4e10 - makefile (davidebizzocchi)
+- 0102015 - users signals (davidebizzocchi)
+- 789da50 - allauth google login box (davidebizzocchi)
+- ab77ab9 - add django toolbar (davidebizzocchi)
+- 113316b - create userprofile on user created (davidebizzocchi)
+- cad14b8 - settings for allauth (davidebizzocchi)
+- e64844c - add allauth (davidebizzocchi)
+- 50711ee - fix message copy (davidebizzocchi)
+- 348c8d1 - template set name of new chat (davidebizzocchi)
+- 77e72d5 - fix chat header name (davidebizzocchi)
+- 647f320 - streaming modify chat header (davidebizzocchi)
+- 76ff630 - add point memory score (davidebizzocchi)
+- 4d0bb05 - template file assoc (davidebizzocchi)
+- 96cbf69 - Message json annotations (davidebizzocchi)
+- 3ed8ef8 - template style (davidebizzocchi)
+- 3e1565e - streaming little fix (davidebizzocchi)
+- 66d56e6 - chat stream api send annotations (davidebizzocchi)
+- 2b26296 - MessageWhy add method get_fileid_from_memory (davidebizzocchi)
+- a02e644 - template annotations components (davidebizzocchi)
+- 134fa93 - streaming annotatoins on streaming (davidebizzocchi)
+- a16d071 - message add file relations (annotations) (davidebizzocchi)
+- 2a688fb - makefile update-prod (davidebizzocchi)
+- d7073d4 - typo (davidebizzocchi)
+- 380777b - fix plugins (davidebizzocchi)
+- bf5dc3c - chat api thread-info endpoint (davidebizzocchi)
+- d1d5d32 - agent add admin (davidebizzocchi)
+- 9028203 - css streaming update .chat-history-item (davidebizzocchi)
+- e392029 - template chat_item add libraries (davidebizzocchi)
+- 6d8914e - streaming update send_message (davidebizzocchi)
+- b3f51a2 - Add thread informations [libraries] (davidebizzocchi)
+- da9d93d - chat models fix streamg (davidebizzocchi)
+- f7a6b46 - docker prod add ./plugins volume (davidebizzocchi)
+- 455e2c7 - docker prod (davidebizzocchi)
+- cb91f2c - makefile prod build commands (davidebizzocchi)
+- 508be1b - docker local cheschire_cat_models external (davidebizzocchi)
+- cac116e - nginx conf for media files (davidebizzocchi)
+- 83ca095 - add prod in docker (davidebizzocchi)
+- 4fcdf06 - prod requirements (davidebizzocchi)
+
+---
+
+
 type: issue_tool
 ## Release v0.1.1-6b88221
 
