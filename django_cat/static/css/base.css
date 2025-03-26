@@ -1,3 +1,27 @@
 .hidden {
     display: none;
 }
+
+:root {
+    --primary-color: #0d6efd;
+    --primary-dark: #0a58ca;
+    --gradient-start: #0d6efd;
+    --gradient-end: #0143a3;
+    --nav-width: 280px;
+    --transition-speed: 0.3s;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+main {
+    transition: margin var(--transition-speed) ease;
+}
+
+footer {
+    background: var(--primary-dark);
+    color: white;
+    padding: 2rem 0;
+    transition: margin var(--transition-speed) ease;
+}

@@ -1,0 +1,475 @@
+{% extends 'base/base.html' %}
+{% load poll_extras %}
+
+{% block title %}Django Multi Cat - Open Source AI Chat Platform{% endblock %}
+
+{% block head %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+        min-height: 80vh;
+        padding: 8rem 2rem;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        border-bottom-left-radius: 30% 10%;
+        border-bottom-right-radius: 30% 10%;
+        display: flex;
+        align-items: center;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        bottom: -50px;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: white;
+        transform: skewY(-2deg);
+        z-index: 1;
+    }
+    
+    .hero-logo {
+        max-width: 180px;
+        margin: 0;
+        filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+    }
+    
+    .hero-logo:hover {
+        transform: scale(1.1) rotate(-5deg);
+    }
+    
+    .hero-title {
+        font-size: 4.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+        background: linear-gradient(to right, #fff, #e0e0e0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.8rem;
+        font-weight: 300;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .feature-card {
+        border: none;
+        transition: all 0.3s ease;
+        height: 100%;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        border-bottom: 5px solid var(--primary-color);
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+        border: none;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(to right, var(--gradient-end), var(--gradient-start));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(111, 66, 193, 0.4);
+    }
+    
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+    }
+    
+    .btn-outline-primary:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .tech-stack {
+        background-color: #f8f9fa;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+    }
+    
+    .llm-explain {
+        background-color: rgba(111, 66, 193, 0.05);
+        border-left: 5px solid var(--primary-color);
+        border-radius: 15px;
+        padding: 2rem;
+    }
+    
+    .creator-info {
+        margin-top: 2rem;
+        font-size: 1.1rem;
+    }
+    
+    .creator-info a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .creator-info a:hover {
+        text-decoration: underline;
+    }
+    
+    .mission-section {
+        background: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center;
+        background-size: cover;
+        padding: 5rem 0;
+        position: relative;
+        color: white;
+        text-align: center;
+    }
+    
+    .mission-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.6);
+    }
+    
+    .mission-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .feature-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease;
+    }
+    
+    .feature-img:hover {
+        transform: scale(1.03);
+    }
+    
+    .section-title {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 2rem;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+        border-radius: 2px;
+    }
+    
+    .animated-underline {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .animated-underline::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--primary-color);
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.3s ease;
+    }
+    
+    .animated-underline:hover::after {
+        transform: scaleX(1);
+        transform-origin: left;
+    }
+    
+    .cta-section {
+        background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+        padding: 4rem 0;
+        color: white;
+        text-align: center;
+        border-radius: 15px;
+        margin: 4rem 0;
+        box-shadow: 0 15px 35px rgba(111, 66, 193, 0.2);
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section {
+            min-height: 60vh;
+            padding: 6rem 1rem;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.4rem;
+        }
+    }
+    
+    .nav-menu {
+        margin-top: 4rem;
+        padding: 2rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .nav-menu .btn {
+        margin: 0.5rem;
+        min-width: 120px;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-menu .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .nav-menu .btn i {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .hero-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        margin-bottom: 4rem;
+    }
+    
+    .hero-branding {
+        text-align: left;
+        /* margin-right: 2rem; */
+    }
+</style>
+{% endblock %}
+
+{% block contenuto %}
+<div class="hero-section mb-5">
+    <div class="container position-relative">
+        <!-- New Header Layout -->
+        <div class="hero-header">
+            <div class="row align-items-center justify-content-center">
+                <div class="col-auto">
+                    <img src="https://cheshirecat.ai/wp-content/uploads/2023/10/Logo-Cheshire-Cat.svg" 
+                         alt="Cheshire Cat Logo" 
+                         class="hero-logo">
+                </div>
+                <div class="col-md-8 text-md-start text-center ps-md-5">
+                    <h1 class="hero-title mb-3">Multi Cat</h1>
+                    <p class="hero-subtitle mb-2">Open-source platform for AI-powered conversations</p>
+                    <p class="h3 fw-light">Democratizing LLM technologies for everyone</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Authentication Buttons or Navigation Menu -->
+        {% if user.is_authenticated %}
+            <div class="nav-menu">
+                <div class="d-flex justify-content-center gap-4 flex-wrap">
+                    <a href="{% url 'agent:list' %}" class="btn btn-light text-center d-flex flex-column align-items-center">
+                        <i class="fas fa-robot"></i>
+                        <span>Agents</span>
+                    </a>
+                    <a href="{% url 'chat:list' %}" class="btn btn-light text-center d-flex flex-column align-items-center">
+                        <i class="fas fa-comments"></i>
+                        <span>Chats</span>
+                    </a>
+                    <a href="{% url 'library:list' %}" class="btn btn-light text-center d-flex flex-column align-items-center">
+                        <i class="fas fa-book"></i>
+                        <span>Libraries</span>
+                    </a>
+                    <a href="{% url 'file:list' %}" class="btn btn-light text-center d-flex flex-column align-items-center">
+                        <i class="fas fa-folder-open"></i>
+                        <span>Files</span>
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="d-flex justify-content-center gap-4 mt-5">
+                <a href="{% url 'users:register' %}" class="btn btn-light btn-lg px-4 py-2">
+                    <i class="fas fa-user-plus me-2"></i>Get Started - It's Free
+                </a>
+                <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg px-4 py-2">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    <!-- Features Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card feature-card h-100 p-4">
+                <div class="text-center mb-3">
+                    <i class="fas fa-robot feature-icon"></i>
+                </div>
+                <h3 class="h4 text-center">Multi-Agent System</h3>
+                <p class="text-muted text-center">Interact with multiple specialized AI agents through a simple and intuitive interface. Each agent has unique capabilities tailored for different tasks.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-card h-100 p-4">
+                <div class="text-center mb-3">
+                    <i class="fas fa-file-alt feature-icon"></i>
+                </div>
+                <h3 class="h4 text-center">Advanced RAG</h3>
+                <p class="text-muted text-center">Retrieval-Augmented Generation system that allows your AI to answer questions based on your documents with high accuracy.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-card h-100 p-4">
+                <div class="text-center mb-3">
+                    <i class="fas fa-code feature-icon"></i>
+                </div>
+                <h3 class="h4 text-center">Open Source</h3>
+                <p class="text-muted text-center">Completely open source project, developed by the community for the community. Contribute, modify, and extend as you need.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- What is LLM Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
+                 alt="AI Technology" 
+                 class="img-fluid feature-img">
+        </div>
+        <div class="col-lg-6">
+            <div class="llm-explain p-4">
+                <h2 class="h3 mb-4"><i class="fas fa-brain me-2"></i>What is an LLM?</h2>
+                <p>A <strong>Large Language Model (LLM)</strong> is an advanced artificial intelligence system trained on vast amounts of text data to understand and generate human-like language.</p>
+                <p>Our platform leverages LLM technology to provide intelligent conversations with your documents, answering questions and extracting insights.</p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check-circle text-primary me-2"></i>Natural language understanding</li>
+                            <li><i class="fas fa-check-circle text-primary me-2"></i>Context-aware responses</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check-circle text-primary me-2"></i>Document comprehension</li>
+                            <li><i class="fas fa-check-circle text-primary me-2"></i>Continuous learning</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technology Stack Section -->
+    <div class="tech-stack mb-5">
+        <h2 class="h3 text-center mb-4 section-title">Our Technology Stack</h2>
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p>Powered by <strong class="animated-underline">Cheshire Cat AI</strong>, our platform provides:</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-primary me-2"></i>Advanced RAG system</li>
+                            <li><i class="fas fa-check text-primary me-2"></i>Persistent multi-chat</li>
+                            <li><i class="fas fa-check text-primary me-2"></i>Vector memory</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-primary me-2"></i>Document management</li>
+                            <li><i class="fas fa-check text-primary me-2"></i>Multi-agent system</li>
+                            <li><i class="fas fa-check text-primary me-2"></i>Plugin architecture</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 text-center">
+                <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
+                     alt="Technology Stack" 
+                     class="img-fluid feature-img">
+            </div>
+        </div>
+    </div>
+
+    <!-- Mission Section -->
+    <div class="mission-section rounded mb-5">
+        <div class="container mission-content">
+            <h2 class="display-5 mb-4">Our Mission</h2>
+            <p class="lead mb-4">Making LLM technologies accessible to everyone, free and without technical barriers.</p>
+            <p>We believe AI should be democratized and available to all, not just large corporations. That's why we've built this open-source platform that anyone can use, modify, and extend.</p>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="cta-section">
+        <div class="container">
+            <h2 class="display-5 mb-4">Ready to experience AI-powered document conversations?</h2>
+            <p class="lead mb-4">Join our growing community of users and developers</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{% url 'users:register' %}" class="btn btn-light btn-lg px-4">
+                    <i class="fas fa-user-plus me-2"></i>Create Free Account
+                </a>
+                <a href="https://github.com/davidebizzocchi/multicat" target="_blank" class="btn btn-outline-light btn-lg px-4">
+                    <i class="fas fa-puzzle-piece me-2"></i>MultiCat Plugin
+                </a>
+                <a href="https://github.com/davidebizzocchi/DjangoMultiCat" target="_blank" class="btn btn-outline-light btn-lg px-4">
+                    <i class="fab fa-github me-2"></i>View on GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- GitHub Links -->
+    <div class="text-center mb-5">
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="https://github.com/davidebizzocchi/DjangoMultiCat" target="_blank" class="btn btn-primary btn-lg">
+                <i class="fab fa-github me-2"></i>DjangoMultiCat
+            </a>
+            <a href="https://github.com/cheshire-cat-ai/core" target="_blank" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-cat me-2"></i>Cheshire Cat AI
+            </a>
+            <a href="https://github.com/davidebizzocchi/multicat" target="_blank" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-puzzle-piece me-2"></i>MultiCat Plugin
+            </a>
+        </div>
+        <div class="creator-info mt-4">
+            <p>Created and maintained by <a href="https://github.com/davidebizzocchi" target="_blank">Davide Bizzocchi</a> and contributors</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
