@@ -1,50 +1,46 @@
 # DjangoCat 😺
 
-Integrating CheshireCat in Django
+**Django Cheshire Cat AI Integration**
+
+A powerful Django implementation of the [Cheshire Cat AI](https://github.com/cheshire-cat-ai/core) framework, enabling natural language interactions with your documents through AI-powered conversations.
 
 > [!IMPORTANT]
 >
-> - **Agent Provider**: [Cheshire Cat AI](https://github.com/cheshire-cat-ai/core)  
+> - **Agent Provider**: [Cheshire Cat AI](https://github.com/cheshire-cat-ai/core)
 >   The core framework for building conversational AI agents.
 >
-> - **Plugin**: [MultiCat](https://github.com/davidebizzocchi/multicat)  
+> - **Plugin**: [MultiCat](https://github.com/davidebizzocchi/multicat)
 >   Enables efficient communication with the Cheshire Cat AI framework.
 >
 
-**Django integration for the Cheshire Cat AI framework**
+## ✨ Core Features
 
-A Django project integrating the [Cheshire Cat AI](https://github.com/cheshire-cat-ai/core) framework with built-in support for:
+### **Conversation Engine**
 
-- Qdrant vector database
-- [MultiCat](https://github.com/davidebizzocchi/multicat) plugin (pre-installed)
-- Dockerized development environment
-- Managment for libraries (vectorstore), files and chats
+- 🐱 Full **[Cheshire Cat AI](https://github.com/cheshire-cat-ai/core)** framework integration
+- 🦹 Pre-installed **[MultiCat](https://github.com/davidebizzocchi/multicat)** plugin
+- 🤖 **Multi-Agent** system (currently prompt-based)
+- 💬 Persistent **multi-chat** history
 
-## 🚀 Features
+### **Document Intelligence**
 
-- Full Docker integration (Compose files included)
-- Pre-configured Qdrant vector memory
-- Version management system
-- Development tools with Makefile
-- Sample environment configuration
-- Integrated CI/CD-ready versioning
-
-### Built-in Supports
-
-- 🐱 Cheshire Cat AI Framework
-- 📦 Qdrant Vector Database
-- 🤖 MultiCat Plugin (pre-installed)
-- 📚 **Vectorstore Management** (libraries, files, and chat history)
-- 🐳 Dockerized Environment
-- 🔄 Version Control System
-
-### 📚 Data Management
-
-- 📚 Library/Collection organization
-- 📁 File upload & document processing
-- 💬 Chat history persistence
-- 🔍 Vector similarity search
+- 📂 **Library** organization
+- 🔍 **Vector similarity search** (RAG)
+- 📁 **File** upload and automatic processing
 - 🗂️ Metadata tagging system
+
+### **Deployment & Management**
+
+- 🐳 Dockerized environment (*development use only*)
+- 🔄 Version control integration
+
+---
+
+### **Key Capabilities**
+
+- **Natural document interaction** - Chat with your files using AI
+- **Structured content management** - Organize documents into collections
+- **Customizable conversations** - Different agents for different use cases
 
 ## ⚙️ Prerequisites
 
