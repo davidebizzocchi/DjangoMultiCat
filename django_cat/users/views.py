@@ -52,7 +52,7 @@ class RegisterUserView(AllauthGoogleMixin, UserPassesTestMixin, CreateView):
         return not self.request.user.is_authenticated
 
     def handle_no_permission(self):
-        return redirect(self.get_success_url())
+        return redirect(self.success_url)
 
     def form_valid(self, form):
         try:
