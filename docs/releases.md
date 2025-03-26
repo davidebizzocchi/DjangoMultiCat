@@ -2,6 +2,27 @@
 
 
 
+type: issue
+New patch version: v1.0.1
+## Release v1.0.1-fa9ad42
+
+### Information
+- **Source branch**: 71-issue-update-readme2
+- **Target branch**: dev
+- **Issue**: [#71](https://github.com/davidebizzocchi/DjangoCat/issues/71)
+- **Type**: issue
+- **Previous version**: v1.0.0-24e4e10
+- **New version**: v1.0.1-fa9ad42
+- **Code change statistics**:  1 file changed, 25 insertions(+), 29 deletions(-)
+
+### Commits
+- fa9ad42 - readme (davidebizzocchi)
+- fe2aaa4 - typo (davidebizzocchi)
+- bd8dcc1 - restyle readme (davidebizzocchi)
+
+---
+
+
 type: dev
 ## Release v1.0.0-24e4e10
 
