@@ -18,19 +18,7 @@
         display: flex;
         align-items: center;
     }
-    
-    .hero-section::before {
-        content: '';
-        position: absolute;
-        bottom: -50px;
-        left: 0;
-        right: 0;
-        height: 100px;
-        background: white;
-        transform: skewY(-2deg);
-        z-index: 1;
-    }
-    
+
     .hero-logo {
         max-width: 180px;
         margin: 0;
@@ -139,30 +127,6 @@
         text-decoration: underline;
     }
     
-    .mission-section {
-        background: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center;
-        background-size: cover;
-        padding: 5rem 0;
-        position: relative;
-        color: white;
-        text-align: center;
-    }
-    
-    .mission-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.6);
-    }
-    
-    .mission-content {
-        position: relative;
-        z-index: 2;
-    }
-    
     .feature-img {
         max-width: 100%;
         height: auto;
@@ -249,6 +213,40 @@
         backdrop-filter: blur(10px);
     }
     
+    .nav-menu .nav-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 1.5rem;
+        min-width: 160px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: var(--primary-color);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border: 2px solid transparent;
+    }
+    
+    .nav-menu .nav-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-color);
+        background: white;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .nav-menu .nav-card i {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: block;
+    }
+    
+    .nav-menu .nav-card span {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
     .nav-menu .btn {
         margin: 0.5rem;
         min-width: 120px;
@@ -274,202 +272,302 @@
     
     .hero-branding {
         text-align: left;
-        /* margin-right: 2rem; */
+    }
+
+    .creator-card {
+        background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+        border-radius: 12px;
+        padding: 1.8rem;
+        min-width: 200px;
+        transition: all 0.4s ease;
+        text-decoration: none;
+        color: white;
+        box-shadow: 0 4px 15px rgba(111, 66, 193, 0.2);
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    
+    .creator-card:hover::before {
+        transform: translateX(0);
+    }
+    
+    .creator-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(111, 66, 193, 0.3);
+    }
+    
+    .creator-card i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .creator-card span {
+        font-size: 1.2rem;
+        font-weight: 600;
+        display: block;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
 </style>
 {% endblock %}
 
 {% block contenuto %}
-<div class="hero-section mb-5">
-    <div class="container position-relative">
-        <!-- New Header Layout -->
-        <div class="hero-header">
-            <div class="row align-items-center justify-content-center">
-                <div class="col-auto">
-                    <img src="https://cheshirecat.ai/wp-content/uploads/2023/10/Logo-Cheshire-Cat.svg" 
-                         alt="Cheshire Cat Logo" 
-                         class="hero-logo">
-                </div>
-                <div class="col-md-8 text-md-start text-center ps-md-5">
-                    <h1 class="hero-title mb-3">Multi Cat</h1>
-                    <p class="hero-subtitle mb-2">Open-source platform for AI-powered conversations</p>
-                    <p class="h3 fw-light">Democratizing LLM technologies for everyone</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Authentication Buttons or Navigation Menu -->
-        {% if user.is_authenticated %}
-            <div class="nav-menu">
-                <div class="d-flex justify-content-center gap-4 flex-wrap">
-                    <a href="{% url 'agent:list' %}" class="btn btn-light text-center d-flex flex-column align-items-center">
-                        <i class="fas fa-robot"></i>
-                        <span>Agents</span>
-                    </a>
-                    <a href="{% url 'chat:list' %}" class="btn btn-light text-center d-flex flex-column align-items-center">
-                        <i class="fas fa-comments"></i>
-                        <span>Chats</span>
-                    </a>
-                    <a href="{% url 'library:list' %}" class="btn btn-light text-center d-flex flex-column align-items-center">
-                        <i class="fas fa-book"></i>
-                        <span>Libraries</span>
-                    </a>
-                    <a href="{% url 'file:list' %}" class="btn btn-light text-center d-flex flex-column align-items-center">
-                        <i class="fas fa-folder-open"></i>
-                        <span>Files</span>
-                    </a>
-                </div>
-            </div>
-        {% else %}
-            <div class="d-flex justify-content-center gap-4 mt-5">
-                <a href="{% url 'users:register' %}" class="btn btn-light btn-lg px-4 py-2">
-                    <i class="fas fa-user-plus me-2"></i>Get Started - It's Free
-                </a>
-                <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg px-4 py-2">
-                    <i class="fas fa-sign-in-alt me-2"></i>Login
-                </a>
-            </div>
-        {% endif %}
-    </div>
-</div>
-
-<div class="container">
-    <!-- Features Section -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-4">
-            <div class="card feature-card h-100 p-4">
-                <div class="text-center mb-3">
-                    <i class="fas fa-robot feature-icon"></i>
-                </div>
-                <h3 class="h4 text-center">Multi-Agent System</h3>
-                <p class="text-muted text-center">Interact with multiple specialized AI agents through a simple and intuitive interface. Each agent has unique capabilities tailored for different tasks.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card feature-card h-100 p-4">
-                <div class="text-center mb-3">
-                    <i class="fas fa-file-alt feature-icon"></i>
-                </div>
-                <h3 class="h4 text-center">Advanced RAG</h3>
-                <p class="text-muted text-center">Retrieval-Augmented Generation system that allows your AI to answer questions based on your documents with high accuracy.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card feature-card h-100 p-4">
-                <div class="text-center mb-3">
-                    <i class="fas fa-code feature-icon"></i>
-                </div>
-                <h3 class="h4 text-center">Open Source</h3>
-                <p class="text-muted text-center">Completely open source project, developed by the community for the community. Contribute, modify, and extend as you need.</p>
-            </div>
-        </div>
-    </div>
-    
-    <!-- What is LLM Section -->
-    <div class="row align-items-center mb-5">
-        <div class="col-lg-6 mb-4 mb-lg-0">
-            <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
-                 alt="AI Technology" 
-                 class="img-fluid feature-img">
-        </div>
-        <div class="col-lg-6">
-            <div class="llm-explain p-4">
-                <h2 class="h3 mb-4"><i class="fas fa-brain me-2"></i>What is an LLM?</h2>
-                <p>A <strong>Large Language Model (LLM)</strong> is an advanced artificial intelligence system trained on vast amounts of text data to understand and generate human-like language.</p>
-                <p>Our platform leverages LLM technology to provide intelligent conversations with your documents, answering questions and extracting insights.</p>
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-check-circle text-primary me-2"></i>Natural language understanding</li>
-                            <li><i class="fas fa-check-circle text-primary me-2"></i>Context-aware responses</li>
-                        </ul>
+<main>
+    <!-- Hero Section -->
+    <section id="home" class="hero-section mb-5">
+        <div class="container position-relative">
+            <!-- New Header Layout -->
+            <div class="hero-header">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-auto">
+                        <img src="https://cheshirecat.ai/wp-content/uploads/2023/10/Logo-Cheshire-Cat.svg" 
+                             alt="Cheshire Cat Logo" 
+                             class="hero-logo">
                     </div>
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-check-circle text-primary me-2"></i>Document comprehension</li>
-                            <li><i class="fas fa-check-circle text-primary me-2"></i>Continuous learning</li>
-                        </ul>
+                    <div class="col-md-8 text-md-start text-center ps-md-5">
+                        <h1 class="hero-title mb-3">Multi Cat</h1>
+                        <p class="hero-subtitle mb-2">Open-source platform for AI-powered conversations</p>
+                        <p class="h3 fw-light">Democratizing LLM technologies for everyone</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Technology Stack Section -->
-    <div class="tech-stack mb-5">
-        <h2 class="h3 text-center mb-4 section-title">Our Technology Stack</h2>
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <p>Powered by <strong class="animated-underline">Cheshire Cat AI</strong>, our platform provides:</p>
-                <div class="row">
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-check text-primary me-2"></i>Advanced RAG system</li>
-                            <li><i class="fas fa-check text-primary me-2"></i>Persistent multi-chat</li>
-                            <li><i class="fas fa-check text-primary me-2"></i>Vector memory</li>
-                        </ul>
+            
+            <!-- Authentication Buttons or Navigation Menu -->
+            {% if user.is_authenticated %}
+                <div class="nav-menu">
+                    <div class="d-flex justify-content-center gap-4 flex-wrap">
+                        <a href="{% url 'agent:list' %}" class="nav-card text-center d-flex flex-column align-items-center">
+                            <i class="fas fa-robot"></i>
+                            <span>Agents</span>
+                        </a>
+                        <a href="{% url 'chat:list' %}" class="nav-card text-center d-flex flex-column align-items-center">
+                            <i class="fas fa-comments"></i>
+                            <span>Chats</span>
+                        </a>
+                        <a href="{% url 'library:list' %}" class="nav-card text-center d-flex flex-column align-items-center">
+                            <i class="fas fa-book"></i>
+                            <span>Libraries</span>
+                        </a>
+                        <a href="{% url 'file:list' %}" class="nav-card text-center d-flex flex-column align-items-center">
+                            <i class="fas fa-folder-open"></i>
+                            <span>Files</span>
+                        </a>
                     </div>
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-check text-primary me-2"></i>Document management</li>
-                            <li><i class="fas fa-check text-primary me-2"></i>Multi-agent system</li>
-                            <li><i class="fas fa-check text-primary me-2"></i>Plugin architecture</li>
-                        </ul>
+                </div>
+            {% else %}
+                <div class="d-flex justify-content-center gap-4 mt-5">
+                    <a href="{% url 'users:register' %}" class="btn btn-light btn-lg px-4 py-2">
+                        <i class="fas fa-user-plus me-2"></i>Get Started - It's Free
+                    </a>
+                    <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg px-4 py-2">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <div class="container">
+        <!-- Features Section -->
+        <section id="features" class="py-5">
+            <div class="container">
+                <h2 class="section-title h1 text-center mb-5">Key Features</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card feature-card h-100 p-4">
+                            <div class="card-body text-center">
+                                <i class="fas fa-robot feature-icon mb-4"></i>
+                                <h3 class="h4 mb-3">Multi-Agent System</h3>
+                                <p class="text-muted mb-0">Interact with multiple specialized AI agents through a simple and intuitive interface.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card feature-card h-100 p-4">
+                            <div class="card-body text-center">
+                                <i class="fas fa-file-alt feature-icon mb-4"></i>
+                                <h3 class="h4 mb-3">Advanced RAG</h3>
+                                <p class="text-muted mb-0">Retrieval-Augmented Generation system that allows your AI to answer questions based on your documents.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card feature-card h-100 p-4">
+                            <div class="card-body text-center">
+                                <i class="fas fa-code feature-icon mb-4"></i>
+                                <h3 class="h4 mb-3">Open Source</h3>
+                                <p class="text-muted mb-0">Completely open source project, developed by the community for the community.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 text-center">
-                <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
-                     alt="Technology Stack" 
-                     class="img-fluid feature-img">
+        </section>
+
+        <!-- LLM Section -->
+        <section id="llm" class="py-5">
+            <div class="container">
+                <div class="card llm-explain">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-6 mb-4 mb-lg-0">
+                                <div class="p-4 h-100">
+                                    <h2 class="h3 mb-4"><i class="fas fa-brain me-2"></i>What is an LLM?</h2>
+                                    <p class="mb-0">A <strong>Large Language Model (LLM)</strong> is an advanced artificial intelligence system trained on vast amounts of text data.</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="p-4 h-100">
+                                    <h2 class="h3 mb-4"><i class="fas fa-brain me-2"></i>How is LLM used?</h2>
+                                    <p>Our platform leverages LLM technology to provide intelligent conversations with your documents.</p>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <ul class="list-unstyled mb-0">
+                                                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i>Natural language</li>
+                                                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i>Context-aware</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-6">
+                                            <ul class="list-unstyled mb-0">
+                                                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i>Document analysis</li>
+                                                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i>Continuous learning</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- Mission Section -->
-    <div class="mission-section rounded mb-5">
-        <div class="container mission-content">
-            <h2 class="display-5 mb-4">Our Mission</h2>
-            <p class="lead mb-4">Making LLM technologies accessible to everyone, free and without technical barriers.</p>
-            <p>We believe AI should be democratized and available to all, not just large corporations. That's why we've built this open-source platform that anyone can use, modify, and extend.</p>
-        </div>
-    </div>
-
-    <!-- CTA Section -->
-    <div class="cta-section">
-        <div class="container">
-            <h2 class="display-5 mb-4">Ready to experience AI-powered document conversations?</h2>
-            <p class="lead mb-4">Join our growing community of users and developers</p>
-            <div class="d-flex justify-content-center gap-3 flex-wrap">
-                <a href="{% url 'users:register' %}" class="btn btn-light btn-lg px-4">
-                    <i class="fas fa-user-plus me-2"></i>Create Free Account
-                </a>
-                <a href="https://github.com/davidebizzocchi/multicat" target="_blank" class="btn btn-outline-light btn-lg px-4">
-                    <i class="fas fa-puzzle-piece me-2"></i>MultiCat Plugin
-                </a>
-                <a href="https://github.com/davidebizzocchi/DjangoMultiCat" target="_blank" class="btn btn-outline-light btn-lg px-4">
-                    <i class="fab fa-github me-2"></i>View on GitHub
-                </a>
+        <!-- Technology Stack Section -->
+        <section id="technology" class="py-5">
+            <div class="container">
+                <div class="card tech-stack">
+                    <div class="card-body p-4">
+                        <h2 class="h3 text-center mb-4 section-title">Our Technology Stack</h2>
+                        <p class="text-center mb-4">Powered by <strong class="animated-underline">Cheshire Cat AI</strong>, our platform provides:</p>
+                        <div class="row justify-content-center">
+                            <div class="col-lg-8">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled mb-0">
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Advanced RAG system</li>
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Persistent multi-chat</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled mb-0">
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Document management</li>
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Multi-agent system</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- GitHub Links -->
-    <div class="text-center mb-5">
-        <div class="d-flex justify-content-center gap-3 flex-wrap">
-            <a href="https://github.com/davidebizzocchi/DjangoMultiCat" target="_blank" class="btn btn-primary btn-lg">
-                <i class="fab fa-github me-2"></i>DjangoMultiCat
-            </a>
-            <a href="https://github.com/cheshire-cat-ai/core" target="_blank" class="btn btn-outline-primary btn-lg">
-                <i class="fas fa-cat me-2"></i>Cheshire Cat AI
-            </a>
-            <a href="https://github.com/davidebizzocchi/multicat" target="_blank" class="btn btn-outline-primary btn-lg">
-                <i class="fas fa-puzzle-piece me-2"></i>MultiCat Plugin
-            </a>
-        </div>
-        <div class="creator-info mt-4">
-            <p>Created and maintained by <a href="https://github.com/davidebizzocchi" target="_blank">Davide Bizzocchi</a> and contributors</p>
-        </div>
+        <!-- Mission Section -->
+        <section id="mission" class="py-5">
+            <div class="container">
+                <div class="card tech-stack">
+                    <div class="card-body p-4">
+                        <h2 class="h3 text-center mb-4 section-title">Our Mission</h2>
+                        <div class="row justify-content-center">
+                            <div class="col-lg-8 text-center">
+                                <div class="mb-4">
+                                    <i class="fas fa-bullseye feature-icon mb-3"></i>
+                                    <p class="lead mb-3">Making LLM technologies accessible to everyone, free and without technical barriers.</p>
+                                    <p class="mb-4">We believe AI should be democratized and available to all, not just large corporations.</p>
+                                </div>
+                                <div class="row justify-content-center">
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled mb-0">
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Open Source</li>
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Free to Use</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled mb-0">
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Community Driven</li>
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>No Technical Barriers</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section id="cta" class="py-6">
+            <div class="cta-section">
+                <div class="container">
+                    <h2 class="display-5 mb-4">Ready to experience AI-powered document conversations?</h2>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{% url 'users:register' %}" class="btn btn-light btn-lg px-4">
+                            <i class="fas fa-user-plus me-2"></i>Create Free Account
+                        </a>
+                        <a href="https://github.com/davidebizzocchi/multicat" target="_blank" class="btn btn-outline-light btn-lg px-4">
+                            <i class="fab fa-github me-2"></i>View on GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Creator Info & Links Section -->
+        <section id="creator-info" class="py-5">
+            <div class="container">
+                <div class="card tech-stack">
+                    <div class="card-body p-4">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-10 text-center">
+                                <h4 class="mb-4">Created with <i class="fas fa-heart text-danger"></i> by</h4>
+                                <p class="mb-4">
+                                    <a href="https://github.com/davidebizzocchi" target="_blank" class="animated-underline">
+                                        <i class="fab fa-github me-2"></i>Davide Bizzocchi
+                                    </a>
+                                </p>
+                                <div class="row g-4 justify-content-center">
+                                    <div class="col-md-4">
+                                        <a href="https://github.com/davidebizzocchi/DjangoMultiCat" target="_blank" 
+                                           class="creator-card text-center d-flex flex-column align-items-center">
+                                            <i class="fab fa-github"></i>
+                                            <span>DjangoMultiCat</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <a href="https://cheshirecat.ai" target="_blank" 
+                                           class="creator-card text-center d-flex flex-column align-items-center">
+                                            <i class="fas fa-cat"></i>
+                                            <span>Cheshire Cat</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <a href="https://github.com/davidebizzocchi/multicat" target="_blank" 
+                                           class="creator-card text-center d-flex flex-column align-items-center">
+                                            <i class="fas fa-puzzle-piece"></i>
+                                            <span>MultiCat Plugin</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
-</div>
+</main>
 {% endblock %}
