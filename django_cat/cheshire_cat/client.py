@@ -606,11 +606,11 @@ class Cat(CatClient):
     
     def sync_agents(self):
         from agent.models import Agent
-        """One-way: django - cat, this because cat don't know what user has created an agent"""
+        """One-way: django -> cat, this because cat don't know what user has created an agent"""
         
         agents = self.list_agents()
-        ids = [agent.id for agent in agents]
-        ids.append("default")
+        ids = {agent.id for agent in agents}
+        ids.add("default")
 
         queryset = Agent.objects.exclude(agent_id__in=ids)
 
