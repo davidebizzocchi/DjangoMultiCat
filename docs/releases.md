@@ -3,6 +3,25 @@
 
 
 type: issue
+New patch version: v1.0.2
+## Release v1.0.2-2018681
+
+### Information
+- **Source branch**: 74-issue-text-in-homepage
+- **Target branch**: dev
+- **Issue**: [#74](https://github.com/davidebizzocchi/DjangoCat/issues/74)
+- **Type**: issue
+- **Previous version**: v1.0.1-fa9ad42
+- **New version**: v1.0.2-2018681
+- **Code change statistics**: 
+
+### Commits
+
+
+---
+
+
+type: issue
 New patch version: v1.0.1
 ## Release v1.0.1-fa9ad42
 
