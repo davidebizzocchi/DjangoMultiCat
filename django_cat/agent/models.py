@@ -1,19 +1,14 @@
 from typing import Any, Union
 from django.db import models
 from django.db.models import Q
+from django.conf import settings
 
 from cheshire_cat.types import AgentRequest, Agent as AgentModel
 from common.utils import BaseUserModel
 
-from icecream import ic
-
-CAPABILITIES_TO_PLUGINS = {
-    "WebSearch": "miaotore",
-    "Gerry Scotti": "gerry_scatty"
-}
 
 def validate_capabilities(value):
-    if not all([capability in CAPABILITIES_TO_PLUGINS.keys() for capability in value]):
+    if not all([capability in settings.CAPABILITIES_TO_PLUGINS.keys() for capability in value]):
         raise ValueError("Invalid capabilities")
 
 
@@ -51,7 +46,7 @@ class Agent(BaseUserModel):
     @property
     def agent(self) -> Union[AgentModel, AgentRequest]:
         metadata = self.metadata.copy()
-        metadata["plugins"] = [CAPABILITIES_TO_PLUGINS[cap] for cap in self.capabilities]
+        metadata["plugins"] = [settings.CAPABILITIES_TO_PLUGINS[cap] for cap in self.capabilities]
 
         if self.agent_id is None:
             return AgentRequest(

@@ -1,11 +1,14 @@
 from django import forms
 import json
-from agent.models import Agent, CAPABILITIES_TO_PLUGINS, validate_capabilities
+from agent.models import Agent, validate_capabilities
+
+from django.conf import settings
+
 
 class AgentForm(forms.ModelForm):
     capabilities = forms.MultipleChoiceField(
         choices=[ (capability, capability)
-            for capability in CAPABILITIES_TO_PLUGINS.keys()
+            for capability in settings.CAPABILITIES_TO_PLUGINS.keys()
         ],
         required=False,
         validators=[validate_capabilities]

@@ -16,6 +16,8 @@ import os
 from django.contrib.messages import constants as messages
 from django.urls import reverse_lazy
 
+from app.utils import string_to_dict
+
 
 ENVIRONMENT_TYPE = config("ENVIRONMENT_TYPE", default="none")
 
@@ -25,6 +27,18 @@ LLM_MODEL_TEXT_ID = config("LLM_MODEL_TEXT_ID", "")
 LLM_MODEL_AUDIO_TRANSCRIPTION_ID = config("LLM_MODEL_AUDIO_TRANSCRIPTION_ID", "")
 # LLM_MODEL_AUDIO_SPEAK_ID = config("LLM_MODEL_AUDIO_ID", "gtts")  # if not given use gtts (Google Translate’s text-to-speech API)
 LLM_MODEL_AUDIO_SPEAK_ID = "gtts"
+
+CAPABILITIES_TO_PLUGINS = string_to_dict(
+    config("CAPABILITIES_PLUGINS", default=""),
+    separator=",",
+    value_len=1
+)
+
+
+{
+    "WebSearch": "miaotore",
+    "Gerry Scotti": "gerry_scatty"
+}
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
