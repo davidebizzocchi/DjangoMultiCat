@@ -20,14 +20,45 @@
     }
 
     .hero-logo {
-        max-width: 180px;
+        max-width: 200px;
         margin: 0;
         filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+        transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        cursor: pointer;
+        transform-origin: center;
+    }
+
+    @keyframes logoRotate {
+        0% {
+            transform: scale(1.5) rotate(-25deg) translateY(0px);
+        }
+        40% {
+            transform: scale(1.5) rotate(4deg) translateY(-10px);
+        }
+        /* 75% {
+            transform: scale(1.5) rotate(-8deg) translateY(-5px);
+        } */
+        100% {
+            transform: scale(1.5) rotate(-25deg) translateY(0px);
+        }
     }
     
     .hero-logo:hover {
-        transform: scale(1.1) rotate(-5deg);
+        transform: scale(1.5);
+        transform-origin: center;
+
+        /* filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3)) brightness(1.1); */
+        animation: logoRotate 2s ease-in-out infinite;
     }
+
+    .hero-logo:hover ~ .hero-logo-help-text {
+        visibility: hidden;
+    }
+/*     
+    .hero-logo:active {
+        transform: scale(0.95) rotate(0deg);
+        transition: all 0.1s ease;
+    } */
     
     .hero-title {
         font-size: 4.5rem;
@@ -264,9 +295,9 @@
     }
     
     .hero-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-evenly;
+        /* display: flex; */
+        /* align-items: center; */
+        /* justify-content: space-evenly; */
         margin-bottom: 4rem;
     }
     
@@ -275,41 +306,43 @@
     }
 
     .creator-card {
-        background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
-        border-radius: 12px;
-        padding: 1.8rem;
-        min-width: 200px;
+        background: var(--primary-color);
         transition: all 0.4s ease;
-        text-decoration: none;
-        color: white;
-        box-shadow: 0 4px 15px rgba(111, 66, 193, 0.2);
-        border: 2px solid transparent;
         position: relative;
         overflow: hidden;
+        border-radius: 30px;
     }
 
-    
-    .creator-card:hover::before {
-        transform: translateX(0);
-    }
-    
     .creator-card:hover {
-        transform: translateY(-5px) scale(1.02);
-        box-shadow: 0 8px 25px rgba(111, 66, 193, 0.3);
+        transform: translateY(-5px);
     }
     
     .creator-card i {
         font-size: 2.5rem;
-        margin-bottom: 1rem;
-        display: block;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     }
-    
-    .creator-card span {
+
+    .author-link {
+        display: inline-block;
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+        color: white !important;
+        text-decoration: none;
         font-size: 1.2rem;
         font-weight: 600;
-        display: block;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(111, 66, 193, 0.2);
+    }
+    
+    .author-link:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(111, 66, 193, 0.3);
+        text-decoration: none !important;
+    }
+    
+    .author-link i {
+        font-size: 1.4rem;
+        vertical-align: middle;
     }
 </style>
 {% endblock %}
@@ -321,13 +354,14 @@
         <div class="container position-relative">
             <!-- New Header Layout -->
             <div class="hero-header">
-                <div class="row align-items-center justify-content-center">
-                    <div class="col-auto">
+                <div class="row align-items-center justify-content-around">
+                    <div class="col-auto row align-items-center justify-content-center">
                         <img src="https://cheshirecat.ai/wp-content/uploads/2023/10/Logo-Cheshire-Cat.svg" 
                              alt="Cheshire Cat Logo" 
                              class="hero-logo">
+                        <span class="hero-logo-help-text text-muted fw-bold">Press me!</span>
                     </div>
-                    <div class="col-md-8 text-md-start text-center ps-md-5">
+                    <div class="col-md-8 text-md-start text-center ps-md-5 w-50">
                         <h1 class="hero-title mb-3">Multi Cat</h1>
                         <p class="hero-subtitle mb-2">Open-source platform for AI-powered conversations</p>
                         <p class="h3 fw-light">Democratizing LLM technologies for everyone</p>
@@ -533,32 +567,42 @@
                     <div class="card-body p-4">
                         <div class="row justify-content-center">
                             <div class="col-lg-10 text-center">
-                                <h4 class="mb-4">Created with <i class="fas fa-heart text-danger"></i> by</h4>
-                                <p class="mb-4">
-                                    <a href="https://github.com/davidebizzocchi" target="_blank" class="animated-underline">
-                                        <i class="fab fa-github me-2"></i>Davide Bizzocchi
+                                <h1 class="mb-4">Created with <i class="fas fa-heart text-danger"></i> by</h1>
+
+                                <h3 class="mb-4 p-4">
+                                    <a class="animated-underline text-decoration-none text-primary" href="https://github.com/davidebizzocchi" target="_blank">
+                                        <i class="fab fa-github me-3"></i>Davide Bizzocchi
                                     </a>
-                                </p>
+                                </h3>
                                 <div class="row g-4 justify-content-center">
                                     <div class="col-md-4">
                                         <a href="https://github.com/davidebizzocchi/DjangoMultiCat" target="_blank" 
-                                           class="creator-card text-center d-flex flex-column align-items-center">
-                                            <i class="fab fa-github"></i>
-                                            <span>DjangoMultiCat</span>
+                                           class="creator-card card h-100 text-white text-decoration-none p-4 text-center">
+                                            <div class="card-body d-flex flex-column align-items-center">
+                                                <i class="fab fa-github mb-3"></i>
+                                                <h5 class="card-title fw-bold">DjangoMultiCat</h5>
+                                                <p class="card-text small opacity-75">Framework web principale</p>
+                                            </div>
                                         </a>
                                     </div>
                                     <div class="col-md-4">
                                         <a href="https://cheshirecat.ai" target="_blank" 
-                                           class="creator-card text-center d-flex flex-column align-items-center">
-                                            <i class="fas fa-cat"></i>
-                                            <span>Cheshire Cat</span>
+                                           class="creator-card card h-100 text-white text-decoration-none p-4 text-center">
+                                            <div class="card-body d-flex flex-column align-items-center">
+                                                <i class="fas fa-cat mb-3"></i>
+                                                <h5 class="card-title fw-bold">Cheshire Cat</h5>
+                                                <p class="card-text small opacity-75">Core AI Framework</p>
+                                            </div>
                                         </a>
                                     </div>
                                     <div class="col-md-4">
                                         <a href="https://github.com/davidebizzocchi/multicat" target="_blank" 
-                                           class="creator-card text-center d-flex flex-column align-items-center">
-                                            <i class="fas fa-puzzle-piece"></i>
-                                            <span>MultiCat Plugin</span>
+                                           class="creator-card card h-100 text-white text-decoration-none p-4 text-center">
+                                            <div class="card-body d-flex flex-column align-items-center">
+                                                <i class="fas fa-puzzle-piece mb-3"></i>
+                                                <h5 class="card-title fw-bold">MultiCat Plugin</h5>
+                                                <p class="card-text small opacity-75">Estensione Multi-Agent</p>
+                                            </div>
                                         </a>
                                     </div>
                                 </div>
