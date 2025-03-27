@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {% block head %}{% endblock %}
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <script>
         const csrftoken = getCookie('csrftoken');
         function getCookie(name) {
@@ -37,7 +37,7 @@
     {% include 'base/messages.html' %}
     {% include 'base/header.html' %}
 
-    <div id="contenuto-container" class="container mt-4">
+    <div id="contenuto-container" class="container mt-4 flex-grow-1">
         {% block contenuto %}
         {% endblock %}
     </div>

@@ -13,6 +13,8 @@
         color: white;
         position: relative;
         overflow: hidden;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
         border-bottom-left-radius: 30% 10%;
         border-bottom-right-radius: 30% 10%;
         display: flex;
@@ -22,7 +24,7 @@
     .hero-logo {
         max-width: 200px;
         margin: 0;
-        filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+        filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
         transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         cursor: pointer;
         transform-origin: center;
@@ -32,9 +34,11 @@
         0% {
             transform: scale(1.5) rotate(-25deg) translateY(0px);
         }
+
         40% {
             transform: scale(1.5) rotate(4deg) translateY(-10px);
         }
+
         /* 75% {
             transform: scale(1.5) rotate(-8deg) translateY(-5px);
         } */
@@ -42,7 +46,7 @@
             transform: scale(1.5) rotate(-25deg) translateY(0px);
         }
     }
-    
+
     .hero-logo:hover {
         transform: scale(1.5);
         transform-origin: center;
@@ -51,25 +55,43 @@
         animation: logoRotate 2s ease-in-out infinite;
     }
 
-    .hero-logo:hover ~ .hero-logo-help-text {
+    .hero-logo:hover~.hero-logo-help-text {
         visibility: hidden;
     }
-/*     
-    .hero-logo:active {
-        transform: scale(0.95) rotate(0deg);
-        transition: all 0.1s ease;
-    } */
-    
+
+    @keyframes flicker {
+        0% {
+            opacity: 1
+        }
+
+        20% {
+            opacity: 0.6
+        }
+
+        50% {
+            opacity: 0
+        }
+
+        100% {
+            opacity: 1
+        }
+
+    }
+
+    .flicker {
+        animation: flicker 8s linear infinite both;
+    }
+
     .hero-title {
         font-size: 4.5rem;
         font-weight: 800;
         margin-bottom: 1.5rem;
-        text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
         background: linear-gradient(to right, #fff, #e0e0e0);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
-    
+
     .hero-subtitle {
         font-size: 1.8rem;
         font-weight: 300;
@@ -79,22 +101,22 @@
         margin-left: auto;
         margin-right: auto;
     }
-    
+
     .feature-card {
         border: none;
         transition: all 0.3s ease;
         height: 100%;
         border-radius: 15px;
         overflow: hidden;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         border-bottom: 5px solid var(--primary-color);
     }
-    
+
     .feature-card:hover {
         transform: translateY(-10px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
     }
-    
+
     .feature-icon {
         font-size: 2.5rem;
         background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
@@ -102,7 +124,7 @@
         -webkit-text-fill-color: transparent;
         margin-bottom: 1rem;
     }
-    
+
     .btn-primary {
         background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
         border: none;
@@ -110,72 +132,72 @@
         font-weight: 600;
         box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
     }
-    
+
     .btn-primary:hover {
         background: linear-gradient(to right, var(--gradient-end), var(--gradient-start));
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(111, 66, 193, 0.4);
     }
-    
+
     .btn-outline-primary {
         color: var(--primary-color);
         border-color: var(--primary-color);
         padding: 0.75rem 2rem;
         font-weight: 600;
     }
-    
+
     .btn-outline-primary:hover {
         background: var(--primary-color);
         color: white;
     }
-    
+
     .tech-stack {
         background-color: #f8f9fa;
         border-radius: 15px;
         padding: 2rem;
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
     }
-    
+
     .llm-explain {
         background-color: rgba(111, 66, 193, 0.05);
         border-left: 5px solid var(--primary-color);
         border-radius: 15px;
         padding: 2rem;
     }
-    
+
     .creator-info {
         margin-top: 2rem;
         font-size: 1.1rem;
     }
-    
+
     .creator-info a {
         color: var(--primary-color);
         text-decoration: none;
         font-weight: 600;
     }
-    
+
     .creator-info a:hover {
         text-decoration: underline;
     }
-    
+
     .feature-img {
         max-width: 100%;
         height: auto;
         border-radius: 10px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         transition: transform 0.3s ease;
     }
-    
+
     .feature-img:hover {
         transform: scale(1.03);
     }
-    
+
     .section-title {
         position: relative;
         display: inline-block;
         margin-bottom: 2rem;
     }
-    
+
     .section-title::after {
         content: '';
         position: absolute;
@@ -187,12 +209,12 @@
         background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
         border-radius: 2px;
     }
-    
+
     .animated-underline {
         position: relative;
         display: inline-block;
     }
-    
+
     .animated-underline::after {
         content: '';
         position: absolute;
@@ -205,12 +227,12 @@
         transform-origin: right;
         transition: transform 0.3s ease;
     }
-    
+
     .animated-underline:hover::after {
         transform: scaleX(1);
         transform-origin: left;
     }
-    
+
     .cta-section {
         background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
         padding: 4rem 0;
@@ -220,30 +242,30 @@
         margin: 4rem 0;
         box-shadow: 0 15px 35px rgba(111, 66, 193, 0.2);
     }
-    
+
     @media (max-width: 768px) {
         .hero-section {
             min-height: 60vh;
             padding: 6rem 1rem;
         }
-        
+
         .hero-title {
             font-size: 3rem;
         }
-        
+
         .hero-subtitle {
             font-size: 1.4rem;
         }
     }
-    
+
     .nav-menu {
         margin-top: 4rem;
         padding: 2rem;
-        background: rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 15px;
         backdrop-filter: blur(10px);
     }
-    
+
     .nav-menu .nav-card {
         background: rgba(255, 255, 255, 0.9);
         border-radius: 12px;
@@ -252,17 +274,17 @@
         transition: all 0.3s ease;
         text-decoration: none;
         color: var(--primary-color);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         border: 2px solid transparent;
     }
-    
+
     .nav-menu .nav-card:hover {
         transform: translateY(-5px);
         border-color: var(--primary-color);
         background: white;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
-    
+
     .nav-menu .nav-card i {
         font-size: 2rem;
         margin-bottom: 1rem;
@@ -271,36 +293,36 @@
         -webkit-text-fill-color: transparent;
         display: block;
     }
-    
+
     .nav-menu .nav-card span {
         font-size: 1.1rem;
         font-weight: 600;
         color: #333;
     }
-    
+
     .nav-menu .btn {
         margin: 0.5rem;
         min-width: 120px;
         transition: all 0.3s ease;
     }
-    
+
     .nav-menu .btn:hover {
         transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
-    
+
     .nav-menu .btn i {
         font-size: 1.2rem;
         margin-bottom: 0.5rem;
     }
-    
+
     .hero-header {
         /* display: flex; */
         /* align-items: center; */
         /* justify-content: space-evenly; */
         margin-bottom: 4rem;
     }
-    
+
     .hero-branding {
         text-align: left;
     }
@@ -316,7 +338,7 @@
     .creator-card:hover {
         transform: translateY(-5px);
     }
-    
+
     .creator-card i {
         font-size: 2.5rem;
     }
@@ -333,13 +355,13 @@
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(111, 66, 193, 0.2);
     }
-    
+
     .author-link:hover {
         transform: translateY(-3px);
         box-shadow: 0 6px 20px rgba(111, 66, 193, 0.3);
         text-decoration: none !important;
     }
-    
+
     .author-link i {
         font-size: 1.4rem;
         vertical-align: middle;
@@ -356,10 +378,9 @@
             <div class="hero-header">
                 <div class="row align-items-center justify-content-around">
                     <div class="col-auto row align-items-center justify-content-center">
-                        <img src="https://cheshirecat.ai/wp-content/uploads/2023/10/Logo-Cheshire-Cat.svg" 
-                             alt="Cheshire Cat Logo" 
-                             class="hero-logo">
-                        <span class="hero-logo-help-text text-muted fw-bold">Press me!</span>
+                        <img src="https://cheshirecat.ai/wp-content/uploads/2023/10/Logo-Cheshire-Cat.svg"
+                            alt="Cheshire Cat Logo" class="hero-logo">
+                        <span class="hero-logo-help-text text-danger fw-bold flicker">Press me!</span>
                     </div>
                     <div class="col-md-8 text-md-start text-center ps-md-5 w-50">
                         <h1 class="hero-title mb-3">Multi Cat</h1>
@@ -368,38 +389,39 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Authentication Buttons or Navigation Menu -->
             {% if user.is_authenticated %}
-                <div class="nav-menu">
-                    <div class="d-flex justify-content-center gap-4 flex-wrap">
-                        <a href="{% url 'agent:list' %}" class="nav-card text-center d-flex flex-column align-items-center">
-                            <i class="fas fa-robot"></i>
-                            <span>Agents</span>
-                        </a>
-                        <a href="{% url 'chat:list' %}" class="nav-card text-center d-flex flex-column align-items-center">
-                            <i class="fas fa-comments"></i>
-                            <span>Chats</span>
-                        </a>
-                        <a href="{% url 'library:list' %}" class="nav-card text-center d-flex flex-column align-items-center">
-                            <i class="fas fa-book"></i>
-                            <span>Libraries</span>
-                        </a>
-                        <a href="{% url 'file:list' %}" class="nav-card text-center d-flex flex-column align-items-center">
-                            <i class="fas fa-folder-open"></i>
-                            <span>Files</span>
-                        </a>
-                    </div>
+            <div class="nav-menu">
+                <div class="d-flex justify-content-center gap-4 flex-wrap">
+                    <a href="{% url 'agent:list' %}" class="nav-card text-center d-flex flex-column align-items-center">
+                        <i class="fas fa-robot"></i>
+                        <span>Agents</span>
+                    </a>
+                    <a href="{% url 'chat:list' %}" class="nav-card text-center d-flex flex-column align-items-center">
+                        <i class="fas fa-comments"></i>
+                        <span>Chats</span>
+                    </a>
+                    <a href="{% url 'library:list' %}"
+                        class="nav-card text-center d-flex flex-column align-items-center">
+                        <i class="fas fa-book"></i>
+                        <span>Libraries</span>
+                    </a>
+                    <a href="{% url 'file:list' %}" class="nav-card text-center d-flex flex-column align-items-center">
+                        <i class="fas fa-folder-open"></i>
+                        <span>Files</span>
+                    </a>
                 </div>
+            </div>
             {% else %}
-                <div class="d-flex justify-content-center gap-4 mt-5">
-                    <a href="{% url 'users:register' %}" class="btn btn-light btn-lg px-4 py-2">
-                        <i class="fas fa-user-plus me-2"></i>Get Started - It's Free
-                    </a>
-                    <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg px-4 py-2">
-                        <i class="fas fa-sign-in-alt me-2"></i>Login
-                    </a>
-                </div>
+            <div class="d-flex justify-content-center gap-4 mt-5">
+                <a href="{% url 'users:register' %}" class="btn btn-light btn-lg px-4 py-2">
+                    <i class="fas fa-user-plus me-2"></i>Get Started - It's Free
+                </a>
+                <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg px-4 py-2">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+            </div>
             {% endif %}
         </div>
     </section>
@@ -415,7 +437,8 @@
                             <div class="card-body text-center">
                                 <i class="fas fa-robot feature-icon mb-4"></i>
                                 <h3 class="h4 mb-3">Multi-Agent System</h3>
-                                <p class="text-muted mb-0">Interact with multiple specialized AI agents through a simple and intuitive interface.</p>
+                                <p class="text-muted mb-0">Interact with multiple specialized AI agents through a simple
+                                    and intuitive interface.</p>
                             </div>
                         </div>
                     </div>
@@ -424,7 +447,8 @@
                             <div class="card-body text-center">
                                 <i class="fas fa-file-alt feature-icon mb-4"></i>
                                 <h3 class="h4 mb-3">Advanced RAG</h3>
-                                <p class="text-muted mb-0">Retrieval-Augmented Generation system that allows your AI to answer questions based on your documents.</p>
+                                <p class="text-muted mb-0">Retrieval-Augmented Generation system that allows your AI to
+                                    answer questions based on your documents.</p>
                             </div>
                         </div>
                     </div>
@@ -433,7 +457,8 @@
                             <div class="card-body text-center">
                                 <i class="fas fa-code feature-icon mb-4"></i>
                                 <h3 class="h4 mb-3">Open Source</h3>
-                                <p class="text-muted mb-0">Completely open source project, developed by the community for the community.</p>
+                                <p class="text-muted mb-0">Completely open source project, developed by the community
+                                    for the community.</p>
                             </div>
                         </div>
                     </div>
@@ -450,24 +475,34 @@
                             <div class="col-lg-6 mb-4 mb-lg-0">
                                 <div class="p-4 h-100">
                                     <h2 class="h3 mb-4"><i class="fas fa-brain me-2"></i>What is an LLM?</h2>
-                                    <p class="mb-0">A <strong>Large Language Model (LLM)</strong> is an advanced artificial intelligence system trained on vast amounts of text data.</p>
+                                    <p class="mb-0">A <strong>Large Language Model (LLM)</strong> is an advanced
+                                        artificial intelligence system trained on vast amounts of text data.</p>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="p-4 h-100">
                                     <h2 class="h3 mb-4"><i class="fas fa-brain me-2"></i>How is LLM used?</h2>
-                                    <p>Our platform leverages LLM technology to provide intelligent conversations with your documents.</p>
+                                    <p>Our platform leverages LLM technology to provide intelligent conversations with
+                                        your documents.</p>
                                     <div class="row">
                                         <div class="col-6">
                                             <ul class="list-unstyled mb-0">
-                                                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i>Natural language</li>
-                                                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i>Context-aware</li>
+                                                <li class="mb-2"><i
+                                                        class="fas fa-check-circle text-primary me-2"></i>Natural
+                                                    language</li>
+                                                <li class="mb-2"><i
+                                                        class="fas fa-check-circle text-primary me-2"></i>Context-aware
+                                                </li>
                                             </ul>
                                         </div>
                                         <div class="col-6">
                                             <ul class="list-unstyled mb-0">
-                                                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i>Document analysis</li>
-                                                <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i>Continuous learning</li>
+                                                <li class="mb-2"><i
+                                                        class="fas fa-check-circle text-primary me-2"></i>Document
+                                                    analysis</li>
+                                                <li class="mb-2"><i
+                                                        class="fas fa-check-circle text-primary me-2"></i>Continuous
+                                                    learning</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -485,20 +520,25 @@
                 <div class="card tech-stack">
                     <div class="card-body p-4">
                         <h2 class="h3 text-center mb-4 section-title">Our Technology Stack</h2>
-                        <p class="text-center mb-4">Powered by <strong class="animated-underline">Cheshire Cat AI</strong>, our platform provides:</p>
+                        <p class="text-center mb-4">Powered by <strong class="animated-underline">Cheshire Cat
+                                AI</strong>, our platform provides:</p>
                         <div class="row justify-content-center">
                             <div class="col-lg-8">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <ul class="list-unstyled mb-0">
-                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Advanced RAG system</li>
-                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Persistent multi-chat</li>
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Advanced RAG
+                                                system</li>
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Persistent
+                                                multi-chat</li>
                                         </ul>
                                     </div>
                                     <div class="col-md-6">
                                         <ul class="list-unstyled mb-0">
-                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Document management</li>
-                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Multi-agent system</li>
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Document
+                                                management</li>
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Multi-agent
+                                                system</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -519,20 +559,26 @@
                             <div class="col-lg-8 text-center">
                                 <div class="mb-4">
                                     <i class="fas fa-bullseye feature-icon mb-3"></i>
-                                    <p class="lead mb-3">Making LLM technologies accessible to everyone, free and without technical barriers.</p>
-                                    <p class="mb-4">We believe AI should be democratized and available to all, not just large corporations.</p>
+                                    <p class="lead mb-3">Making LLM technologies accessible to everyone, free and
+                                        without technical barriers.</p>
+                                    <p class="mb-4">We believe AI should be democratized and available to all, not just
+                                        large corporations.</p>
                                 </div>
                                 <div class="row justify-content-center">
                                     <div class="col-md-6">
                                         <ul class="list-unstyled mb-0">
-                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Open Source</li>
-                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Free to Use</li>
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Open Source
+                                            </li>
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Free to Use
+                                            </li>
                                         </ul>
                                     </div>
                                     <div class="col-md-6">
                                         <ul class="list-unstyled mb-0">
-                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Community Driven</li>
-                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>No Technical Barriers</li>
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>Community
+                                                Driven</li>
+                                            <li class="mb-3"><i class="fas fa-check text-primary me-2"></i>No Technical
+                                                Barriers</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -552,7 +598,8 @@
                         <a href="{% url 'users:register' %}" class="btn btn-light btn-lg px-4">
                             <i class="fas fa-user-plus me-2"></i>Create Free Account
                         </a>
-                        <a href="https://github.com/davidebizzocchi/multicat" target="_blank" class="btn btn-outline-light btn-lg px-4">
+                        <a href="https://github.com/davidebizzocchi/multicat" target="_blank"
+                            class="btn btn-outline-light btn-lg px-4">
                             <i class="fab fa-github me-2"></i>View on GitHub
                         </a>
                     </div>
@@ -570,14 +617,15 @@
                                 <h1 class="mb-4">Created with <i class="fas fa-heart text-danger"></i> by</h1>
 
                                 <h3 class="mb-4 p-4">
-                                    <a class="animated-underline text-decoration-none text-primary" href="https://github.com/davidebizzocchi" target="_blank">
+                                    <a class="animated-underline text-decoration-none text-primary"
+                                        href="https://github.com/davidebizzocchi" target="_blank">
                                         <i class="fab fa-github me-3"></i>Davide Bizzocchi
                                     </a>
                                 </h3>
                                 <div class="row g-4 justify-content-center">
                                     <div class="col-md-4">
-                                        <a href="https://github.com/davidebizzocchi/DjangoMultiCat" target="_blank" 
-                                           class="creator-card card h-100 text-white text-decoration-none p-4 text-center">
+                                        <a href="https://github.com/davidebizzocchi/DjangoMultiCat" target="_blank"
+                                            class="creator-card card h-100 text-white text-decoration-none p-4 text-center">
                                             <div class="card-body d-flex flex-column align-items-center">
                                                 <i class="fab fa-github mb-3"></i>
                                                 <h5 class="card-title fw-bold">DjangoMultiCat</h5>
@@ -586,8 +634,8 @@
                                         </a>
                                     </div>
                                     <div class="col-md-4">
-                                        <a href="https://cheshirecat.ai" target="_blank" 
-                                           class="creator-card card h-100 text-white text-decoration-none p-4 text-center">
+                                        <a href="https://cheshirecat.ai" target="_blank"
+                                            class="creator-card card h-100 text-white text-decoration-none p-4 text-center">
                                             <div class="card-body d-flex flex-column align-items-center">
                                                 <i class="fas fa-cat mb-3"></i>
                                                 <h5 class="card-title fw-bold">Cheshire Cat</h5>
@@ -596,8 +644,8 @@
                                         </a>
                                     </div>
                                     <div class="col-md-4">
-                                        <a href="https://github.com/davidebizzocchi/multicat" target="_blank" 
-                                           class="creator-card card h-100 text-white text-decoration-none p-4 text-center">
+                                        <a href="https://github.com/davidebizzocchi/multicat" target="_blank"
+                                            class="creator-card card h-100 text-white text-decoration-none p-4 text-center">
                                             <div class="card-body d-flex flex-column align-items-center">
                                                 <i class="fas fa-puzzle-piece mb-3"></i>
                                                 <h5 class="card-title fw-bold">MultiCat Plugin</h5>
