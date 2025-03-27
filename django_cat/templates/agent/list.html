@@ -28,6 +28,13 @@
                     {{ agent.instructions|truncatechars:100 }}
                 </div>
                 {% endif %}
+                {% if agent.capabilities %}
+                <div class="mt-1">
+                    {% for capability in agent.capabilities %}
+                    <span class="badge bg-secondary me-1">{{ capability }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
             <div class="btn-group">
                 {% if not agent.is_default %}

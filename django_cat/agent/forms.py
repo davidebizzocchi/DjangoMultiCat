@@ -1,11 +1,19 @@
 from django import forms
 import json
-from agent.models import Agent
+from agent.models import Agent, CAPABILITIES_TO_PLUGINS, validate_capabilities
 
 class AgentForm(forms.ModelForm):
+    capabilities = forms.MultipleChoiceField(
+        choices=[ (capability, capability)
+            for capability in CAPABILITIES_TO_PLUGINS.keys()
+        ],
+        required=False,
+        validators=[validate_capabilities]
+    )
+
     class Meta:
         model = Agent
-        fields = ['name', 'instructions', 'metadata']
+        fields = ['name', 'instructions', 'metadata', 'capabilities']
         widgets = {
             'metadata': forms.Textarea(attrs={
                 'rows': 4, 

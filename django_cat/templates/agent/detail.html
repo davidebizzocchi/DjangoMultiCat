@@ -26,6 +26,17 @@
             <h5 class="card-title">Instructions</h5>
             <p class="card-text">{{ agent.instructions|linebreaks }}</p>
 
+            <h5 class="card-title mt-4">Capabilities</h5>
+            <div>
+                {% if agent.capabilities %}
+                    {% for capability in agent.capabilities %}
+                    <span class="badge bg-secondary me-2">{{ capability }}</span>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No capabilities configured</p>
+                {% endif %}
+            </div>
+
             <h5 class="card-title mt-4">Metadata</h5>
             <pre class="bg-light p-3 rounded"><code>{{ agent.metadata|pprint }}</code></pre>
 

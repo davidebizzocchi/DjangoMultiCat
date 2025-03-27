@@ -7,6 +7,15 @@ from common.utils import BaseUserModel
 
 from icecream import ic
 
+CAPABILITIES_TO_PLUGINS = {
+    "WebSearch": "miaotore",
+    "Gerry Scotti": "gerry_scatty"
+}
+
+def validate_capabilities(value):
+    if not all([capability in CAPABILITIES_TO_PLUGINS.keys() for capability in value]):
+        raise ValueError("Invalid capabilities")
+
 
 class AgentManager(models.Manager):
     def filter(self, *args, **kwargs):
@@ -20,8 +29,14 @@ class AgentManager(models.Manager):
 
 class Agent(BaseUserModel):
     agent_id = models.CharField(max_length=255, null=True, blank=True, default=None)
+
     name = models.CharField(max_length=255, default="")
     instructions = models.TextField(default="")
+    capabilities = models.JSONField(
+        validators=[validate_capabilities],
+        default=list
+    )
+
     metadata = models.JSONField(default=dict)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -35,20 +50,23 @@ class Agent(BaseUserModel):
 
     @property
     def agent(self) -> Union[AgentModel, AgentRequest]:
+        metadata = self.metadata.copy()
+        metadata["plugins"] = [CAPABILITIES_TO_PLUGINS[cap] for cap in self.capabilities]
+
         if self.agent_id is None:
             return AgentRequest(
                 name=self.name,
                 instructions=self.instructions,
-                metadata=self.metadata
+                metadata=metadata
             )
         else:
             return AgentModel(
                 id=self.agent_id,
                 name=self.name,
                 instructions=self.instructions,
-                metadata=self.metadata
+                metadata=metadata
             )
-        
+
     def model_dump(self) -> dict[str, Any]:
         return self.agent.model_dump()
         
