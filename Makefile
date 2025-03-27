@@ -22,22 +22,6 @@ requirements:	## Create requirements.txt from requirements.in
 
 	source .venv/bin/activate && uv pip install -r docker/local/requirements.txt
 
-build-django:
-	@docker buildx build --platform linux/amd64 -f docker/prod/Dockerfile --tag nonnodave/cat-for-all:django-prod --push .
-
-build-nginx:
-	@docker buildx build --platform linux/amd64 -f docker/prod/nginx/Dockerfile --tag nonnodave/cat-for-all:nginx-django --push docker/prod/nginx
-
-update-prod:
-	@echo "Building nginx"
-	$(MAKE) build-nginx
-
-	@echo "Building django"
-	$(MAKE) build-django
-
-	@echo "Updating contabo"
-	@ssh my_contabo_1 "cd /home/amministratore/docker/django_cat; ./update.sh"
-
 build-local-cat:
 	docker build -t cheshire-cat-core:latest -f core/core/Dockerfile core/core
 	@echo "Image cheshire-cat-core:latest builded and tagged: cheshire-cat-core:latest"
@@ -124,7 +108,7 @@ git-sync-branches:
 	@git fetch --prune
 	
 	@echo "Deleting local branch..."
-	@git branch -vv | grep ': gone]' | awk '{print $$1}' | xargs -r git branch -D
+	@git branch -vv | grep ': gone]' | grep -vE 'prod|main' | awk '{print $1}' | xargs -r git branch -D
 	
 	@echo "Creating new branch from origin..."
 	@git branch -r | grep -v '\->' | grep -v 'origin/main\|origin/dependabot' | sed 's/origin\///' | while read branch; do git branch --track "$$branch" "origin/$$branch" 2>/dev/null || true; done
