@@ -130,15 +130,20 @@ async def delete_agent(
             detail={"error": "Cannot delete default agent"}
         )
     
-    if agent_id not in cat.agents:
-        raise HTTPException(
-            status_code=404,
-            detail={"error": "Agent not found"}
-        )
+    # Check if the agent exists
+    for agent in cat.agents():
+        agent = agent.cast()
+
+        if agent_id == agent.id:
+            cat.delete_agent(agent_id)
     
-    cat.delete_agent(agent_id)
-    
-    return {
-        "success": True,
-        "message": f"Agent {agent_id} deleted successfully"
-    }
+            return {
+                "success": True,
+                "message": f"Agent {agent_id} deleted successfully"
+            }
+
+    # If the agent does not exist, raise an error
+    raise HTTPException(
+        status_code=404,
+        detail={"error": "Agent not found"}
+    )

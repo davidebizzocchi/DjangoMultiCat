@@ -1,34 +1,38 @@
-from typing import Dict, List
+from typing import List
 from cat.auth.permissions import AuthUserInfo
 
 from cat.convo.messages import UserMessage
 from cat.log import log
 
 from cat.looking_glass.cheshire_cat import CheshireCat
-
 from cat.looking_glass.stray_cat import StrayCat
+from cat.cache.cache_item import CacheItem
 
 from cat.plugins.multicat.decorators import option
 
-# Common
 from cat.plugins.multicat.refactory.stray_cat.common import CommonStrayCat
 from cat.plugins.multicat.refactory.stray_cat.son import SonStrayCat
-
-
-from cat.cache.in_memory_cache import InMemoryCache
-from cat.cache.cache_item import CacheItem
 
 from cat.plugins.multicat.cache.users import UserFatherCache
 from cat.plugins.multicat.cache.sons import FatherSonCache
 
+
 # Cache
-CACHE = UserFatherCache()
+CACHE = None
+
 
 # Adapt the StrayCat to curate the SonStrayCat (the perfect father)
 @option(StrayCat)
 class FatherStrayCat(StrayCat, CommonStrayCat):
     sons: "UserFatherCache"
     bevoled_son_chat_id = "default"
+
+    def _initialize_cache(self):
+        """Initialize the global cache"""
+        global CACHE
+        CACHE = UserFatherCache(
+            max_items=self.settings.max_users
+        )
 
     def _get_user_cache(self, user_id: str) -> UserFatherCache:
         """Get the user cache"""
@@ -41,11 +45,11 @@ class FatherStrayCat(StrayCat, CommonStrayCat):
         # User item
         item = CacheItem(
             key=user_id,
-            value=FatherSonCache(),
-            ttl=3600  # TODO: make it configurable
+            value=FatherSonCache(
+                max_items=self.settings.max_chat_sessions
+            ),
+            ttl=self.settings.users_timeout
         )
-
-        # Set max number of Son fore each Father
 
         CACHE.insert(item)
 
@@ -60,7 +64,7 @@ class FatherStrayCat(StrayCat, CommonStrayCat):
             CacheItem(
                 key=chat_id,
                 value=value,
-                ttl=3600  # TODO: make it configurable
+                ttl=self.settings.chat_session_timeout
             )
         )
 
@@ -74,7 +78,11 @@ class FatherStrayCat(StrayCat, CommonStrayCat):
         user_data: AuthUserInfo
     ):
         log.warning("FatherStrayCat created")
-        
+
+        # Initialize cache if needed
+        if CACHE is None:
+            self._initialize_cache()
+
         # user data
         self.__user_id = user_data.name # TODOV2: use id
         self.__user_data = user_data

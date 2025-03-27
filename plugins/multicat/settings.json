@@ -1,1 +1,7 @@
-{}
+{
+    "max_users": 100,
+    "users_timeout": 3600,
+    "max_chat_sessions": 100,
+    "chat_session_timeout": 3600,
+    "limited_plugins": "gerry_scatty, miaotore"
+}

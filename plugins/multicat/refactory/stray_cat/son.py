@@ -3,22 +3,22 @@ from typing import Any, List, Union
 from cat.auth.permissions import AuthUserInfo
 
 from cat.convo.messages import CatMessage
-from cat.log import log
 
 from cat.looking_glass.stray_cat import StrayCat
 from cat.memory.working_memory import WorkingMemory
-from cat.cache.cache_item import CacheItem
-
 from cat.looking_glass.stray_cat import MSG_TYPES
 
-# Common
+from cat.cache.cache_item import CacheItem
+
 from cat.plugins.multicat.refactory.stray_cat.common import CommonStrayCat
+from cat.plugins.multicat.agents.CatAgents.main_agent import MainAgentLimited
 
 from cat.plugins.multicat.agents.crud import manager as agent_manager
 
 
 stray_cat_attr = {k: v for k, v in StrayCat.__dict__.items()}
 MyStrayCat: StrayCat = type("MyStrayCat", StrayCat.__bases__, stray_cat_attr)
+
 
 # A perfect son
 class SonStrayCat(MyStrayCat, CommonStrayCat):
@@ -99,8 +99,13 @@ class SonStrayCat(MyStrayCat, CommonStrayCat):
     
     @property
     def agent_id(self):
-        return self.working_memory.user_message_json.agent_id
-    
+        return self.working_memory.user_message_json.agent_id or "default"
+
+    @property
+    def agent(self):
+        """Return the agent of the son"""
+        return agent_manager.get_agent(self.agent_id).cast()
+
     def is_default_agent(self):
         return self.agent_id == "default"
 
@@ -147,3 +152,8 @@ class SonStrayCat(MyStrayCat, CommonStrayCat):
     def history(self, value):
         self.working_memory.history = value
         self.update_working_memory_cache()
+
+    @property
+    def main_agent(self):
+        """Return the main agent of the son"""
+        return MainAgentLimited.get_for_agent(self.agent) if not self.is_default_agent() else super().main_agent

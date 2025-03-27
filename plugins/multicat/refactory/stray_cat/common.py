@@ -1,11 +1,9 @@
-from typing import Dict, Union
+from typing import Union
 import uuid
-
-from cat.looking_glass.cheshire_cat import CheshireCat
-from cat.log import log
 
 from cat.plugins.multicat.types import Agent
 from cat.plugins.multicat.agents.crud import manager as agent_manager
+from cat.plugins.multicat.settings import MultiCatSettings
 
 
 class CommonStrayCat():
@@ -16,6 +14,11 @@ class CommonStrayCat():
     - control for cache with chat_id
 
     """
+
+    @property
+    def settings(self) -> MultiCatSettings:
+        return MultiCatSettings.model_validate(self.mad_hatter.get_plugin().load_settings())
+
 
     def agents(self):
         return agent_manager.list_agents()

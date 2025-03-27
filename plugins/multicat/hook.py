@@ -7,8 +7,6 @@ from cat.looking_glass import prompts
 from cat.plugins.multicat.types import Agent
 from cat.plugins.multicat.refactory.stray_cat.son import SonStrayCat
 
-from cat.log import log
-
 
 @hook()
 def before_cat_stores_episodic_memory(doc: Document, cat):
@@ -60,6 +58,11 @@ def after_cat_bootstrap(cat: CheshireCat):
 @hook(priority=0)
 def agent_prompt_prefix(prefix, cat):
     if isinstance(cat, SonStrayCat):
-        return  cat.get_instructions() or prefix
+        new_instructions = cat.get_instructions()
+        if new_instructions:
+            prefix = (
+                f"{prefix}"
+                f"\nYOUR NEW INSTRUCTIONS:\n{new_instructions}\n\n"
+            )
     
     return prefix
