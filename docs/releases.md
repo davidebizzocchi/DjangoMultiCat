@@ -21,6 +21,25 @@ type: feature
 
 
 type: issue
+New patch version: v1.0.3
+## Release v1.0.3-42c728c
+
+### Information
+- **Source branch**: 75-issue-beautiful-header
+- **Target branch**: dev
+- **Issue**: [#75](https://github.com/davidebizzocchi/DjangoCat/issues/75)
+- **Type**: issue
+- **Previous version**: v1.0.2-2018681
+- **New version**: v1.0.3-42c728c
+- **Code change statistics**:  3 files changed, 2 insertions(+), 20 deletions(-)
+
+### Commits
+- 42c728c - makefile (davidebizzocchi)
+
+---
+
+
+type: issue
 New patch version: v1.0.2
 ## Release v1.0.2-2018681
 
