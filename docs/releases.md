@@ -3,6 +3,25 @@
 
 
 type: issue
+New patch version: v1.1.5
+## Release v1.1.5-09e4bb7
+
+### Information
+- **Source branch**: 76-issue-test2
+- **Target branch**: dev
+- **Issue**: [#76](https://github.com/davidebizzocchi/DjangoCat/issues/76)
+- **Type**: issue
+- **Previous version**: v1.1.4-d9f3c40
+- **New version**: v1.1.5-09e4bb7
+- **Code change statistics**:  1 file changed, 1 insertion(+), 1 deletion(-)
+
+### Commits
+- 09e4bb7 - makefile (davidebizzocchi)
+
+---
+
+
+type: issue
 New patch version: v1.1.4
 ## Release v1.1.4-d9f3c40
 
