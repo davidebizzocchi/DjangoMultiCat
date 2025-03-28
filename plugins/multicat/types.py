@@ -1,3 +1,4 @@
+#type: ignore
 from typing import Dict, List
 from pydantic import BaseModel, Field
 
@@ -6,3 +7,4 @@ class Agent(BaseModel):
     name: str = ""
     instructions: str = ""
     metadata: Dict = Field(default_factory=dict)  # This for safe mutable default values
+    enable_vector_search: bool = Field(default=True)

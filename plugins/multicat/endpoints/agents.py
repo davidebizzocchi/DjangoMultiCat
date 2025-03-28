@@ -24,6 +24,7 @@ class AgentUpdateRequest(BaseModel):
     name: Optional[str] = None
     instructions: Optional[str] = None
     metadata: Optional[dict] = None
+    enable_vector_search: Optional[bool] = True
 
 class AgentRequestResponse(AgentUpdateRequest):
     id: str = "default"
@@ -74,7 +75,8 @@ async def create_agent(
         id=data.id,
         name=data.name or "",
         instructions=data.instructions or "",
-        metadata=data.metadata or {}
+        metadata=data.metadata or {},
+        enable_vector_search=data.enable_vector_search,
     )
     
     return {
@@ -109,6 +111,9 @@ async def update_agent(
 
     if data.metadata is not None:
         agent.metadata = data.metadata
+
+    if data.enable_vector_search is not None:
+        agent.enable_vector_search = data.enable_vector_search
 
     agent = cat.update_agent(agent)
 

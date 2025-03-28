@@ -157,3 +157,27 @@ class SonStrayCat(MyStrayCat, CommonStrayCat):
     def main_agent(self):
         """Return the main agent of the son"""
         return MainAgentLimited.get_for_agent(self.agent) if not self.is_default_agent() else super().main_agent
+    
+    def recall_relevant_memories_to_working_memory(self, query=None):
+        """
+        Recall the relevant memories to the working memory.
+        If specied in the agent.
+        """
+
+        # The agent is default
+        if self.is_default_agent():
+            return super().recall_relevant_memories_to_working_memory(query)
+        
+        # Check agent enable_vector_search value
+        if self.agent.enable_vector_search:
+            return super().recall_relevant_memories_to_working_memory(query)
+
+        # Set the memory as empty
+        memory_types = self.memory.vectors.collections.keys()
+
+        for memory_type in memory_types:
+            memory_key = f"{memory_type}_memories"
+
+            setattr(
+                self.working_memory, memory_key, list()
+            )  # self.working_memory.procedural_memories = ...
