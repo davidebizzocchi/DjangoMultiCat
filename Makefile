@@ -1,4 +1,4 @@
-# v26-03-2025
+# v29-03-2025
 
 VERSION := $(shell cat django_cat/VERSION | cut -d'-' -f1 | cut -c2-)
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
