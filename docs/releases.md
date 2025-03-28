@@ -2,6 +2,24 @@
 
 
 
+type: feature
+## Release v1.1.0-639722c
+
+### Information
+- **Source branch**: 73-feature-create-a-basic-interface-and-agent-capabilities
+- **Target branch**: dev
+- **Issue**: [#73](https://github.com/davidebizzocchi/DjangoCat/issues/73)
+- **Type**: feature
+- **Previous version**: v1.0.2-2018681
+- **New version**: v1.1.0-639722c
+- **Code change statistics**: 
+
+### Commits
+
+
+---
+
+
 type: issue
 New patch version: v1.0.2
 ## Release v1.0.2-2018681
