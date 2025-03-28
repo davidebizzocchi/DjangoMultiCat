@@ -37,6 +37,15 @@
                 {% endif %}
             </div>
 
+            <h5 class="card-title mt-4">Memory Search</h5>
+            <p class="card-text">
+                {% if agent.enable_vector_search %}
+                    <span class="badge bg-success">Enabled</span>
+                {% else %}
+                    <span class="badge bg-danger">Disabled</span>
+                {% endif %}
+            </p>
+
             <h5 class="card-title mt-4">Metadata</h5>
             <pre class="bg-light p-3 rounded"><code>{{ agent.metadata|pprint }}</code></pre>
 

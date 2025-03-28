@@ -26,6 +26,7 @@ class AgentRequest(BaseModel):
     name: str
     instructions: str
     metadata: Dict = Field(default_factory=dict)
+    enable_vector_search: bool = Field(default=True)
 
 class Agent(AgentRequest):
     id: str = "default"

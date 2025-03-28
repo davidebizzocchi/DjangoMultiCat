@@ -62,12 +62,31 @@
                             <div class="form-text">Select the capabilities for this agent</div>
                         </div>
 
+                        {% comment %}
                         <div class="mb-3">
                             <label for="{{ form.metadata.id_for_label }}" class="form-label">Metadata (JSON)</label>
                             {{ form.metadata|add_class:"form-control" }}
                             {% if form.metadata.errors %}
                                 <div class="invalid-feedback d-block">{{ form.metadata.errors }}</div>
                             {% endif %}
+                        </div>
+                        {% endcomment %}
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                       name="{{ form.enable_vector_search.name }}" 
+                                       id="{{ form.enable_vector_search.id_for_label }}"
+                                       class="form-check-input"
+                                       {% if form.enable_vector_search.value %}checked{% endif %}>
+                                <label class="form-check-label" for="{{ form.enable_vector_search.id_for_label }}">
+                                    Enable Memory Search
+                                </label>
+                            </div>
+                            {% if form.enable_vector_search.errors %}
+                                <div class="invalid-feedback d-block">{{ form.enable_vector_search.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Enable or disable memory search for this agent</div>
                         </div>
 
                         <div class="d-flex justify-content-between">

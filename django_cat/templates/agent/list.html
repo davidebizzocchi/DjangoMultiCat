@@ -35,6 +35,16 @@
                     {% endfor %}
                 </div>
                 {% endif %}
+                <div class="mt-1">
+                    <small class="text-muted">
+                        Memory Search: 
+                        {% if agent.enable_vector_search %}
+                            <span class="badge bg-success">Enabled</span>
+                        {% else %}
+                            <span class="badge bg-danger">Disabled</span>
+                        {% endif %}
+                    </small>
+                </div>
             </div>
             <div class="btn-group">
                 {% if not agent.is_default %}

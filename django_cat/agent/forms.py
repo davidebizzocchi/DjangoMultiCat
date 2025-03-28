@@ -16,7 +16,7 @@ class AgentForm(forms.ModelForm):
 
     class Meta:
         model = Agent
-        fields = ['name', 'instructions', 'metadata', 'capabilities']
+        fields = ['name', 'instructions', 'metadata', 'capabilities', "enable_vector_search"]
         widgets = {
             'metadata': forms.Textarea(attrs={
                 'rows': 4, 

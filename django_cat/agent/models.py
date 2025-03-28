@@ -31,6 +31,7 @@ class Agent(BaseUserModel):
         validators=[validate_capabilities],
         default=list
     )
+    enable_vector_search = models.BooleanField(default=True, verbose_name="Memory Search")
 
     metadata = models.JSONField(default=dict)
 
@@ -42,36 +43,38 @@ class Agent(BaseUserModel):
     class Meta:
         ordering = ("user", "-updated_at")
 
-
-    @property
-    def agent(self) -> Union[AgentModel, AgentRequest]:
+    def get_agent_kwargs(self, **kwargs):
         metadata = self.metadata.copy()
         metadata["plugins"] = [settings.CAPABILITIES_TO_PLUGINS[cap] for cap in self.capabilities]
 
+        if "metadata" in kwargs:
+            metadata.update(kwargs["metadata"])
+        if "plugins" in kwargs:
+            metadata["plugins"] = kwargs["plugins"]
+
+        return {
+            "id": self.agent_id,
+            "name": self.name,
+            "instructions": self.instructions,
+            "metadata": metadata,
+            "enable_vector_search": self.enable_vector_search
+        }
+
+
+    @property
+    def agent(self) -> Union[AgentModel, AgentRequest]:
+        
+
         if self.agent_id is None:
-            return AgentRequest(
-                name=self.name,
-                instructions=self.instructions,
-                metadata=metadata
-            )
+            return AgentRequest.model_validate(self.get_agent_kwargs())
         else:
-            return AgentModel(
-                id=self.agent_id,
-                name=self.name,
-                instructions=self.instructions,
-                metadata=metadata
-            )
+            return AgentModel.model_validate(self.get_agent_kwargs())
 
     def model_dump(self) -> dict[str, Any]:
         return self.agent.model_dump()
         
     def full_model_dump(self) -> AgentModel:
-        return AgentModel(
-            id=self.agent_id,
-            name=self.name,
-            instructions=self.instructions,
-            metadata=self.metadata
-        ).model_dump()
+        return AgentModel.model_validate(self.get_agent_kwargs()).model_dump()
     
     @staticmethod
     def get_default():
