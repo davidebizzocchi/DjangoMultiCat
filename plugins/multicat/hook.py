@@ -75,4 +75,10 @@ def get_memory_type_keys(default_memory_types: list, cat: SonStrayCat) -> list:
     if not cat.agent.enable_vector_search:
         default_memory_types.remove("declarative")
 
+        setattr(
+            cat.working_memory,
+            "declarative_memories",
+            list()
+        )
+
     return default_memory_types
