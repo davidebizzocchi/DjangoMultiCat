@@ -1,8 +1,9 @@
 from typing import Any, List, Union
+import tiktoken
 
 from cat.auth.permissions import AuthUserInfo
 
-from cat.convo.messages import CatMessage
+from cat.convo.messages import CatMessage, EmbedderModelInteraction
 
 from cat.looking_glass.stray_cat import StrayCat
 from cat.memory.working_memory import WorkingMemory
@@ -10,8 +11,11 @@ from cat.looking_glass.stray_cat import MSG_TYPES
 
 from cat.cache.cache_item import CacheItem
 
+from cat import utils
+from cat.log import log
+
 from cat.plugins.multicat.refactory.stray_cat.common import CommonStrayCat
-from cat.plugins.multicat.agents.CatAgents.main_agent import MainAgentLimited
+from cat.plugins.multicat.agents.cat_agents.main_agent import MainAgentLimited
 
 from cat.plugins.multicat.agents.crud import manager as agent_manager
 
@@ -157,27 +161,126 @@ class SonStrayCat(MyStrayCat, CommonStrayCat):
     def main_agent(self):
         """Return the main agent of the son"""
         return MainAgentLimited.get_for_agent(self.agent) if not self.is_default_agent() else super().main_agent
-    
+
     def recall_relevant_memories_to_working_memory(self, query=None):
+        """Retrieve context from memory.
+
+        The method retrieves the relevant memories from the vector collections that are given as context to the LLM.
+        Recalled memories are stored in the working memory.
+
+        Parameters
+        ----------
+        query : str, optional
+            The query used to make a similarity search in the Cat's vector memories.  
+            If not provided, the query will be derived from the last user's message.
+
+        Examples
+        --------
+        Recall memories from custom query
+        >>> cat.recall_relevant_memories_to_working_memory(query="What was written on the bottle?")
+
+        Notes
+        -----
+        The user's message is used as a query to make a similarity search in the Cat's vector memories.
+        Five hooks allow to customize the recall pipeline before and after it is done.
+
+        See Also
+        --------
+        cat_recall_query
+        before_cat_recalls_memories
+        before_cat_recalls_episodic_memories
+        before_cat_recalls_declarative_memories
+        before_cat_recalls_procedural_memories
+        after_cat_recalls_memories
         """
-        Recall the relevant memories to the working memory.
-        If specied in the agent.
-        """
 
-        # The agent is default
-        if self.is_default_agent():
-            return super().recall_relevant_memories_to_working_memory(query)
-        
-        # Check agent enable_vector_search value
-        if self.agent.enable_vector_search:
-            return super().recall_relevant_memories_to_working_memory(query)
+        recall_query = query
 
-        # Set the memory as empty
-        memory_types = self.memory.vectors.collections.keys()
+        if query is None:
+            # If query is not provided, use the user's message as the query
+            recall_query = self.working_memory.user_message_json.text
 
-        for memory_type in memory_types:
+        # We may want to search in memory
+        recall_query = self.mad_hatter.execute_hook(
+            "cat_recall_query", recall_query, cat=self
+        )
+        log.info(f"Recall query: '{recall_query}'")
+
+        # Embed recall query
+        recall_query_embedding = self.embedder.embed_query(recall_query)
+        self.working_memory.recall_query = recall_query
+
+        # keep track of embedder model usage
+        self.working_memory.model_interactions.append(
+            EmbedderModelInteraction(
+                prompt=[recall_query],
+                source=utils.get_caller_info(skip=1),
+                reply=recall_query_embedding, # TODO: should we avoid storing the embedding?
+                input_tokens=len(tiktoken.get_encoding("cl100k_base").encode(recall_query)),
+            )
+        )
+
+        # hook to do something before recall begins
+        self.mad_hatter.execute_hook("before_cat_recalls_memories", cat=self)
+
+        # Setting default recall configs for each memory
+        # TODO: can these data structures become instances of a RecallSettings class?
+        default_episodic_recall_config = {
+            "embedding": recall_query_embedding,
+            "k": 3,
+            "threshold": 0.7,
+            "metadata": {"source": self.user_id},
+        }
+
+        default_declarative_recall_config = {
+            "embedding": recall_query_embedding,
+            "k": 3,
+            "threshold": 0.7,
+            "metadata": {},
+        }
+
+        default_procedural_recall_config = {
+            "embedding": recall_query_embedding,
+            "k": 3,
+            "threshold": 0.7,
+            "metadata": {},
+        }
+
+        # hooks to change recall configs for each memory
+        recall_configs = [
+            self.mad_hatter.execute_hook(
+                "before_cat_recalls_episodic_memories",
+                default_episodic_recall_config,
+                cat=self,
+            ),
+            self.mad_hatter.execute_hook(
+                "before_cat_recalls_declarative_memories",
+                default_declarative_recall_config,
+                cat=self,
+            ),
+            self.mad_hatter.execute_hook(
+                "before_cat_recalls_procedural_memories",
+                default_procedural_recall_config,
+                cat=self,
+            ),
+        ]
+
+        memory_types = self.mad_hatter.execute_hook(
+            "get_memory_type_keys",
+            list(self.memory.vectors.collections.keys()),
+            cat=self
+        )
+
+        for config, memory_type in zip(recall_configs, memory_types):
             memory_key = f"{memory_type}_memories"
 
+            # recall relevant memories for collection
+            vector_memory = getattr(self.memory.vectors, memory_type)
+            memories = vector_memory.recall_memories_from_embedding(**config)
+
             setattr(
-                self.working_memory, memory_key, list()
+                self.working_memory, memory_key, memories
             )  # self.working_memory.procedural_memories = ...
+
+        # hook to modify/enrich retrieved memories
+        self.mad_hatter.execute_hook("after_cat_recalls_memories", cat=self)

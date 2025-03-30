@@ -14,7 +14,6 @@ class MainAgentLimited(MainAgent):
     @staticmethod
     def get_for_agent(agent) -> "MainAgentLimited":
         """Get the main agent for the given agent."""
-        from cat.log import log
 
         # Get all plugins in the database
         all_plugins = MadHatter().load_active_plugins_from_db()

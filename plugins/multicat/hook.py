@@ -66,3 +66,13 @@ def agent_prompt_prefix(prefix, cat):
             )
     
     return prefix
+
+@hook(priority=0)
+def get_memory_type_keys(default_memory_types: list, cat: SonStrayCat) -> list:    
+    if cat.is_default_agent():
+        return default_memory_types
+
+    if not cat.agent.enable_vector_search:
+        default_memory_types.remove("declarative")
+
+    return default_memory_types
