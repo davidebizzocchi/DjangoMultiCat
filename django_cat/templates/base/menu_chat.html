@@ -1,11 +1,12 @@
-<li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="{% url 'chat:home' %}" role="button" aria-expanded="false">Chat</a>
-    <ul class="dropdown-menu">
-      <li><a class="dropdown-item" href="{% url 'chat:home' %}" >Home</a></li>
-      <li><hr class="dropdown-divider"></li>
-      <li><a class="dropdown-item" href="{% url 'library:list' %}" >Libraries list</a></li>
-      <li><a class="dropdown-item" href="{% url 'file:list' %}" >Files list</a></li>
-      <li><a class="dropdown-item" href="{% url 'chat:list' %}" >Chats list</a></li>
-      <li><a class="dropdown-item" href="{% url 'agent:list' %}" >Agents list</a></li>
-    </ul>
+<li class="nav-item mx-1">
+  <a class="nav-link btn btn-outline-success rounded-3 px-4 text-success border-success border fw-bold {% if '/agent' in request.path %}active{% endif %}" href="{% url 'agent:list' %}">Agents</a>
+</li>
+<li class="nav-item mx-1">
+  <a class="nav-link btn btn-outline-warning rounded-3 px-4 text-warning border-warning border border-1 fw-bold {% if '/chat' in request.path %}active{% endif %}" href="{% url 'chat:list' %}">Chats</a>
+</li>
+<li class="nav-item mx-1">
+    <a class="nav-link btn btn-outline-info rounded-3 px-4 text-info border-primary fw-bold {% if '/library' in request.path %}active{% endif %}" href="{% url 'library:list' %}">Libraries</a>
+</li>
+<li class="nav-item mx-1">
+    <a class="nav-link btn btn-outline-danger rounded-3 px-4 text-danger border-danger fw-bold {% if '/file' in request.path %}active{% endif %}" href="{% url 'file:list' %}">Files</a>
 </li>

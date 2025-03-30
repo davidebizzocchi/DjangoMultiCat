@@ -1,3 +1,3 @@
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>
+<li class="nav-item mx-1">
+    <a class="nav-link btn btn-outline-danger rounded-pill px-4 text-danger border-danger border border-1 fw-bold {% if '/logout' in request.path %}active{% endif %}" href="{% url 'users:logout' %}">Logout</a>
 </li>
