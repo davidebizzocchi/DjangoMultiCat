@@ -1,32 +1,34 @@
 {% load poll_extras %}
 <header>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg bg-dark navbar-dark shadow-sm">
         <div class="container">
             {% load static %}
-            <a class="navbar-brand" href="{% url 'home' %}"><h1>Home</h1></a>
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+                <i class="fas fa-cat me-2"></i>
+                <span>Cat For All</span>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mr-auto" style="margin-right: auto !important;">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     {% if request.user.is_staff %}
                         {% include 'base/menu_admin.html' %}
                     {% endif %}
 
                     {% if request.user.is_authenticated %}
-                            {% include 'base/menu_chat.html' %}
-                        
+                        {% include 'base/menu_chat.html' %}
+                    {% endif %}
+                </ul>
+
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    {% if request.user.is_authenticated %}
+                        {% include 'base/menu_user.html' %}
                         {% include 'base/menu_logout.html' %}
                     {% else %}
                         {% include 'base/menu_login.html' %}
                         {% include 'base/menu_register.html' %}
                     {% endif %}
-                </ul>
-
-                <ul class="navbar-nav">
-                    <!-- {% if request.user.is_authenticated %} -->
-                    {% include 'base/menu_user.html' %}
-                    <!-- {% endif %} -->
                 </ul>
             </div>
         </div>

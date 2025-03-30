@@ -2,6 +2,27 @@
 
 
 
+type: issue_html_header
+## Release v1.1.5-09e4bb7
+
+### Information
+- **Source branch**: 77-issue_html_header
+- **Target branch**: dev
+- **Issue**: [#77](https://github.com/davidebizzocchi/DjangoCat/issues/77)
+- **Type**: issue_html_header
+- **Previous version**: v1.1.5-09e4bb7
+- **New version**: v1.1.5-09e4bb7
+- **Code change statistics**:  8 files changed, 67 insertions(+), 54 deletions(-)
+
+### Commits
+- 784e036 - add header style in base.css (davidebizzocchi)
+- 04ac162 - update header menu (davidebizzocchi)
+- a5562d1 - update header (davidebizzocchi)
+- 1cd1d1a - home removed btn-primary style (davidebizzocchi)
+
+---
+
+
 type: issue
 New patch version: v1.1.5
 ## Release v1.1.5-09e4bb7
