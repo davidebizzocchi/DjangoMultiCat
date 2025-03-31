@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import socket
 from decouple import config
 import os
 from django.contrib.messages import constants as messages
@@ -309,22 +310,29 @@ MEDIA_URL = "/media/"
 
 UPLOADS_ROOT = MEDIA_ROOT / "uploads"
 
-# Debug Toolbar
-INTERNAL_IPS = ["127.0.0.1", "0.0.0.0", "localhost"]
-if DEBUG:
-    import socket
+# -------------------------------------------------------------------------
+# Debug Toolbar Configuration
+# -------------------------------------------------------------------------
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+    "0.0.0.0",
+]
 
-    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-    INTERNAL_IPS += [ip[:-1] + "1" for ip in ips]
+TOOLBAR_DEBUG = config("TOOLBAR_DEBUG", default=DEBUG, cast=bool)
+hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips]
+INTERNAL_IPS.append("127.0.0.1")
 
-if config("TOOLBAR_DEBUG", cast=bool, default=DEBUG):
-    INSTALLED_APPS = [
-        *INSTALLED_APPS,
-        "debug_toolbar",
-    ]
-    MIDDLEWARE = [
-        "debug_toolbar.middleware.DebugToolbarMiddleware",
-        *MIDDLEWARE,
-    ]
+def show_toolbar_callback(*args, **kwargs):
+    return TOOLBAR_DEBUG
+
+DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": show_toolbar_callback}
+
+# Conditionally add django-debug-toolbar if TOOLBAR_DEBUG is True
+if TOOLBAR_DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+    DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda request: True}
 
 SITE_URL = config("SITE_URL", default="http://localhost:8000")
