@@ -1,6 +1,6 @@
 {
     "name": "Multicat",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "description": "This plugin allows you to use CheshireCat in multi-chat, multi-chatbot and assing a file_id to your declarative. Exists also a django interface to manage all https://github.com/davidebizzocchi/DjangoMultiCat. Check docs for more :)",
     "author_name": "Davide Bizzocchi",
     "author_url": "https://github.com/davidebizzocchi",

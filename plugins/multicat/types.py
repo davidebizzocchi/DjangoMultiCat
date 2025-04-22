@@ -1,4 +1,4 @@
-#type: ignore
+# type: ignore
 from typing import Dict, List
 from pydantic import BaseModel, Field
 
