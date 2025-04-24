@@ -62,7 +62,7 @@ groq==0.20.0
     # via -r requirements/base.in
 gtts==2.5.4
     # via -r requirements/base.in
-h11==0.14.0
+h11==0.16.0
     # via httpcore
 httpcore==1.0.7
     # via httpx
