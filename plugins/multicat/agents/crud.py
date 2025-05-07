@@ -135,7 +135,7 @@ class AgentManager():
     @parse(input_type=AgentDB)
     def update_agent(self, payload: AgentDB):
         query = Query()
-        self.table.update(payload, query.id == payload.id)
+        self.table.update(payload.model_dump(), query.id == payload.id)
 
         return self.get_agent(payload.id)
 

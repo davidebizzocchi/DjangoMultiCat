@@ -1,8 +1,14 @@
 from typing import Union
 import uuid
 
-from cat.plugins.multicat.types import Agent
+from cat.looking_glass.cheshire_cat import CheshireCat
+
+from cat.plugins.multicat.types import Agent, LLM
+
 from cat.plugins.multicat.agents.crud import manager as agent_manager
+from cat.plugins.multicat.llms.crud import manager as llm_manager
+
+from cat.plugins.multicat.llms.models import LLMModel
 from cat.plugins.multicat.settings import MultiCatSettings
 
 
@@ -49,6 +55,49 @@ class CommonStrayCat():
     def delete_agent(self, agent: Union[str, Agent]):
         return agent_manager.delete_agent(agent)
 
+    # LLM
+    def llms(self, cast=True):
+        return llm_manager.list_llms(cast=cast)
+    
+    def get_llm_by_name(self, name, database_only=False, save=False, cast=False):
+        cat = CheshireCat()
+
+        if not hasattr(cat, "llms"):
+            cat.llms = {}
+
+        if not database_only and name in cat.llms:
+            return cat.llms[name]
+
+        llm = llm_manager.get(name, cast=cast)
+
+        if save:
+            cat.llms[name] = llm
+
+        return llm
+    
+    def create_llm(self, **kwargs):
+        llm = LLMModel.model_validate(kwargs)
+        return llm_manager.create(llm)
+    
+    def update_llm(self, updated_llm):
+        return llm_manager.update(updated_llm)
+    
+    def delete_llm(self, llm: Union[str, LLMModel]):
+        if isinstance(llm, str):
+            llm = llm_manager.delete(llm)
+
+        if isinstance(llm, LLMModel):
+            return llm_manager.delete(llm.name)
+        
+        return ValueError("Invalid LLM type. Must be str or LLMModel.")
+
+    def upsert_llm(self, llm: Union[LLMModel, LLM] = None, **kwargs):
+
+        if llm is None:
+            config = kwargs.pop("config", kwargs)
+            return llm_manager.upsert(config, **kwargs)
+        
+        return llm_manager.upsert(llm, **kwargs)
 
     # Files
     def get_file_list(self):

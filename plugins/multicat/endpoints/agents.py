@@ -18,6 +18,7 @@ from cat.log import log
 
 from cat.plugins.multicat.types import Agent
 from cat.plugins.multicat.agents.crud import manager as agent_manager
+from cat.plugins.multicat.llms.crud import manager as llm_manager
 
 
 class AgentUpdateRequest(BaseModel):
@@ -25,6 +26,7 @@ class AgentUpdateRequest(BaseModel):
     instructions: Optional[str] = None
     metadata: Optional[dict] = None
     enable_vector_search: Optional[bool] = True
+    llm_name: Optional[str] = None
 
 class AgentRequestResponse(AgentUpdateRequest):
     id: str = "default"
@@ -77,6 +79,7 @@ async def create_agent(
         instructions=data.instructions or "",
         metadata=data.metadata or {},
         enable_vector_search=data.enable_vector_search,
+        llm_name=data.llm_name,
     )
     
     return {
@@ -114,6 +117,9 @@ async def update_agent(
 
     if data.enable_vector_search is not None:
         agent.enable_vector_search = data.enable_vector_search
+
+    if data.llm_name is not None:
+        agent.llm_name= data.llm_name
 
     agent = cat.update_agent(agent)
 
