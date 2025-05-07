@@ -1,0 +1,298 @@
+{% extends "base/base.html" %}
+{% load poll_extras %}
+
+{% block title %}{% if is_new %}New LLM{% else %}Edit LLM{% endif %}{% endblock %}
+
+{% block contenuto %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        {% if is_new %}
+                            <i class="fas fa-plus-circle"></i> New Language Model
+                        {% else %}
+                            <i class="fas fa-edit"></i> Edit Language Model
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="llm-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+                            {{ form.name|add_class:"form-control" }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">{{ form.name.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">A descriptive name for this Language Model</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="llm-selector" class="form-label">LLM Type</label>
+                            <select id="llm-selector" class="form-select">
+                                <option value="">-- Select a Language Model --</option>
+                                {% for llm_name, llm_form in llm_forms.forms.items %}
+                                <option
+                                    value="{{ llm_name }}"
+                                    {% if form.llm_class.value == llm_name %}selected{% endif %}>
+                                    {{ llm_form.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                Select the type of Language Model to use
+                                <span id="model-link-container" class="d-none">
+                                    - <a href="#" target="_blank" id="model-link">Learn more</a>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div id="llm-description" class="alert alert-info mb-3 d-none"></div>
+                        
+                        <!-- Hidden field to store the actual class value -->
+                        <input type="hidden" name="{{ form.llm_class.name }}" id="{{ form.llm_class.id_for_label }}" value="{{ form.llm_class.value|default:'' }}">
+                        <input type="hidden" name="{{ form.config.name }}" id="{{ form.config.id_for_label }}" value="{{ form.config.value|default:'{}' }}">
+
+                        <!-- Dynamic LLM Forms -->
+                        <div id="dynamic-llm-forms" class="mb-4">
+                            {% for llm_name, form_data in llm_forms.forms.items %}
+                            <div id="form-{{ llm_name|slugify }}" class="llm-form-container" style="display: none;">                                
+                                {% for field in form_data.form %}
+                                <div class="mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {{ field.label }}
+                                        {% if field.field.required %}
+                                        <span class="text-danger">*</span>
+                                        {% endif %}
+                                    </label>
+                                    
+                                    {% if field|field_type == "BooleanField" %}
+                                    <div class="form-check">
+                                        {{ field|add_class:"form-check-input" }}
+                                        <label class="form-check-label" for="{{ field.id_for_label }}">Enable</label>
+                                    </div>
+                                    {% else %}
+                                        {{ field|add_class:"form-control" }}
+                                    {% endif %}
+                                    
+                                    {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                    {% endif %}
+                                    
+                                    {% if field.errors %}
+                                    <div class="invalid-feedback d-block">{{ field.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'llm:list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for LLM selection and dynamic forms -->
+<script>
+    // DOM elements
+    const llmSelector = document.getElementById('llm-selector');
+    const llmClassInput = document.getElementById('{{ form.llm_class.id_for_label }}');
+    const llmConfigInput = document.getElementById('{{ form.config.id_for_label }}');
+    const llmForms = document.querySelectorAll('.llm-form-container');
+    
+    // Current config if exists
+    let currentConfig = {};
+    try {
+        const configValue = '{{ form.config.value|escapejs }}';
+        currentConfig = configValue ? JSON.parse(configValue) : {};
+        console.log("Loaded existing config:", currentConfig);
+    } catch (e) {
+        console.error("Error parsing config:", e);
+        currentConfig = {};
+    }
+    
+    // Get llm class from the form
+    let LLMClassValue = '{{ form.llm_class.value|escapejs }}';
+    if (!LLMClassValue || LLMClassValue === 'None') {
+        LLMClassValue = llmSelector.options[llmSelector.selectedIndex].value;
+    }
+    console.log("Original LLM class:", LLMClassValue);
+    
+    // Map for LLM metadata and class-to-name mapping
+    const llmMeta = {};
+    {% for llm_name, llm_form in llm_forms.items %}
+    llmMeta["{{ llm_name|escapejs }}"] = {
+        name: "{{ llm_name|escapejs }}",
+        className: "{{ llm_form.original_class_name|escapejs }}",
+        link: "{{ llm_form.meta.link|default:""|escapejs }}"
+    };
+    {% endfor %}
+    
+    // Function to show the selected form
+    function showLLMForm(llmName) {
+        // Hide all forms first
+        llmForms.forEach(form => {
+            form.style.display = 'none';
+            
+            // Disable all inputs in hidden forms to prevent validation errors
+            form.querySelectorAll('input, select, textarea').forEach(input => {
+                input.disabled = true;
+            });
+        });
+        
+        // Show the selected form if exists
+        const formId = `form-${llmName.toLowerCase().replace(/\s+/g, '-')}`;
+        const selectedForm = document.getElementById(formId);
+        
+        if (selectedForm) {
+            selectedForm.style.display = 'block';
+            
+            // Enable all inputs in the visible form
+            selectedForm.querySelectorAll('input, select, textarea').forEach(input => {
+                input.disabled = false;
+            });
+            
+            // Set class input for submission
+            llmClassInput.value = LLMClassValue;
+
+            // Pre-populate form with existing config if available
+            if (Object.keys(currentConfig).length > 0) {
+                console.log("Pre-populating form with existing config");
+                fillFormWithConfig(selectedForm, currentConfig);
+            }
+        }
+    }
+    
+    // Function to fill form fields with config values
+    function fillFormWithConfig(formContainer, config) {
+        console.log("Filling form with config:", config);
+        // For each config key, find the matching form field and set its value
+        Object.entries(config).forEach(([key, value]) => {
+            const inputField = formContainer.querySelector(`[name$="${key}"]`);
+            if (inputField) {
+                if (inputField.type === 'checkbox') {
+                    inputField.checked = value === true;
+                } else {
+                    inputField.value = value;
+                }
+                console.log(`Set ${key} to ${value}`);
+            } else {
+                console.log(`Field for ${key} not found`);
+            }
+        });
+    }
+    
+    // Function to collect form data into config object
+    function collectFormData(formContainer) {
+        const config = {};
+        const inputs = formContainer.querySelectorAll('input:not([disabled]), select:not([disabled]), textarea:not([disabled])');
+        
+        inputs.forEach(input => {
+            // Extract the field name from the input name (remove form prefix if present)
+            let fieldName = input.name;
+            if (fieldName.includes('-')) {
+                fieldName = fieldName.split('-').pop();
+            }
+            
+            // Set value based on input type
+            if (input.type === 'checkbox') {
+                config[fieldName] = input.checked;
+            } else if (input.type === 'number') {
+                config[fieldName] = input.value === '' ? null : Number(input.value);
+            }
+            else {
+                config[fieldName] = input.value;
+            }
+        });
+        
+        return config;
+    }
+    
+    // Listen for change on LLM selector
+    llmSelector.addEventListener('change', function() {
+        const selectedLLM = this.value;
+        showLLMForm(selectedLLM);
+    });
+    
+    // Initialize with selected value if exists, or disable all form inputs initially
+    document.addEventListener('DOMContentLoaded', function() {
+        // First, disable all form inputs
+        llmForms.forEach(form => {
+            form.querySelectorAll('input, select, textarea').forEach(input => {
+                input.disabled = true;
+            });
+        });
+        
+        // If we have an existing class, find the corresponding name and show that form
+        if (LLMClassValue) {            
+            showLLMForm(LLMClassValue);
+        }
+    });
+    
+    // Handle form submission
+    document.getElementById('llm-form').addEventListener('submit', function(e) {
+        const selectedLLM = llmSelector.value;
+        console.log("Selected LLM:", selectedLLM);
+        
+        // Validate form selection
+        if (!selectedLLM) {
+            e.preventDefault();
+            alert('Please select a Language Model before submitting.');
+            return false;
+        }
+        
+        // Get form ID from the selected LLM
+        const formId = `form-${selectedLLM.toLowerCase().replace(/\s+/g, '-')}`;
+        const selectedForm = document.getElementById(formId);
+        
+        if (selectedForm) {
+            // Get original class name from the form
+            
+            // Collect form data into config
+            const config = collectFormData(selectedForm);
+            
+            // Check required fields
+            let missingFields = [];
+            selectedForm.querySelectorAll('input[required]:not([disabled]), select[required]:not([disabled]), textarea[required]:not([disabled])').forEach(field => {
+                if (!field.value) {
+                    field.classList.add('is-invalid');
+                    missingFields.push(field.label || field.name);
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            // If missing fields, show error and don't submit
+            if (missingFields.length > 0) {
+                e.preventDefault();
+                alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
+                return false;
+            }
+            
+            // Update values for submission
+            llmConfigInput.value = JSON.stringify(config);
+            llmClassInput.value = selectedLLM;
+            
+            console.log(`Submitting: LLM Class=${selectedLLM}`, config);
+        } else {
+            e.preventDefault();
+            alert('Form configuration error. Please try again.');
+            return false;
+        }
+    });
+</script>
+{% endblock %}

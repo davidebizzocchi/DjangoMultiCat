@@ -53,7 +53,8 @@ urlpatterns = [
     path("file/", include("file.urls", namespace="file")),
 
     path("agent/", include("agent.urls", namespace="agent")),
-    
+    path("llm/", include("llm.urls", namespace="llm")),
+
     path("api/", api.urls),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     "library",
     "file",
     "agent",
+    "llm",
 
     # AllAuth
     "allauth",
@@ -187,6 +188,11 @@ ACCOUNT_REAUTHENTICATION_REQUIRED = config(
 ACCOUNT_REAUTHENTICATION_TIMEOUT = config(
     "ACCOUNT_REAUTHENTICATION_TIMEOUT", default=300, cast=int
 )
+
+if DEBUG:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
+else:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 AUTH_USER_MODEL = "users.User"
 

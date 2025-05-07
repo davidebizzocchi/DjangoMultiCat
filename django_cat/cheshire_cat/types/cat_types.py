@@ -22,14 +22,26 @@ class DocReadingProgress(BaseModel):
     source: str
     received_at: float = Field(default_factory=lambda: time.time())
 
+class LLMRequest(BaseModel):
+    name: str
+    llm_class: str
+    config: Dict = Field(default_factory=dict)
+
 class AgentRequest(BaseModel):
     name: str
     instructions: str
     metadata: Dict = Field(default_factory=dict)
     enable_vector_search: bool = Field(default=True)
 
+    llm_name: Optional[str] = None
+
 class Agent(AgentRequest):
     id: str = "default"
+
+class LLMModel(BaseModel):
+    name: str = Field(description="This is the LLM name")
+    llm_class: str
+    config: Dict = Field(default_factory=dict)
 
 class ModelInteraction(BaseModel):
     """

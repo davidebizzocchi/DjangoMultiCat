@@ -1,0 +1,47 @@
+{% extends "base/base.html" %}
+
+{% block title %}Language Model Details{% endblock %}
+
+{% block contenuto %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-brain"></i> Language Model Details
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Name:</dt>
+                        <dd class="col-sm-9">{{ llm.name }}</dd>
+                        
+                        <dt class="col-sm-3">LLM Class:</dt>
+                        <dd class="col-sm-9">{{ llm.llm_class }}</dd>
+                        
+                        <dt class="col-sm-3">Configuration:</dt>
+                        <dd class="col-sm-9">
+                            <pre class="bg-light p-3 rounded"><code>{{ llm.config|pprint }}</code></pre>
+                        </dd>
+                    </dl>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'llm:list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <div>
+                            <a href="{% url 'llm:update' llm.id %}" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a href="{% url 'llm:delete' llm.id %}" class="btn btn-danger ms-2">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -12,7 +12,7 @@ import io
 import uuid
 
 from cheshire_cat.types.cat_types import UserMessage
-from cheshire_cat.types import AgentRequest, CatMessage, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification, DocReadingProgress
+from cheshire_cat.types import AgentRequest, CatMessage, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification, DocReadingProgress, LLMRequest
 from cheshire_cat.types import Agent as AgentComplete
 from openai import OpenAI
 
@@ -618,7 +618,61 @@ class Cat(CatClient):
             self.create_agent(agent)
 
         return queryset.count()
+    
+    def create_llm(self, llm: LLMRequest):
+        """Create a new LLM"""
+        response = self.llm.create_llm(
+            data=llm.model_dump()
+        )
 
+        if response.get("success", False):
+            return True
+        
+        return False
+    
+    def update_llm(self, llm: LLMRequest):
+        """Update an existing LLM"""
+        response = self.llm.update_llm(
+            data=llm.model_dump()
+        )
+
+        if response.get("success", False):
+            return True
+        
+        return False
+
+    def delete_llm(self, llm_name: str):
+        """Delete an existing LLM"""
+        response = self.llm.delete_llm(
+            llm_name=llm_name
+        )
+
+        if response.get("success", False):
+            return True
+
+        return False
+
+    def list_llms(self):
+        """List all LLMs"""
+        response = self.llm.list_llms()
+
+        if response.get("success", False):
+            return [LLMRequest.model_validate(llm) for llm in response["llms"]]
+        
+        return []
+
+    def get_llm(self, llm_id: str):
+        """Get an LLM by its ID"""
+        response = self.llm.get_llm(llm_id=llm_id)
+
+        if response.get("success", False):
+            return LLMRequest.model_validate(response["llm"])
+        
+        return None
+
+    def get_llm_schemas(self):
+        """List all schemas"""
+        return self.llm.get_llm_schemas()["schemas"]
 
 
 @wait_cat

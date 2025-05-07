@@ -22,6 +22,9 @@
                     {% if agent.is_default %}
                         <span class="badge bg-primary ms-2">Default</span>
                     {% endif %}
+                    {% if agent.llm %}
+                        <span class="badge bg-info ms-2">{{ agent.llm.name }}</span>
+                    {% endif %}
                 </div>
                 {% if agent.instructions %}
                 <div class="small text-muted mt-1">
@@ -42,6 +45,12 @@
                             <span class="badge bg-success">Enabled</span>
                         {% else %}
                             <span class="badge bg-danger">Disabled</span>
+                        {% endif %}
+                        {% if agent.llm_class %}
+                        | LLM Class: <span class="text-info">{{ agent.llm_class }}</span>
+                        {% endif %}
+                        {% if agent.llm %}
+                        | LLM: <span class="text-info">{{ agent.llm.name }}</span>
                         {% endif %}
                     </small>
                 </div>

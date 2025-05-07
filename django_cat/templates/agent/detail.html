@@ -37,6 +37,49 @@
                 {% endif %}
             </div>
 
+            <!-- LLM Information Section -->
+            <h5 class="card-title mt-4">Language Model (LLM)</h5>
+            {% if agent.llm %}
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Name:</strong> {{ agent.llm.name }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Class:</strong> {{ agent.llm.llm_class }}</p>
+                            </div>
+                        </div>
+                        <hr>
+                        <h6>Configuration:</h6>
+                        <pre class="mb-0"><code>{{ agent.llm.config|pprint }}</code></pre>
+                    </div>
+                </div>
+            {% elif agent.llm_name %} {# Fallback for legacy llm_name, llm_class, llm_config #}
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <p class="text-warning"><i class="fas fa-exclamation-triangle"></i> This agent is using a legacy LLM configuration.</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Name:</strong> 
+                                    {{ agent.llm_name }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Class:</strong> 
+                                    {{ agent.llm_class }}
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                        <h6>Configuration:</h6>
+                        <pre class="mb-0"><code>{{ agent.llm_config|pprint }}</code></pre>
+                    </div>
+                </div>
+            {% else %}
+                <p class="text-muted">No LLM associated with this agent.</p>
+            {% endif %}
+
             <h5 class="card-title mt-4">Memory Search</h5>
             <p class="card-text">
                 {% if agent.enable_vector_search %}

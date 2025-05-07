@@ -1,6 +1,7 @@
 from django import forms
 import json
 from agent.models import Agent, validate_capabilities
+from llm.models import LLM  # Import LLM model
 
 from django.conf import settings
 
@@ -13,10 +14,11 @@ class AgentForm(forms.ModelForm):
         required=False,
         validators=[validate_capabilities]
     )
+    llm = forms.ModelChoiceField(queryset=None, required=False, empty_label="Nessun LLM selezionato")  # Add LLM choice field
 
     class Meta:
         model = Agent
-        fields = ['name', 'instructions', 'metadata', 'capabilities', "enable_vector_search"]
+        fields = ['name', 'instructions', 'metadata', 'capabilities', "enable_vector_search", "llm"]  # Add 'llm' to fields
         widgets = {
             'metadata': forms.Textarea(attrs={
                 'rows': 4, 
@@ -29,6 +31,8 @@ class AgentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.user = user
         self.fields['metadata'].required = False
+        if user:  # Filter LLMs by the current user
+            self.fields['llm'].queryset = LLM.objects.filter(user=user)
 
     def clean_metadata(self):
         metadata = self.cleaned_data.get("metadata", "{}")

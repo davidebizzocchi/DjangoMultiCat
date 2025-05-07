@@ -1,7 +1,11 @@
-from django import template
 from decouple import config
 from app.pre_utils import get_version_from_file
+
+from django import template
+from django.forms.boundfield import BoundField
+
 from icecream import ic
+
 
 register = template.Library()
 
@@ -37,3 +41,11 @@ def capitalize(value):
         if len(value) > 0:
             return value[0].upper() + value[1:]
     return value
+
+@register.filter(name="field_type")
+def field_type(field: BoundField):
+    """
+    Returns the field class name of a form field.
+    Usage: {{ form.field|field_type }}
+    """
+    return field.field.__class__.__name__

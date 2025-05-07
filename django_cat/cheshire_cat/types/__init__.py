@@ -13,7 +13,8 @@ from cheshire_cat.types.cat_types import (
     MessageWhy,
     Message,
     ConversationMessage,
-    UserMessage
+    UserMessage,
+    LLMRequest
 )
 
 # Import from new_types
