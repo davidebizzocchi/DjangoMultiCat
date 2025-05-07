@@ -1,9 +1,6 @@
 #type: ignore
 from typing import Dict, Optional
 from pydantic import BaseModel, Field
-
-from pydantic import BaseModel, Field, field_validator
-
 from cat.factory.llm import get_llm_from_name
 
 class LLM(BaseModel):
@@ -17,13 +14,7 @@ class LLM(BaseModel):
         if llm is None:
             raise ValueError(f"LLM {self.name} not found")
         return llm.get_llm_from_config(self.config)
-    
-    # updated_at: int = Field(default_factory=generate_timestamp)
-    
-    # @field_validator('name', mode='before')
-    # def handle_none(cls, v):
-    #     """Prevent name is None"""
-    #     return v if v is not None else generate_uuid()
+
 
 class Agent(BaseModel):
     id: str = "default"

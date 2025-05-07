@@ -8,6 +8,7 @@ from cat.mad_hatter.decorators import endpoint
 from cat.looking_glass.stray_cat import StrayCat
 from cat.factory.llm import get_llms_schemas
 
+
 class LLMRequest(BaseModel):
     name: str
     llm_class: str

@@ -5,7 +5,6 @@ from cat.auth.permissions import AuthUserInfo
 
 from cat.convo.messages import CatMessage, EmbedderModelInteraction
 
-from cat.looking_glass.cheshire_cat import CheshireCat
 from cat.looking_glass.stray_cat import StrayCat
 
 from cat.memory.working_memory import WorkingMemory
@@ -20,7 +19,6 @@ from cat.plugins.multicat.refactory.stray_cat.common import CommonStrayCat
 from cat.plugins.multicat.agents.cat_agents.main_agent import MainAgentLimited
 
 from cat.plugins.multicat.agents.crud import manager as agent_manager
-from cat.plugins.multicat.llms.crud import manager as llm_manager
 
 
 stray_cat_attr = {k: v for k, v in StrayCat.__dict__.items()}

@@ -1,16 +1,12 @@
 
-from typing import Any, Dict
+from typing import Dict
 from tinydb import Query, TinyDB
 
 from cat.db.database import get_db
-from cat.db import crud
 from cat.factory.llm import get_llm_from_name
 
 from cat.plugins.multicat.llms.models import LLMModel
 from cat.plugins.multicat.types import LLM
-
-
-from cat.log import log
 
 
 class LLMManager:

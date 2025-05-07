@@ -1,24 +1,15 @@
-from typing import Optional
-
-from cat.auth.permissions import AuthPermission
-
-from cat.auth.connection import HTTPAuth
-from cat.auth.permissions import AuthResource
-
-
-from typing import Dict
+from typing import Optional, Dict
 from pydantic import BaseModel
 from fastapi import Request, HTTPException, Depends
-from cat.mad_hatter.decorators import endpoint
-from cat.auth.connection import HTTPAuth
+
 from cat.auth.permissions import AuthPermission, AuthResource
+from cat.auth.connection import HTTPAuth
+from cat.mad_hatter.decorators import endpoint
 
 from cat.looking_glass.stray_cat import StrayCat
 from cat.log import log
 
 from cat.plugins.multicat.types import Agent
-from cat.plugins.multicat.agents.crud import manager as agent_manager
-from cat.plugins.multicat.llms.crud import manager as llm_manager
 
 
 class AgentUpdateRequest(BaseModel):
@@ -94,10 +85,6 @@ async def update_agent(
     agent_id: str = "default",
     cat: StrayCat=Depends(HTTPAuth(AuthResource.CONVERSATION, AuthPermission.WRITE)),
 ) -> Dict:
-    log.debug(f"User ID: {cat.user_id}")
-    log.debug(f"Updating agents: {agent_id}")
-    log.debug(f"New agent instructions: {data.instructions}")
-
     agent: Agent = cat.get_agent_by_id(agent_id).cast()
 
     if agent is None:
