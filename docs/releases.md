@@ -2,6 +2,26 @@
 
 
 
+type: feature_multi_llms
+## Release v1.2.0-8d1fd80
+
+### Information
+- **Source branch**: dev
+- **Target branch**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Type**: dev
+- **Previous version**: v1.2.0-8d1fd80
+- **New version**: v1.2.0-8d1fd80
+- **Code change statistics**:  40 files changed, 1941 insertions(+), 163 deletions(-)
+
+### Commits
+- 621237c - align plugin (davidebizzocchi)
+- 6a5d880 - update requirements (davidebizzocchi)
+- 0312df8 - add llms (davidebizzocchi)
+
+---
+
+
 type: issue_html_header
 ## Release v1.1.5-09e4bb7
 
