@@ -13,9 +13,9 @@ asgiref==3.8.1
     #   django-allauth
 asttokens==3.0.0
     # via icecream
-beautifulsoup4==4.13.3
+beautifulsoup4==4.13.4
     # via -r requirements/base.in
-certifi==2025.1.31
+certifi==2025.4.26
     # via
     #   httpcore
     #   httpx
@@ -23,7 +23,7 @@ certifi==2025.1.31
     #   sentry-sdk
 cffi==1.17.1
     # via cryptography
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
     # via requests
 cheshire-cat-api==1.4.9
     # via -r requirements/base.in
@@ -31,24 +31,24 @@ click==8.1.8
     # via gtts
 colorama==0.4.6
     # via icecream
-cryptography==44.0.2
+cryptography==44.0.3
     # via pyjwt
 distro==1.9.0
     # via
     #   groq
     #   openai
-django==5.1.7
+django==5.2.1
     # via
     #   -r requirements/base.in
     #   django-allauth
     #   django-debug-toolbar
     #   django-ninja
     #   sentry-sdk
-django-allauth==65.5.0
+django-allauth==65.7.0
     # via -r requirements/base.in
-django-debug-toolbar==5.1.0
+django-debug-toolbar==5.2.0
     # via -r requirements/base.in
-django-ninja==1.3.0
+django-ninja==1.4.1
     # via -r requirements/base.in
 django-widget-tweaks==1.5.0
     # via -r requirements/base.in
@@ -58,13 +58,13 @@ email-validator==2.2.0
     # via -r requirements/base.in
 executing==2.2.0
     # via icecream
-groq==0.20.0
+groq==0.24.0
     # via -r requirements/base.in
 gtts==2.5.4
     # via -r requirements/base.in
-h11==0.14.0
+h11==0.16.0
     # via httpcore
-httpcore==1.0.7
+httpcore==1.0.9
     # via httpx
 httpx==0.28.1
     # via
@@ -84,13 +84,13 @@ markdown2==2.5.3
     # via -r requirements/base.in
 oauthlib==3.2.2
     # via requests-oauthlib
-openai==1.68.2
+openai==1.77.0
     # via -r requirements/base.in
-packaging==24.2
+packaging==25.0
     # via pytesseract
 pdf2image==1.17.0
     # via -r requirements/base.in
-pillow==11.1.0
+pillow==11.2.1
     # via
     #   -r requirements/base.in
     #   pdf2image
@@ -99,13 +99,13 @@ psycopg2-binary==2.9.10
     # via -r requirements/base.in
 pycparser==2.22
     # via cffi
-pydantic==2.10.6
+pydantic==2.11.4
     # via
     #   cheshire-cat-api
     #   django-ninja
     #   groq
     #   openai
-pydantic-core==2.27.2
+pydantic-core==2.33.2
     # via pydantic
 pygments==2.19.1
     # via icecream
@@ -128,7 +128,7 @@ requests==2.32.3
     #   tiktoken
 requests-oauthlib==2.0.0
     # via django-allauth
-sentry-sdk==2.24.0
+sentry-sdk==2.27.0
     # via -r requirements/base.in
 six==1.17.0
     # via python-dateutil
@@ -137,7 +137,7 @@ sniffio==1.3.1
     #   anyio
     #   groq
     #   openai
-soupsieve==2.6
+soupsieve==2.7
     # via beautifulsoup4
 sqlparse==0.5.3
     # via
@@ -147,14 +147,17 @@ tiktoken==0.9.0
     # via -r requirements/base.in
 tqdm==4.67.1
     # via openai
-typing-extensions==4.12.2
+typing-extensions==4.13.2
     # via
     #   beautifulsoup4
     #   groq
     #   openai
     #   pydantic
     #   pydantic-core
-urllib3==2.2.2
+    #   typing-inspection
+typing-inspection==0.4.0
+    # via pydantic
+urllib3==2.0.7
     # via
     #   cheshire-cat-api
     #   requests
