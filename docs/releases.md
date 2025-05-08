@@ -3,6 +3,26 @@
 
 
 type: issue
+New patch version: v1.2.3
+## Release v1.2.3-f5e1226
+
+### Information
+- **Source branch**: 82-issue-broken-agent-save
+- **Target branch**: dev
+- **Issue**: [#82](https://github.com/davidebizzocchi/DjangoCat/issues/82)
+- **Type**: issue
+- **Previous version**: v1.2.2-cae0766
+- **New version**: v1.2.3-f5e1226
+- **Code change statistics**:  67 files changed, 522 insertions(+), 548 deletions(-)
+
+### Commits
+- f5e1226 - delete blank spaces (davidebizzocchi)
+- 3073921 - fix error about llms in Agent (davidebizzocchi)
+
+---
+
+
+type: issue
 New patch version: v1.2.2
 ## Release v1.2.2-cae0766
 
