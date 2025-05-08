@@ -135,7 +135,7 @@
                                     <a href="{% url 'file:assoc' file.file_id %}" class="btn btn-outline-primary btn-sm">
                                         <i class="fas fa-folder-tree me-1"></i>Manage Libraries
                                     </a>
-                                    <a href="{{ file.link }}" target="_blank" class="btn btn-outline-info btn-sm">
+                                    <a id="file-link" href="{{ file.link }}" target="_blank" class="btn btn-outline-info btn-sm">
                                         <i class="fas fa-external-link-alt me-1"></i>Preview
                                     </a>
                                     <a href="{% url 'file:delete' file.file_id %}" class="btn btn-outline-danger btn-sm">
@@ -237,6 +237,13 @@ const updateFileStatus = (fileId) => {
             } else {
                 console.log('File processing complete');
                 $("#progress-bar").hide();
+            }
+
+            // Update file link when ready
+            const $fileLink = $fileElement.find('#file-link');
+            if (data.status === 'ready') {
+                console.log('Updating file link to:', data.link);
+                $fileLink.attr('href', data.link);
             }
             
             console.timeEnd(`Status update for ${fileId}`);

@@ -111,6 +111,12 @@ class File(BaseUserModel):
             'library_id',
             'user__username'
         )
+    
+    @property
+    def link(self):
+        return (
+            f"/media/{self.file.path.relative_to(settings.MEDIA_ROOT)}"
+        )
 
     def _get_library_from_id(self, library_id: str):
         return Library.objects.get(library_id=library_id)
@@ -253,12 +259,6 @@ class File(BaseUserModel):
         
         if callback is not None:
             callback(*callback_args)
-    
-    @property
-    def link(self):
-        return (
-            f"/media/{self.file.path.relative_to(settings.MEDIA_ROOT)}"
-        )
 
     @classmethod
     def calculate_file_hash(self, file: Path) -> str:
@@ -320,7 +320,7 @@ class File(BaseUserModel):
                 self.file = FileObject(path=new_text_path) 
                 # Save only file field to update path and recalculated size
                 # This save() should not trigger wait_upload again because pk exists
-                super().save(update_fields=['file']) 
+                self.save(update_fields=['file']) 
 
                 # Delete the original audio file
                 original_audio_path.unlink()
