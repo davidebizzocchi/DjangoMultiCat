@@ -279,6 +279,13 @@
     div.header-content-wrapper {
         --bs-box-shadow: 0 0.5rem 1rem rgba(137, 137, 137, 0.075);
     }
+
+    /* Audio Recorder Styles */
+    #audio-recorder {
+        margin: 8px 0;
+        padding: 12px;
+        border-radius: 8px;
+    }
 </style>
 {% endblock%}
 
@@ -386,6 +393,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 {% include 'chat/components/sidebar/history/date_group.html' %}
 {% include 'chat/components/sidebar/history/chat_item.html' %}
 
+{% include 'chat/components/general/audio_recorder.html' %}
 {% include 'chat/components/general/loader.html' %}
 {% include 'chat/components/general/change_name.html' %}
 {% include 'chat/components/general/error_banner.html' %}
@@ -448,6 +456,14 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     const input_action_buttons_container_dom = input_group_dom.find("div.action-buttons-container");
     const input_action_buttons_dom = input_action_buttons_container_dom.find("div[role=button]");
 
+    // audio recorder
+    const audio_recorder_popup_dom = $("#audio-recorder");
+    const audio_record_button_dom = audio_recorder_popup_dom.find("#recordBtn");
+    const audio_waveform_canvas_dom = audio_recorder_popup_dom.find("#waveform");
+    const audio_status_dom = audio_recorder_popup_dom.find("#audioStatus");
+    const audio_timer_element_dom = audio_recorder_popup_dom.find(".timer");
+    const audio_progress_bar_dom = audio_recorder_popup_dom.find(".progress-bar");
+
     const send_message_dom = input_action_buttons_dom.filter("div.file-input-button");
 
     const notification_container_dom = $("div.ds-notification-container");
@@ -467,9 +483,9 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     const class_chat_history_date_group = "history-date-group";
     const class_chat_message_action_button = "_chat-message-action_";
     const class_assistant_chat_message = "code-block-wrapper";
-
     const class_button_toggle_annotations = "_toggle_annotations_container_"
-    
+    const class_close_button = "btn-close-popup";
+
     /* VARIABILES */
     let popup_chat_action_active = false;
     let actual_chat_group_date_value = null;
@@ -477,7 +493,19 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 
     let last_user_text = "";
 
-    console.log("buttons", buttons_dom, sidebar_button_dom);
+    // Audio recording configuration
+    const MIN_CHUNK_DURATION = 1 * 1000; // 1 sec
+    const MAX_CHUNK_DURATION = 5 * 1000; // 5 sec
+    const SILENCE_THRESHOLD_RMS = 5; // RMS threshold for silence
+    const SILENCE_DURATION = 0.5 * 1000; // 2 sec of silence for pause
+
+    // Waveform visualization variables
+    let audio_waveformData;
+    let audio_animationId;
+    let audio_canvasContext;
+    let audio_startTime;
+    let audio_microphone;
+    let audio_stream;
 
     /* OVVERIDE */
 
@@ -559,6 +587,21 @@ class="apple en_US dark" data-ds-dark-theme="dark"
                 console.log("CLICKED OUTSIDE!");
 
                 hide_chat_control_popup();
+            }
+        });
+
+         // Close the popup when click on .btn-close-popup
+         $("body").on("click", "button." + class_close_button, function (event) {
+            let target = $(event.currentTarget);
+            let action = get_data(target, "action");
+            
+            let parent_class = "." + get_data(target, "parent-class");
+            let parent_dom = target.closest(parent_class);
+
+            try {
+                parent_dom[action]?.();
+            } catch (error) {
+                console.error("Error closing popup", error);
             }
         });
 
@@ -683,13 +726,16 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             let target = $(event.currentTarget);
             let action = target.data("action");
 
-            console.log("HAI PREMUTO UN PULSANTE DELL'INPUT!", action);
+            console.log("A BUTTON WAS PRESSED IN THE INPUT!", action);
 
 
             // TOODO: Execute the action
 
             if (action == "send-msg" && send_message_dom.is_active()) {
                 send_message();
+            }
+            else if (action == "record") {
+                show_audio_recorder();
             }
             // TODO: add others
             else {
@@ -810,9 +856,63 @@ class="apple en_US dark" data-ds-dark-theme="dark"
                 annot_container.fadeOut(timeout);
             }
         });
+    
+        // Audio Start/Stop recording
+        audio_recorder_popup_dom.on("click", "button#recordBtn", function (event) {
+            if (!audio_mediaRecorder || audio_mediaRecorder.state === 'inactive') {
+                startRecording(drawWaveform);
+            } else {
+                stopRecording();
+            }
+        });
+
     });
 
     /* FUNCTIONS */
+    function createRestartableInterval(callback, delay) {
+        let intervalId;
+        
+        const start = () => {
+            stop(); // Clear any existing interval
+            intervalId = setInterval(callback, delay);
+        };
+        
+        const stop = () => {
+          if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+          }
+        };
+        
+        return { start, stop };
+      }
+
+    function createRestartableTimeout(callback, delay) {
+        let timeoutId;
+        
+        const start = () => {
+            stop(); // Clear any existing timeout
+            timeoutId = setTimeout(callback, delay);
+        };
+        
+        const stop = () => {
+            if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+            }
+        };
+        
+        return { start, stop };
+    }
+
+    function isValidURL(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (err) {
+            return false;
+        }
+    }
 
     function serializeFormToJson(form) {
         const formDataArray = form.serializeArray(); // Serialize form into an array of objects
@@ -1475,7 +1575,105 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         return container;
     }
 
-    // Loader
+
+    /* AUDIO RECORDER */
+    {% include 'js/transcribe.js' %}
+    function show_audio_recorder() {
+        audio_recorder_popup_dom.show();
+        // Initialize canvas when showing the recorder
+        initWaveformCanvas();
+    }
+
+    function hide_audio_recorder() {
+        audio_recorder_popup_dom.hide();
+    }
+
+    // Initialize the waveform canvas
+    function initWaveformCanvas() {
+        // Get the canvas and set its dimensions
+        const canvas = audio_waveform_canvas_dom[0];
+        const container = audio_waveform_canvas_dom.parent();
+        
+        canvas.width = container.width();
+        canvas.height = container.height();
+        
+        audio_canvasContext = canvas.getContext('2d');
+        audio_canvasContext.fillStyle = 'rgba(0, 123, 255, 0.5)';
+    }
+
+    // Draw waveform visualization
+    function drawWaveform() {
+        if (!audio_canvasContext || !audio_waveformData || !audio_analyser) {
+            audio_animationId = requestAnimationFrame(drawWaveform);
+            return;
+        }
+        
+        // Get canvas
+        const canvas = audio_waveform_canvas_dom[0];
+        
+        // Clear canvas
+        audio_canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Get current audio data
+        audio_analyser.getByteFrequencyData(audio_waveformData);
+        
+        // Draw waveform bars
+        const barWidth = canvas.width / audio_waveformData.length;
+        const heightScale = canvas.height / 255;
+        
+        for (let i = 0; i < audio_waveformData.length; i++) {
+            const barHeight = audio_waveformData[i] * heightScale;
+            const x = i * barWidth;
+            const y = canvas.height - barHeight;
+            
+            audio_canvasContext.fillRect(x, y, barWidth - 1, barHeight);
+        }
+        
+        // Continue animation
+        audio_animationId = requestAnimationFrame(drawWaveform);
+    }
+
+    // Update timer display
+    function updateTimer() {
+        if (!audio_isRecording) return;
+        
+        const elapsed = Math.floor((Date.now() - audio_startTime) / 1000);
+        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const seconds = (elapsed % 60).toString().padStart(2, '0');
+        
+        audio_timer_element_dom.text(`${minutes}:${seconds}`);
+        
+        setTimeout(updateTimer, 1000);
+    }
+
+    // Update UI elements based on recording state
+    function updateUIForRecording(recording) {
+        if (audio_record_button_dom.length) {
+            const iconSpan = audio_record_button_dom.find('i');
+            const textSpan = audio_record_button_dom.find('span');
+            
+            if (recording) {
+                textSpan.text('Stop Recording');
+                iconSpan.removeClass('fa-microphone').addClass('fa-stop');
+                audio_record_button_dom.removeClass('btn-primary').addClass('btn-danger');
+                audio_status_dom.text('Recording...');
+            } else {
+                textSpan.text('Start Recording');
+                iconSpan.removeClass('fa-stop').addClass('fa-microphone');
+                audio_record_button_dom.removeClass('btn-danger').addClass('btn-primary');
+            }
+        }
+    }
+
+    // Update status display
+    function updateStatus(message) {
+        if (audio_status_dom.length) {
+            audio_status_dom.text(message);
+        }
+    }
+
+
+    /* Loader */
     function create_message_loader(message=null) {
         console.log("LOADER");
         let loader = HTML_LOADER.clone(true);

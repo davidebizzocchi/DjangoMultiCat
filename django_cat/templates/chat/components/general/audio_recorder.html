@@ -1,0 +1,36 @@
+<!-- Audio Recorder Component -->
+<div id="audio-recorder" class="audio-recorder card bg-dark text-light mb-3" style="z-index: 1000; display: none;">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Audio Recorder</h5>
+        <div class="d-flex align-items-center">
+            <div class="timer text-muted me-3">00:00</div>
+            <button class="btn-close btn-close-white btn-close-popup" data-action="hide" data-parent-class="audio-recorder" aria-label="Close"></button>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <div class="waveform-container mb-3" style="height: 100px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+            <canvas id="waveform" width="100%" height="100"></canvas>
+        </div>
+
+        <div class="progress mb-3" style="height: 4px;">
+            <div class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+        </div>
+
+        <button id="recordBtn" class="btn btn-primary w-100 mb-2">
+            <i class="fas fa-microphone me-2"></i>
+            <span>Start Recording</span>
+        </button>
+
+        <div id="audioStatus" class="text-center text-primary mb-3 hidden">
+            Ready to record
+        </div>
+
+        <div class="d-flex gap-2 justify-content-center mt-3">
+            <button class="btn btn-outline-danger flex-grow-1 btn-close-popup" data-parent-class="audio-recorder" data-action="cancel">
+                <i class="fas fa-times me-2"></i>
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
