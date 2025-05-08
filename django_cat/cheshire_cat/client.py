@@ -255,7 +255,7 @@ class Cat(CatClient):
         )
         return transcription.text.strip()
 
-    def transcribe(self, audio_bytes):
+    def transcribe(self, audio_bytes: io.BytesIO):
         # Get file size
         audio_bytes.seek(0, 2)  # Seek to end
         file_size = audio_bytes.tell()
@@ -276,7 +276,6 @@ class Cat(CatClient):
 
             # Create a temporary file-like object for the chunk
             chunk_bytes = io.BytesIO(chunk)
-
             full_text.append(self._transcribe(chunk_bytes))
 
         return " ".join(full_text)

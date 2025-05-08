@@ -1,21 +1,35 @@
 import hashlib
-from pathlib import Path
 import threading
+from pathlib import Path
+import io
 import time
 from typing import Union
 import uuid
+from decouple import config
+from icecream import ic
 from django.conf import settings
 from django.db import models
+
 from common.utils import BaseUserModel
-from cheshire_cat.types import DocReadingProgress
-from file.fields import FileObject, FileObjectDecoder, FileObjectEncoder, IngestionConfig, IngestionConfigEncoder, IngestionConfigDecoder, IngestionType, PageMode, PostProcessType
-from decouple import config
 from library.models import Library
-import re
-from threading import Event
-from icecream import ic
-from PIL import Image
-from file.utils import process_image_ocr, get_image_from_file, save_processed_text, extract_and_validate_json, update_processed_text, next_file_path
+from cheshire_cat.types import DocReadingProgress
+from file.fields import (
+    FileObject,
+    FileObjectDecoder,
+    FileObjectEncoder,
+    IngestionConfig,
+    IngestionConfigEncoder,
+    IngestionConfigDecoder,
+    IngestionType
+)
+from file.utils import (
+    process_image_ocr,
+    get_image_from_file,
+    save_processed_text,
+    extract_and_validate_json,
+    update_processed_text,
+    next_file_path
+)
 
 
 class FileLibraryAssociation(models.Model):
@@ -39,6 +53,7 @@ class FileLibraryAssociation(models.Model):
     class Meta:
         verbose_name = 'file library association'
         verbose_name_plural = 'file library associations'
+
 
 class File(BaseUserModel):
     title = models.CharField(max_length=255, default="")
@@ -255,50 +270,91 @@ class File(BaseUserModel):
         """
         Save the processed file and update path
         """
-        self.file = FileObject(path=new_path, size=self.file.size)
+        self.file = FileObject(path=new_path)  # Let FileObject determine the new size
         self.save(update_fields=['file'])
     
     def apply_config_file(self, use_page_separator=False):
         """
         Process file based on ingestion configuration and save result
         """
-        if not self.ingestion_config.is_ocr:
-            return
-        
-        try:
-            images = get_image_from_file(self.file.path)
-            texts = []
-            page_counter = 1
-            
-            # Handle both list of images (PDF) and single image
-            image_list = images if isinstance(images, list) else [images]
-            total_images = len(image_list)
-            
-            for idx, img in enumerate(image_list, 1):
-                # Process OCR for the current image
-                page_texts = process_image_ocr(img, is_double_page=self.ingestion_config.is_double_page)
+        if self.ingestion_config.type == IngestionType.AUDIO:
+            try:
+                original_audio_path = self.file.path
                 
-                # Add page number to each extracted text
-                for text in page_texts:
-                    texts.append(f"{text}\n[Page {page_counter}]\n")
-                    page_counter += 1
-                
-                # Update progress
-                self.config_progress = int((idx / total_images) * 100)
-                self.save(update_fields=['config_progress'])
-            
-            # Join texts with or without separator
-            separator = "\n\n=== NEW PAGE ===\n\n" if use_page_separator else "\n"
-            processed_text = separator.join(texts)
+                if not self.hash:
+                    # Fallback, ma l'hash dovrebbe essere impostato da self.save() prima di chiamare wait_upload -> apply_config_file
+                    self.hash = self.calculate_file_hash(original_audio_path)
+                    # Non salvare qui per evitare ricorsioni o problemi di thread, l'hash dovrebbe essere persistito prima.
+                    # Considera di loggare un avviso se l'hash non è presente a questo punto.
+                    ic(f"Warning: File hash was not set before apply_config_file for {original_audio_path}. Calculating now.")
+                    if not self.hash:  # Se ancora non disponibile dopo il calcolo
+                        raise ValueError("File hash is not available for naming transcribed file and could not be calculated.")
 
-            self.processed_text = processed_text
-            
-            # Save the result
-            new_path = save_processed_text(processed_text, self.file.path.absolute())
-            self.save_processed_file(new_path)
+                raw_audio_bytes = original_audio_path.read_bytes()
+                audio_object = io.BytesIO(raw_audio_bytes)
+
+                # Assumendo che self.client.transcribe esista e restituisca il testo trascritto
+                transcribed_text = self.client.transcribe(audio_object)
+
+                new_text_filename = f"{self.hash}.txt"
+                new_text_path = original_audio_path.parent / new_text_filename
                 
-        except Exception as e:
-            raise ValueError(f"Error processing file: {str(e)}")
+                new_text_path.write_text(transcribed_text, encoding='utf-8')
+                
+                # Aggiorna l'oggetto file per puntare al nuovo file di testo
+                # La dimensione verrà ricalcolata da FileObject
+                self.file = FileObject(path=new_text_path) 
+                # Salva solo il campo 'file' per aggiornare il percorso e la dimensione ricalcolata
+                # Questo save() non dovrebbe richiamare wait_upload di nuovo perché pk esiste.
+                super().save(update_fields=['file']) 
+
+
+                # Elimina il file audio originale
+                original_audio_path.unlink()
+                
+                self.config_progress = 100
+                super().save(update_fields=['config_progress'])  # Usa super().save per evitare la logica completa di self.save()
+
+            except Exception as e:
+                ic(f"Error processing audio file: {str(e)}")
+                raise ValueError(f"Error processing audio file: {str(e)}")
+            return
+
+        elif self.ingestion_config.is_ocr:
+            try:
+                images = get_image_from_file(self.file.path)
+                texts = []
+                page_counter = 1
+                
+                # Handle both list of images (PDF) and single image
+                image_list = images if isinstance(images, list) else [images]
+                total_images = len(image_list)
+                
+                for idx, img in enumerate(image_list, 1):
+                    # Process OCR for the current image
+                    page_texts = process_image_ocr(img, is_double_page=self.ingestion_config.is_double_page)
+                    
+                    # Add page number to each extracted text
+                    for text in page_texts:
+                        texts.append(f"{text}\n[Page {page_counter}]\n")
+                        page_counter += 1
+                    
+                    # Update progress
+                    self.config_progress = int((idx / total_images) * 100)
+                    self.save(update_fields=['config_progress'])
+                
+                # Join texts with or without separator
+                separator = "\n\n=== NEW PAGE ===\n\n" if use_page_separator else "\n"
+                processed_text = separator.join(texts)
+
+                self.processed_text = processed_text
+                
+                # Save the result
+                new_path = save_processed_text(processed_text, self.file.path.absolute())
+                self.save_processed_file(new_path)
+                    
+            except Exception as e:
+                raise ValueError(f"Error processing file: {str(e)}")
 
     def call_llm(self, prompt: str):
         token = self.client.count_token(prompt)
@@ -379,18 +435,19 @@ class File(BaseUserModel):
         If hash not defined, generate it.
         Set file name (including extension) as title
         """
-        if not self.pk:
-            self.wait_ingest()
-            threading.Thread(target=self.wait_upload).start()
+        is_new = not self.pk
 
-        if not self.pk:
-            self.calculate_file_hash(self.file.path)
-
-
-        if not self.title:
-            self.title = self.file.path.name
+        if is_new and self.file and self.file.path.exists():
+            if not self.hash:
+                self.hash = self.calculate_file_hash(self.file.path)
+            if not self.title:
+                self.title = self.file.path.name
 
         super().save(*args, **kwargs)
+
+        if is_new:  # Solo se è una nuova istanza e dopo che super().save() ha assegnato un pk
+            self.wait_ingest()
+            threading.Thread(target=self.wait_upload).start()
 
     def delete(self):
         """

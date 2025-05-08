@@ -36,6 +36,7 @@ class FileUploadForm(forms.Form):
         choices=[
             (IngestionType.NORMAL.value, 'Normal'),
             (IngestionType.OCR.value, 'OCR'),
+            (IngestionType.AUDIO.value, 'Audio (Transcription)'),
         ],
         initial=IngestionType.NORMAL.value,
         label="Ingestion Type",

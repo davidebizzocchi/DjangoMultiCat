@@ -53,6 +53,7 @@ class FileObjectDecoder(json.JSONDecoder):
 class IngestionType(str, Enum):
     NORMAL = "normal"
     OCR = "ocr"
+    AUDIO = "audio"
 
 class PageMode(str, Enum):
     SINGLE = "single"
