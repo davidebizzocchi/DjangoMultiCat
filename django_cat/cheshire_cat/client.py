@@ -246,7 +246,6 @@ class Cat(CatClient):
         return self._message_contents[chat_id]
     
     def _transcribe(self, audio_bytes, language="it"):
-        start = time.time()
         transcription = self._llm.audio.transcriptions.create(
             file=("temp.wav", audio_bytes),
             model=settings.LLM_MODEL_AUDIO_TRANSCRIPTION_ID,
@@ -254,9 +253,8 @@ class Cat(CatClient):
             prompt="Transcribe the user's message",
             response_format="json"
         )
-        ic("time", time.time() - start, transcription)
         return transcription.text.strip()
-    
+
     def transcribe(self, audio_bytes):
         # Get file size
         audio_bytes.seek(0, 2)  # Seek to end
