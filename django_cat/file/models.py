@@ -41,7 +41,6 @@ class FileLibraryAssociation(models.Model):
         verbose_name_plural = 'file library associations'
 
 class File(BaseUserModel):
-    # Rimuovi la vecchia classe IngestionFlags
     title = models.CharField(max_length=255, default="")
     file: FileObject = models.JSONField(encoder=FileObjectEncoder, decoder=FileObjectDecoder)
     file_id = models.CharField(max_length=255, unique=True, default=uuid.uuid4)
@@ -53,7 +52,7 @@ class File(BaseUserModel):
         default=IngestionConfig,
     )
     PENDING_CONFIG = 'pending_config'
-    PENDING_PROCESS = 'pending_process'  # Nuovo stato
+    PENDING_PROCESS = 'pending_process'  # New status
     PENDING_UPLOAD = 'pending_upload'
     READY = 'ready'
     STATUS_CHOICES = [
@@ -68,7 +67,7 @@ class File(BaseUserModel):
         choices=STATUS_CHOICES,
         default=PENDING_CONFIG
     )
-    config_progress = models.IntegerField(default=0)  # Percentuale di completamento OCR
+    config_progress = models.IntegerField(default=0)  # OCR completion percentage
     
     @property
     def is_configuring(self):
@@ -142,12 +141,12 @@ class File(BaseUserModel):
         
     def wait_ingest(self, callback_on_step=None, callback_on_complete=None):
         file_id = str(self.file_id)
-        handler_refs = {'id': None}  # Dizionario per mantenere il riferimento
+        handler_refs = {'id': None}  # Dictionary to keep the reference
 
         def handle_notification(notification: DocReadingProgress):
             
             if notification.type == "doc-reading-progress":
-                # Estrae la parte prima del primo punto
+                # Extracts the part before the first dot
                 source_id = notification.source.split('.', 1)[0] if '.' in notification.source else notification.source
                 if file_id == source_id:
                     if notification.status == "progress":
@@ -169,7 +168,7 @@ class File(BaseUserModel):
 
                         self.client.unregister_notification_handler(handler_refs['id'])
 
-        # Salva l'ID nel dizionario di riferimento
+        # Save the ID in the reference dictionary
         handler_refs['id'] = self.client.register_notification_handler(handle_notification)
         return handler_refs['id']
 
@@ -202,7 +201,7 @@ class File(BaseUserModel):
         self.save(update_fields=['status', 'config_progress'])
         self.apply_config_file()
 
-        # Aggiungi il post-processing
+        # Add post-processing
         self.status = self.PENDING_PROCESS
         self.config_progress = 0
         self.save(update_fields=['status', 'config_progress'])
@@ -232,7 +231,7 @@ class File(BaseUserModel):
     def link(self):
         return (
             f"/media/{self.file.path.relative_to(settings.MEDIA_ROOT)}"
-        )  # Attenzione se viene cambiato il nome nella cartella in docker
+        )  # Be careful if the folder name in docker is changed
 
     @classmethod
     def calculate_file_hash(self, file: Path) -> str:
@@ -271,30 +270,30 @@ class File(BaseUserModel):
             texts = []
             page_counter = 1
             
-            # Gestione sia per lista di immagini (PDF) che singola immagine
+            # Handle both list of images (PDF) and single image
             image_list = images if isinstance(images, list) else [images]
             total_images = len(image_list)
             
             for idx, img in enumerate(image_list, 1):
-                # Process OCR per l'immagine corrente
+                # Process OCR for the current image
                 page_texts = process_image_ocr(img, is_double_page=self.ingestion_config.is_double_page)
                 
-                # Aggiungi numero pagina ad ogni testo estratto
+                # Add page number to each extracted text
                 for text in page_texts:
-                    texts.append(f"{text}\n[Pagina {page_counter}]\n")
+                    texts.append(f"{text}\n[Page {page_counter}]\n")
                     page_counter += 1
                 
-                # Aggiorna progresso
+                # Update progress
                 self.config_progress = int((idx / total_images) * 100)
                 self.save(update_fields=['config_progress'])
             
-            # Unisci i testi con o senza separatore
-            separator = "\n\n=== NUOVA PAGINA ===\n\n" if use_page_separator else "\n"
+            # Join texts with or without separator
+            separator = "\n\n=== NEW PAGE ===\n\n" if use_page_separator else "\n"
             processed_text = separator.join(texts)
 
             self.processed_text = processed_text
             
-            # Salva il risultato
+            # Save the result
             new_path = save_processed_text(processed_text, self.file.path.absolute())
             self.save_processed_file(new_path)
                 
@@ -304,11 +303,11 @@ class File(BaseUserModel):
     def call_llm(self, prompt: str):
         token = self.client.count_token(prompt)
 
-        # Calcola il tempo minimo necessario tra le richieste
+        # Calculate the minimum time required between requests
         max_tokens_per_minute = 6000
 
         minutes_per_token = 1 / max_tokens_per_minute
-        wait_time = token * minutes_per_token * 60  # Converti in secondi
+        wait_time = token * minutes_per_token * 60  # Convert to seconds
 
         ic(token, minutes_per_token, wait_time)
         # time.sleep(wait_time + 2)
@@ -340,19 +339,13 @@ class File(BaseUserModel):
 
                 new_file_path = next_file_path(self.file.path).with_suffix('.txt')
 
-                # Divide il contenuto in pagine usando il delimitatore
+                # Divide the content into pages using the delimiter
                 pages = content.split("\n")
                 total_pages = len(pages)
                 previous_text = ""
 
                 for idx, line in enumerate(pages):
                     if line.strip().startswith('[Pagina ') and line.strip().endswith(']'):
-                    #     if current_page:
-                    #         pages.append('\n'.join(current_page))
-                    #     current_page = []
-                    # else:
-                    #     current_page.append(line)
-
                         if previous_text == "":
                             continue
 
@@ -404,21 +397,21 @@ class File(BaseUserModel):
         Execute actions on model delete.
         Delete main file and all associated processed files.
         """
-        # Elimina il file dal cat
+        # Delete the file from the cat
         ic(self.client.delete_file(self))
         
-        # Trova e elimina tutti i file associati
+        # Find and delete all associated files
         base_path = self.file.path.parent
         base_name = self.hash
         
-        # Cerca file con pattern nome_1.txt, nome_2.txt, ecc
+        # Search for files with pattern name_1.txt, name_2.txt, etc.
         for file_path in base_path.glob(f"{base_name}*.*"):
             try:
                 file_path.unlink()
             except FileNotFoundError:
                 continue
                 
-        # Elimina il file originale
+        # Delete the original file
         try:
             self.file.path.unlink()
         except FileNotFoundError:
