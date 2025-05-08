@@ -37,7 +37,7 @@ class AllauthGoogleMixin:
             # redirect["Location"] = redirect.url.replace("http%", "https%")
 
             return adapter.get_provider().redirect_from_request(request)
-        
+    
         return super().post(request, *args, **kwargs)
 
 
@@ -92,10 +92,10 @@ class UserProfileView(LoginRequiredMixin, UpdateView):
     form_class = UserProfileConfigurationForm
     success_url = reverse_lazy('users:profile')
     context_object_name = 'user'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+    
         context.update({
             "email": self.user.email,
             "name": self.user.name,
@@ -106,7 +106,7 @@ class UserProfileView(LoginRequiredMixin, UpdateView):
         })
 
         return context
-    
+
     def get_object(self, queryset = ...):
         return self.user
 
@@ -121,13 +121,13 @@ class DeleteUserView(LoginRequiredMixin, TemplateView):
 class UserListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'users/list.html'
     login_url = reverse_lazy('users:login')
-    
+
     def test_func(self):
         return self.usr.is_staff
-    
+
     def handle_no_permission(self):
         return redirect('home')
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['users'] = User.objects.all()

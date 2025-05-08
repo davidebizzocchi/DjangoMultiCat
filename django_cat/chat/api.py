@@ -64,22 +64,22 @@ def message_generator(message, chat, user):
         chat = get_object_or_404(Chat, chat_id=chat, user=user)
     elif not isinstance(chat, Chat):
         raise ValueError("Invalid chat type")
-    
+
     # Retrive message text
     if isinstance(message, Message):
         message = message.text
     elif not isinstance(message, str):
         raise ValueError("Invalid message type")
-    
+
     # Send message using chat
     chat.send_message(message)
-    
+
     # Stream responses from specific chat
     send_tokens = False
     for token in chat.stream():
         send_tokens = True
         yield f"data: {json.dumps({'data': token.text})}\n\n"
-    
+
     # Get final message (CatMessage)
     final_message = chat.wait_message_content()
 
@@ -125,10 +125,10 @@ def stream(request, data: MessageIn):
 @router.post("/transcribe", url_name="transcribe")
 def audio_upload(request, audio: UploadedFile = File(...)):
     client: Cat = get_user_client(request.user)
-    
+
     # Get transcription
     transcribed_text = client.transcribe(audio.file)
-    
+
     return JsonResponse({
         "status": "success",
         "text": transcribed_text
@@ -138,7 +138,7 @@ def audio_upload(request, audio: UploadedFile = File(...)):
 def speak(request, data: TextIn):
     client: Cat = get_user_client(request.user)
     audio_stream = client.speak(data.text)
-    
+
     response = FileResponse(
         audio_stream,
         content_type='audio/mp3',
@@ -151,13 +151,13 @@ def speak(request, data: TextIn):
 def speak_last(request, chat_id: str):
     # Get chat and verify ownership
     chat = get_object_or_404(Chat, chat_id=chat_id, user=request.user)
-    
+
     # Get last assistant message for this specific chat
     last_message = Message.objects.filter(
         chat=chat,
         sender=Message.Sender.ASSISTANT
     ).order_by('-timestamp').first()
-    
+
     if not last_message:
         return JsonResponse({
             "status": "error",
@@ -166,7 +166,7 @@ def speak_last(request, chat_id: str):
 
     client: Cat = get_user_client(request.user)
     audio_stream = client.speak(last_message.text)
-    
+
     response = FileResponse(
         audio_stream,
         content_type='audio/mp3',
@@ -179,13 +179,13 @@ def speak_last(request, chat_id: str):
 def wipe_chat(request, chat_id: str):
     # Get chat and verify ownership  
     chat = get_object_or_404(Chat, chat_id=chat_id, user=request.user)
-    
+
     # Wipe chat memory
     chat.wipe()
-    
+
     # Delete all messages from database
     Message.objects.filter(chat=chat).delete()
-    
+
     return JsonResponse({
         "status": "success",
         "message": "Chat memory wiped successfully"
@@ -282,11 +282,11 @@ def create_thread(request, data: ThreadCreateSchema):
     if data.name is not None:
         chat.title = data.name
         chat.save()
-        
+    
     if data.libraries is not None:
         if isinstance(data.libraries, str):
             data.libraries = [data.libraries]
-            
+        
         for library in Library.objects.only("id").filter(library_id__in=data.libraries, user=user):
             chat.libraries.add(library)
             library.add_new_chat(str(chat.chat_id))

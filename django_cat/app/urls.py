@@ -43,12 +43,12 @@ handler500 = Error500View.as_view()
 urlpatterns = [
     path('XYZ2024-admin/', admin.site.urls),
     path("", include("common.urls")),
-    
+
     path('accounts/', include('allauth.urls')),
     path("users/", include("users.urls", namespace="users")),
-    
+
     path("chat/", include("chat.urls", namespace="chat")),
-    
+
     path("library/", include("library.urls", namespace="library")),
     path("file/", include("file.urls", namespace="file")),
 

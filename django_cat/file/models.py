@@ -45,11 +45,11 @@ class FileLibraryAssociation(models.Model):
         self.library.remove_file_from_existing_chats(str(self.file.file_id))
 
         super().delete(*args, **kwargs)
-    
+
 
     def __str__(self):
         return f"{self.file} in {self.library}"
-    
+
     class Meta:
         verbose_name = 'file library association'
         verbose_name_plural = 'file library associations'
@@ -76,22 +76,22 @@ class File(BaseUserModel):
         (PENDING_UPLOAD, 'Uploading'),
         (READY, 'Ready'),
     ]
-    
+
     status = models.CharField(
         max_length=20, 
         choices=STATUS_CHOICES,
         default=PENDING_CONFIG
     )
     config_progress = models.IntegerField(default=0)  # OCR completion percentage
-    
+
     @property
     def is_configuring(self):
         return self.status == self.PENDING_CONFIG
-        
+    
     @property
     def is_uploading(self):
         return self.status == self.PENDING_UPLOAD
-        
+    
     @property 
     def is_ready(self):
         return self.status == self.READY
@@ -111,7 +111,7 @@ class File(BaseUserModel):
             'library_id',
             'user__username'
         )
-    
+
     @property
     def link(self):
         return (
@@ -134,7 +134,7 @@ class File(BaseUserModel):
 
         if not self.check_assoc(library):
             return FileLibraryAssociation.objects.create(file=self, library=library)
-        
+    
     def delete_library(self, library: Union[str, Library]):
         if isinstance(library, str):
             library = self._get_library_from_id(library)
@@ -142,7 +142,7 @@ class File(BaseUserModel):
         if self.check_assoc(library):
             for assoc in FileLibraryAssociation.objects.filter(file=self, library=library):
                 assoc.delete()
-        
+    
     def assoc_library_list(self, libraries: list):
         for library in libraries:
             if isinstance(library, str):
@@ -160,7 +160,7 @@ class File(BaseUserModel):
     def is_ingested(self):
         if self.ingested:
             return True
-        
+    
     def wait_ingest(self, callback_on_step=None, callback_on_complete=None):
         # Dictionary to keep the reference
         # is used as closure for keep the associated handler ID
@@ -184,7 +184,7 @@ class File(BaseUserModel):
                     if notification.status == "progress":
                         self.config_progress = notification.perc_read
                         self.save(update_fields=['config_progress'])
-                        
+                    
                         if callback_on_step is not None:
                             callback_on_step(int(notification.perc_read))
 
@@ -212,7 +212,7 @@ class File(BaseUserModel):
         }
 
         ic(self.client.upload_file(self, metadata))
-        
+    
     def wait_upload(self):
         """
         Wait for file to be ready before uploading.
@@ -220,10 +220,10 @@ class File(BaseUserModel):
         """
         timeout_seconds = config("WAIT_UPLOAD", cast=int, default=30)  # timeout in seconds
         start = time.time()
-        
+    
         while not self.file.path.exists() or not self.pk:
             time.sleep(0.2)  # check every 200ms
-            
+        
             if time.time() - start > timeout_seconds:
                 return
 
@@ -256,7 +256,7 @@ class File(BaseUserModel):
         while not self.ingested:
             time.sleep(wait_time)
             self.refresh_from_db()
-        
+    
         if callback is not None:
             callback(*callback_args)
 
@@ -268,7 +268,7 @@ class File(BaseUserModel):
             while chunk := f.read(8192):
                 hasher.update(chunk)
         return hasher.hexdigest()
-    
+
     @classmethod
     def calculate_file_has_from_instance(self, file):
         hasher = hashlib.md5()
@@ -277,14 +277,14 @@ class File(BaseUserModel):
             hasher.update(chunk)
 
         return hasher.hexdigest()
-    
+
     def save_processed_file(self, new_path: Path | str):
         """
         Save the processed file and update path
         """
         self.file = FileObject(path=new_path)  # Let FileObject determine the new size
         self.save(update_fields=['file'])
-    
+
     def apply_config_file(self, use_page_separator=False):
         """
         Process file based on ingestion configuration and save result.
@@ -294,7 +294,7 @@ class File(BaseUserModel):
         if self.ingestion_config.is_audio:
             try:
                 original_audio_path = self.file.path
-                
+            
                 if not self.hash:
                     # Fallback - hash should be set by self.save() before calling wait_upload -> apply_config_file
                     self.hash = self.calculate_file_hash(original_audio_path)
@@ -312,9 +312,9 @@ class File(BaseUserModel):
 
                 new_text_filename = f"{self.hash}.txt"
                 new_text_path = original_audio_path.parent / new_text_filename
-                
+            
                 new_text_path.write_text(transcribed_text, encoding='utf-8')
-                
+            
                 # Update file object to point to the new text file
                 # Size will be recalculated by FileObject
                 self.file = FileObject(path=new_text_path) 
@@ -324,7 +324,7 @@ class File(BaseUserModel):
 
                 # Delete the original audio file
                 original_audio_path.unlink()
-                
+            
                 self.config_progress = 100
                 super().save(update_fields=['config_progress'])  # Use super().save to avoid full save() logic
 
@@ -338,34 +338,34 @@ class File(BaseUserModel):
                 images = get_image_from_file(self.file.path)
                 texts = []
                 page_counter = 1
-                
+            
                 # Handle both list of images (PDF) and single image
                 image_list = images if isinstance(images, list) else [images]
                 total_images = len(image_list)
-                
+            
                 for idx, img in enumerate(image_list, 1):
                     # Process OCR for the current image
                     page_texts = process_image_ocr(img, is_double_page=self.ingestion_config.is_double_page)
-                    
+                
                     # Add page number to each extracted text
                     for text in page_texts:
                         texts.append(f"{text}\n[Page {page_counter}]\n")
                         page_counter += 1
-                    
+                
                     # Update progress
                     self.config_progress = int((idx / total_images) * 100)
                     self.save(update_fields=['config_progress'])
-                
+            
                 # Join texts with or without separator
                 separator = "\n\n=== NEW PAGE ===\n\n" if use_page_separator else "\n"
                 processed_text = separator.join(texts)
 
                 self.processed_text = processed_text
-                
+            
                 # Save the result
                 new_path = save_processed_text(processed_text, self.file.path.absolute())
                 self.save_processed_file(new_path)
-                    
+                
             except Exception as e:
                 raise ValueError(f"Error processing file: {str(e)}")
 
@@ -394,7 +394,7 @@ class File(BaseUserModel):
 
             if not prompt:
                 return
-            
+        
             # Get thee content to process
             content = getattr(self, "processed_text", None)
             if content is None:
@@ -479,18 +479,18 @@ class File(BaseUserModel):
         """
         # Delete the file from the cat
         ic(self.client.delete_file(self))
-        
+    
         # Find and delete all associated files
         base_path = self.file.path.parent
         base_name = self.hash
-        
+    
         # Search for files with pattern name_1.txt, name_2.txt, etc.
         for file_path in base_path.glob(f"{base_name}*.*"):
             try:
                 file_path.unlink()
             except FileNotFoundError:
                 continue
-                
+            
         # Delete the original file
         try:
             self.file.path.unlink()
@@ -502,7 +502,7 @@ class File(BaseUserModel):
 
     def __str__(self):
         return self.title
-    
+
     class Meta:
         verbose_name = 'file'
         verbose_name_plural = 'files'

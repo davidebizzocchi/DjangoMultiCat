@@ -30,18 +30,18 @@ document.querySelectorAll('.topic-circle').forEach(circle => {
     circle.addEventListener('click', function() {
         const topicId = this.dataset.topicId;
         const container = document.getElementById(`examples-${topicId}`);
-        
+    
         // Reset previous active states
         if (activeCircle) activeCircle.classList.remove('active');
         if (activeContainer) activeContainer.style.display = 'none';
-        
+    
         // If clicking same circle, collapse
         if (activeContainer === container) {
             activeContainer = null;
             activeCircle = null;
             return;
         }
-        
+    
         // Set new active states
         this.classList.add('active');
         container.style.display = 'block';

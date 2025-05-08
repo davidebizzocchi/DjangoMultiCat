@@ -45,14 +45,14 @@ __all__ = [
     "Message",
     "ConversationMessage",
     "UserMessage",
-    
+
     # From new_types
     "ChatHistoryMessage",
     "ChatHistory",
     "GenericMessage",
     "ChatToken", 
     "CatMessage",
-    
+
     # From mixins
     "ChatIDMixin"
 ]

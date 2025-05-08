@@ -17,7 +17,7 @@
                         Are you sure you want to delete the language model "<strong>{{ llm.name }}</strong>"?
                         This action cannot be undone.
                     </p>
-                    
+                
                     <div class="card mb-4">
                         <div class="card-header">
                             <h5 class="mb-0">Language Model Details</h5>
@@ -26,13 +26,13 @@
                             <dl class="row mb-0">
                                 <dt class="col-sm-3">Name:</dt>
                                 <dd class="col-sm-9">{{ llm.name }}</dd>
-                                
+                            
                                 <dt class="col-sm-3">LLM Class:</dt>
                                 <dd class="col-sm-9">{{ llm.llm_class }}</dd>
                             </dl>
                         </div>
                     </div>
-                    
+                
                     <form method="post">
                         {% csrf_token %}
                         <div class="d-flex justify-content-between">

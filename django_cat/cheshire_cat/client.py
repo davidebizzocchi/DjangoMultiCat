@@ -40,16 +40,16 @@ class Cat(CatClient):
         config = kwargs.get('config')
         if not config:
             raise ValueError("Config is required")
-        
+    
         user_id = config.user_id
-        
+    
         if user_id not in cls._instances:
             wait_for_cat()
             instance = super().__new__(cls)
             instance._initialized = False
             cls._instances[user_id] = instance
             # cls._ref_counts[user_id] = 0  # Initialize counter
-        
+    
         # cls._ref_counts[user_id] += 1  # Increment counter
         return cls._instances[user_id]
 
@@ -61,7 +61,7 @@ class Cat(CatClient):
             self._stream_active: Dict[str, bool] = {}
             self._is_startup = False
             self.AUDIO_MAX_SIZE = 25 * 1024 * 1024  # 25MB in bytes
-            
+        
             super().__init__(on_message=self.on_message, *args, **kwargs)
 
             self._llm = OpenAI(
@@ -69,7 +69,7 @@ class Cat(CatClient):
                 api_key=settings.LLM_PROVIDER_API_KEY
             )
             self.startup()
-            
+        
             self._notification_handlers: Dict[str, callable] = {}
             self._initialized = True
 
@@ -85,7 +85,7 @@ class Cat(CatClient):
         ic(self.is_ws_connected)
         if self.is_ws_connected or self._is_startup:
             return self
-        
+    
         self.connect_ws()
         self._is_startup = True
 
@@ -101,17 +101,17 @@ class Cat(CatClient):
                 raise TimeoutError("Cannot connect to the websocket")
 
         return self
-    
+
     def count_token(self, message: str):
         encoding = tiktoken.get_encoding("cl100k_base")
         return len(encoding.encode(message))
-    
+
     def chat_completition(self, message: str):
         """Send a message to the completion chat"""
         self.send(message=message, chat_id="completition", agent_id="completition")
 
         return "completition"
-    
+
     def _check_history(self, chat_id):
         """
         Check if the chat history is empty and insert messages if needed.
@@ -127,7 +127,7 @@ class Cat(CatClient):
         # Insert only the last 10 messages
         if cat_history_len > 10:
             return
-        
+    
         chat = Chat.objects.get(chat_id=chat_id)
 
         # Exclude last user message
@@ -164,9 +164,9 @@ class Cat(CatClient):
 
     def _reset_new_message(self, chat_id="default"):
         """Reset message state for a specific chat"""
-        
+    
         self._chat_queues[chat_id] = Queue()
-        
+    
         self._message_contents[chat_id] = None
         self._stream_active[chat_id] = True
 
@@ -174,7 +174,7 @@ class Cat(CatClient):
         """Handle messages for specific chats"""
         msg_type = message.get("type", None)
         chat_id = message.get("chat_id", "default")
-        
+    
         if msg_type == "chat_token":
             message = message.get("content", {})
             content = message.get("content", "")
@@ -184,11 +184,11 @@ class Cat(CatClient):
 
             if self._stream_active.get(chat_id, False):
                 self._chat_queues[chat_id].put(stream_message)
-        
+    
         elif msg_type == "chat":
             self._message_contents[chat_id] = CatMessage(**message)
             self.end_stream(chat_id)
-        
+    
         elif msg_type == "json-notification":
             content = message.get("content", {})
             if content.get("type") == "doc-reading-progress":
@@ -198,7 +198,7 @@ class Cat(CatClient):
                 handlers = list(self._notification_handlers.values())
                 for handler in handlers:
                     handler(progress)
-        
+    
         else:
             # Handle generic messages
             generic_message = GenericMessage(**message)
@@ -217,7 +217,7 @@ class Cat(CatClient):
 
     def _stream(self, chat_id):
         """Stream messages for specific chat"""
-        
+    
         while self._stream_active.get(chat_id, False):
             chat_queque = self._chat_queues[chat_id]
             try:
@@ -238,13 +238,13 @@ class Cat(CatClient):
         if chat_id not in self._stream_active:
             yield f"Error: {chat_id} this chat is not active"
             return
-        
+    
         # Change here: yield from instead of a simple call
         yield from self._stream(chat_id)
 
     def get_message_content(self, chat_id: str = "default") -> CatMessage:
         return self._message_contents.get(chat_id)
-    
+
     def wait_message_content(self, chat_id: str = "default") -> CatMessage:
         stream_ended_at = None
         while self._message_contents.get(chat_id) is None:
@@ -258,7 +258,7 @@ class Cat(CatClient):
                     return None
 
         return self._message_contents[chat_id]
-    
+
     def _transcribe(self, audio_bytes, language="it"):
         transcription = self._llm.audio.transcriptions.create(
             file=("temp.wav", audio_bytes),
@@ -282,7 +282,7 @@ class Cat(CatClient):
         # For larger files, split and process in chunks
         full_text = []
         chunk_size = self.AUDIO_MAX_SIZE
-        
+    
         while True:
             chunk = audio_bytes.read(chunk_size)
             if not chunk:
@@ -293,10 +293,10 @@ class Cat(CatClient):
             full_text.append(self._transcribe(chunk_bytes))
 
         return " ".join(full_text)
-    
+
     def parse_markdown(self, text):
         return BeautifulSoup(markdown2.markdown(text), "html.parser").get_text()
-    
+
     def _speak_gtts(self, text):
         return gTTS(
             text=self.parse_markdown(text),
@@ -308,10 +308,10 @@ class Cat(CatClient):
             return self._speak_gtts(text)
 
         return None
-    
+
     def speak(self, text):
         return self._speak(text)
-    
+
     def get_collections_name(self, name: str) -> Iterable[str]:
         for collection in self.memory.get_collections()["collections"]:
             yield collection["name"]
@@ -326,11 +326,11 @@ class Cat(CatClient):
     def delete_chat(self, chat_id: str):
         self.wipe_chat_episodic(chat_id)
         return self.memory.delete_working_memory(chat_id)
-    
+
     def wipe_chat(self, chat_id: str):
         self.wipe_chat_episodic(chat_id)
         return self.memory.wipe_conversation_history_by_chat(chat_id)
-    
+
     def get_chat_history(self, chat_id: str):
         response = self.memory.get_working_memory(chat_id)
         if "history" in response:
@@ -351,21 +351,21 @@ class Cat(CatClient):
             chat_id=chat_id,
             message=message,
             index=index)
-        
+    
         if response.get("success", False):
             return True
-        
+    
         return False
 
     def register_notification_handler(self, handler, *handler_args, **handler_kwargs) -> str:
         """
         Register a handler for notifications and return its ID
-        
+    
         Args:
             handler: Function that receives a notification
             *handler_args: Positional arguments to pass to the handler
             **handler_kwargs: Keyword arguments to pass to the handler
-            
+        
         Returns:
             str: Unique ID of the registered handler
         """
@@ -376,7 +376,7 @@ class Cat(CatClient):
     def unregister_notification_handler(self, handler_id: str):
         """
         Remove a handler given its ID
-        
+    
         Args:
             handler_id: ID of the handler to remove
         """
@@ -402,10 +402,10 @@ class Cat(CatClient):
         """Returns recent notifications after cleaning up old ones"""
         self._cleanup_old_notifications()
         return list(self._notifications)
-    
+
     def upload_file(self, file, metadata: Dict, chunk_size=None, chunk_overlap=None):
         url =  f"http://{HOST}:{PORT}/rabbithole/"
-        
+    
         with open(file.file.path.absolute(), "rb") as f:
             files = {"file": (
                 str(file.file.path.name),  # Use the file_id with the extension
@@ -427,7 +427,7 @@ class Cat(CatClient):
                     "user_id": file.userprofile.cheshire_id  # Add the user_id in the header
                 },
             ).json()
-    
+
     def delete_file(self, file):
         return self.memory.wipe_memory_points_by_metadata(
             collection_id="declarative",
@@ -438,10 +438,10 @@ class Cat(CatClient):
 
     def get_file_chats(self, file) -> List[str]:
         """Get all chats using a specific file through its libraries
-        
+    
         Args:
             file: File instance to check
-            
+        
         Returns:
             List[str]: List of chat IDs using this file
         """
@@ -457,20 +457,20 @@ class Cat(CatClient):
 
     def update_file_chats(self, file) -> dict:
         """Update the chats associated with a file in the memory
-        
+    
         Args:
             file: File instance to update
-            
+        
         Returns:
             dict: Response from the API with update status
         """
         chat_ids = self.get_file_chats(file)
-                
+            
         metadata = {
             "search": {"file_id": str(file.file_id)},
             "update": {"chats_id": chat_ids}
         }
-        
+    
         return self.memory.update_points_metadata(
             collection_id="declarative",
             search=metadata["search"], 
@@ -479,10 +479,10 @@ class Cat(CatClient):
 
     def get_file_metadata(self, file) -> dict:
         """Get all memory points for a specific file
-        
+    
         Args:
             file_id: ID of the file to search for
-            
+        
         Returns:
             dict: Memory points containing the file metadata
         """
@@ -514,14 +514,14 @@ class Cat(CatClient):
             chat_ids=chat_ids,
             mode=mode
         )
-    
+
     def add_file_to_chats(self, file, chat_ids: List[str]):
         """Add a file to a chat in the memory
-        
+    
         Args:
             file: File instance to add
             chat_id: Chat ID to add the file to
-            
+        
         Returns:
             dict: Response from the API with update status
         """
@@ -537,14 +537,14 @@ class Cat(CatClient):
         return self.edit_file_chats(
             file_id, chat_ids, "add", "declarative"
         )
-    
+
     def remove_file_to_chats(self, file, chat_ids: List[str]):
         """Remove a file to a chat in the memory
-        
+    
         Args:
             file: File instance to remove
             chat_id: Chat ID to remove the file to
-            
+        
         Returns:
             dict: Response from the API with update status
         """
@@ -577,29 +577,29 @@ class Cat(CatClient):
 
         if response.get("success", False):
             return AgentComplete.model_validate(response["agent"])
-        
-        return None
     
+        return None
+
     def retrieve_agent(self, agent_id: str):
         response = self.agents.retrieve_agent(agent_id=agent_id)
 
         if response.get("success", False):
             return AgentComplete.model_validate(response["agent"])
-        
-        return None
     
+        return None
+
     def list_agents(self):
         response = self.agents.list_agents()
         return list(AgentComplete.model_validate(agent) for agent in response["agents"])
-        
+    
     def delete_agent(self, agent_id: str):
         response = self.agents.delete_agent(agent_id=agent_id)
 
         if response.get("success", False):
             return True
-        
-        return False
     
+        return False
+
     def update_agent(self, agent: Union[AgentComplete]):
         from agent.models import Agent
 
@@ -612,13 +612,13 @@ class Cat(CatClient):
 
         if response.get("success", False):
             return AgentComplete.model_validate(response["agent"])
-        
-        return None
     
+        return None
+
     def sync_agents(self):
         from agent.models import Agent
         """One-way: django -> cat, this because cat don't know what user has created an agent"""
-        
+    
         agents = self.list_agents()
         ids = {agent.id for agent in agents}
         ids.add("default")
@@ -629,7 +629,7 @@ class Cat(CatClient):
             self.create_agent(agent)
 
         return queryset.count()
-    
+
     def create_llm(self, llm: LLMRequest):
         """Create a new LLM"""
         response = self.llm.create_llm(
@@ -638,9 +638,9 @@ class Cat(CatClient):
 
         if response.get("success", False):
             return True
-        
-        return False
     
+        return False
+
     def update_llm(self, llm: LLMRequest):
         """Update an existing LLM"""
         response = self.llm.update_llm(
@@ -649,7 +649,7 @@ class Cat(CatClient):
 
         if response.get("success", False):
             return True
-        
+    
         return False
 
     def delete_llm(self, llm_name: str):
@@ -669,7 +669,7 @@ class Cat(CatClient):
 
         if response.get("success", False):
             return [LLMRequest.model_validate(llm) for llm in response["llms"]]
-        
+    
         return []
 
     def get_llm(self, llm_id: str):
@@ -678,7 +678,7 @@ class Cat(CatClient):
 
         if response.get("success", False):
             return LLMRequest.model_validate(response["llm"])
-        
+    
         return None
 
     def get_llm_schemas(self):
@@ -698,11 +698,11 @@ def get_user_id(username: str):
     return None
 
 def connect_as_admin() -> Cat:
-    
+
     admin_id = get_user_id("admin")
     if (admin_id is None):
         raise ValueError("Admin user not found")
-    
+
     config = CatConfig(user_id=admin_id, base_url=HOST, port=PORT)
     return Cat(config=config)
 
@@ -718,7 +718,7 @@ def create_user(user):
     if user_id is not None:
         user.set_manual_id(user_id)
         return True
-    
+
     url = f"http://{HOST}:{PORT}/users/"
 
     payload = {

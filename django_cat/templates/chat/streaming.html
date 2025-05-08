@@ -25,7 +25,7 @@
         --button-border-color: rgba(0, 122, 255, 0.15) !important;
         --ds-button-hover-color: rgba(77, 107, 254, 0.2) !important;
     }
-    
+
     div.chat-session-title {
         text-transform: capitalize;
     }
@@ -113,7 +113,7 @@
             transform-origin: top;
         }
     }
-    
+
     @keyframes fadeInUpScale {
         0% {
             transform: scaleY(0);
@@ -400,8 +400,8 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 {% include 'chat/components/general/create.html' %}
 
 
-<script type="module">    
-    
+<script type="module">
+
     // Carica la libreria SSE come modulo
     import { SSE } from 'https://cdn.jsdelivr.net/npm/sse.js@2.4.1/lib/sse.min.js';
 
@@ -577,7 +577,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         fetch_thread_list();
 
         /* HANDLERS */
-        
+    
         // This control all the outside elements click
         $("body").on("click", function (event) {
             let target = $(event.target);
@@ -594,7 +594,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
          $("body").on("click", "button." + class_close_button, function (event) {
             let target = $(event.currentTarget);
             let action = get_data(target, "action");
-            
+        
             let parent_class = "." + get_data(target, "parent-class");
             let parent_dom = target.closest(parent_class);
 
@@ -687,7 +687,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             let target = $(event.currentTarget);
 
             // console.log(target.scrollTop(), (chat_heigth() - target.innerHeight()));
-            
+        
             // difference between the scroll and the chat height: 200px
             if (target.scrollTop() >= (chat_heigth() - target.innerHeight()) * 0.9) {
                 scroll_down_icon_dom.hide();
@@ -749,7 +749,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         input_textarea_dom.on("input", function (event) {
             let text = input_textarea_dom.val();
             // console.log("INPUT TEXTAREA!", text);
-            
+        
             if (text.length > 0) {
                 send_message_dom.activate();
             } else {
@@ -761,7 +761,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         // Redirect: Change chat when press chat button
         chat_list_dom.on("click", "div.chat-history-item", function (event) {
             let target = $(event.currentTarget);
-            
+        
             if ($(event.target).closest('.chat-item-menu').length)  // Press menu item
                 return;
 
@@ -781,11 +781,11 @@ class="apple en_US dark" data-ds-dark-theme="dark"
                 send_message();
             }
         });
-    
+
         // Close the notification: X pressed
         notification_container_dom.on("click", "div.ds-toast__close", function (event) {
             let target = $(event.currentTarget).closest("div.ds-toast-animation");
-            
+        
             let timer = target.data("timer");
             console.log("timer", timer);
 
@@ -811,7 +811,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
                 reload_thread_page
             )
         });
-        
+    
         // Pulsante creazione chat
         popup_new_chat_dom.on("click", "div.ds-icon-button", function (event) {
             console.log("hide chat form")
@@ -821,7 +821,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             popup_new_chat_dom.hide();
             {% endif %}
         });
-        
+    
         // Insert prompts
         prompt_examples_dom.on("click", function (event) {
             let target = $(event.target);
@@ -829,14 +829,14 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             input_textarea_dom.val(target.text().trim());
             send_message();
         });
-    
+
         // Show/hide think content of asst messages
         chat_bubble_dom.on("click", "div.think-wrapper button.collapse-think", function (event) {
             let target = $(event.currentTarget);
             target.closest("div.think-wrapper").find("div.think-container").toggleClass("show");
             target.attr("aria-expanded") == "true" ? target.attr("aria-expanded", "false") : target.attr("aria-expanded", "true");
         });
-    
+
         chat_bubble_dom.on("click", "button." + class_button_toggle_annotations, function (event) {
             let target = $(event.currentTarget);
             let annot_container = target.closest("div.container").find("div.annotations-container");
@@ -856,7 +856,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
                 annot_container.fadeOut(timeout);
             }
         });
-    
+
         // Audio Start/Stop recording
         audio_recorder_popup_dom.on("click", "button#recordBtn", function (event) {
             if (!audio_mediaRecorder || audio_mediaRecorder.state === 'inactive') {
@@ -871,37 +871,37 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     /* FUNCTIONS */
     function createRestartableInterval(callback, delay) {
         let intervalId;
-        
+    
         const start = () => {
             stop(); // Clear any existing interval
             intervalId = setInterval(callback, delay);
         };
-        
+    
         const stop = () => {
           if (intervalId) {
             clearInterval(intervalId);
             intervalId = null;
           }
         };
-        
+    
         return { start, stop };
       }
 
     function createRestartableTimeout(callback, delay) {
         let timeoutId;
-        
+    
         const start = () => {
             stop(); // Clear any existing timeout
             timeoutId = setTimeout(callback, delay);
         };
-        
+    
         const stop = () => {
             if (timeoutId) {
             clearTimeout(timeoutId);
             timeoutId = null;
             }
         };
-        
+    
         return { start, stop };
     }
 
@@ -993,7 +993,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 
         popup_chat_actions_dom.show();
         popup_chat_action_active = true;
-        
+    
         console.log("popup args", args)
         add_data(popup_chat_actions_dom, args);
 
@@ -1066,7 +1066,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
 
                 */
             });
-        
+    
     }
 
     function chat_heigth() {
@@ -1089,7 +1089,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             contentType: "application/json",
             dataType: "json",
             success: function (response) {
-                
+            
                 console.log(response);
                 if (callback && typeof callback === "function") {
                     callback(response);
@@ -1226,13 +1226,13 @@ class="apple en_US dark" data-ds-dark-theme="dark"
                 return [text, text.substring(final_think_index + 8)];
             }
         }
-        
+    
         return ["", text];
     }
 
     function populate_asst_message(msg, text) {
         msg.testo += text;
-        
+    
         let parsed_text = parse_asst_text(msg.testo);
 
         if (parsed_text[0].length != 0) {
@@ -1242,11 +1242,11 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         msg.find("div.think-content").text(parsed_text[0]);
         msg.find("div.ds-markdown").html(convertToHTML(parsed_text[1]));
     }
-    
+
     function add_thread_libraries(thread, libraries) {
 
         let chat_libs = thread.find("div.chat-libraries");
-        
+    
         chat_libs.show();
 
         let chat_libs_text = chat_libs.children().first();
@@ -1303,9 +1303,9 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         // Seleziono l'utenti history date group e glielo appendo
         let last_chat_group = chat_list_dom.find("div." + class_chat_history_date_group + ":last");
         let last_spacer = last_chat_group.find("div.date-group-spacer");
-        
+    
         last_spacer.before(item);
-        
+    
         // console.log("all:", last_chat_group, last_spacer);
         return item;
     }
@@ -1336,8 +1336,8 @@ class="apple en_US dark" data-ds-dark-theme="dark"
                 create_chat_group().populate(thread.date);
                 actual_chat_group_date_value = thread.date;
             }
-                
             
+        
             create_chat_item().populate(thread.title, thread.thread_id);
         });
     }
@@ -1373,7 +1373,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     function reload_thread_page(response = null) {
         console.log("realod", response);
 
-        
+    
         console.log("{% url 'chat:create' %}");
         if (response === null)
             window.location.href = "{% url 'chat:create' %}"
@@ -1382,7 +1382,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             window.location.href = response.url
         else
             window.location.href = "{% url 'chat:create' %}"
-            
+        
     }
 
     function change_thread(thread_id) {
@@ -1530,7 +1530,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         container.removeAttr("id");
 
         container.appendTo(popup.find("div.elements"));
-        
+    
         let proto_button = container.find("div.ds-segmented-button");
 
         args.forEach((item, index) => {
@@ -1593,10 +1593,10 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         // Get the canvas and set its dimensions
         const canvas = audio_waveform_canvas_dom[0];
         const container = audio_waveform_canvas_dom.parent();
-        
+    
         canvas.width = container.width();
         canvas.height = container.height();
-        
+    
         audio_canvasContext = canvas.getContext('2d');
         audio_canvasContext.fillStyle = 'rgba(0, 123, 255, 0.5)';
     }
@@ -1607,28 +1607,28 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             audio_animationId = requestAnimationFrame(drawWaveform);
             return;
         }
-        
+    
         // Get canvas
         const canvas = audio_waveform_canvas_dom[0];
-        
+    
         // Clear canvas
         audio_canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-        
+    
         // Get current audio data
         audio_analyser.getByteFrequencyData(audio_waveformData);
-        
+    
         // Draw waveform bars
         const barWidth = canvas.width / audio_waveformData.length;
         const heightScale = canvas.height / 255;
-        
+    
         for (let i = 0; i < audio_waveformData.length; i++) {
             const barHeight = audio_waveformData[i] * heightScale;
             const x = i * barWidth;
             const y = canvas.height - barHeight;
-            
+        
             audio_canvasContext.fillRect(x, y, barWidth - 1, barHeight);
         }
-        
+    
         // Continue animation
         audio_animationId = requestAnimationFrame(drawWaveform);
     }
@@ -1636,13 +1636,13 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     // Update timer display
     function updateTimer() {
         if (!audio_isRecording) return;
-        
+    
         const elapsed = Math.floor((Date.now() - audio_startTime) / 1000);
         const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
         const seconds = (elapsed % 60).toString().padStart(2, '0');
-        
+    
         audio_timer_element_dom.text(`${minutes}:${seconds}`);
-        
+    
         setTimeout(updateTimer, 1000);
     }
 
@@ -1651,7 +1651,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
         if (audio_record_button_dom.length) {
             const iconSpan = audio_record_button_dom.find('i');
             const textSpan = audio_record_button_dom.find('span');
-            
+        
             if (recording) {
                 textSpan.text('Stop Recording');
                 iconSpan.removeClass('fa-microphone').addClass('fa-stop');
@@ -1733,7 +1733,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             chat_header_name_text.text(user_text);
             find_thread_item(THREAD_ID).find("div.chat-title-text").text(user_text);
         }
-            
+        
 
         last_user_text = user_text;
 
@@ -1748,11 +1748,11 @@ class="apple en_US dark" data-ds-dark-theme="dark"
             endLoadingState();
 
             create_error_banner("Server error, please try again...");
-            
+        
             if (exist_loader) loader.remove();
             asst_msg.remove();
             user_msg.remove();
-            
+        
         }, 10 * 1000);
 
         startLoadingState();
@@ -1870,7 +1870,7 @@ class="apple en_US dark" data-ds-dark-theme="dark"
     }
 
     function endLoadingState() {   
-        input_textarea_dom.activate();     
+        input_textarea_dom.activate(); 
         input_textarea_dom.val("");
         input_textarea_dom.focus();
         // $("#chat-form-help-text").text("");

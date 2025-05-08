@@ -22,18 +22,18 @@
             <h2>{{ title }}</h2>
             <p>Environment: {{ environment }}</p>
         </div>
-        
+    
         <div class="content">
             <div class="detail"><span class="label">Username:</span> {{ username }}</div>
             <div class="detail"><span class="label">User ID:</span> {{ user_id }}</div>
             <div class="detail"><span class="label">Email:</span> {{ email }}</div>
-            
+        
             <h3 style="color: #e74c3c; margin-top: 25px;">Action Required</h3>
             <a href="{{ approve_url }}" class="button">Approve User</a>
             <br>
             <a href="{{ admin_url }}" style="margin-top: 5px; display: inline-block;">View in Admin Panel</a>
         </div>
-        
+    
         <div class="footer">
             Django Cat
         </div>

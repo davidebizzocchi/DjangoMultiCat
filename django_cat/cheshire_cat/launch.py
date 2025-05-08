@@ -23,7 +23,7 @@ def main():
         ic(response.status_code)
         if response.status_code == 200:
             break
-    
+
     if response is not None:
         data = response.json()
 
@@ -33,7 +33,7 @@ def main():
                 ic(user_id)
                 break
 
-    
+
     # if user_id is not None:
 
     if user_id is not None:

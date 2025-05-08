@@ -36,7 +36,7 @@ class AgentForm(forms.ModelForm):
 
     def clean_metadata(self):
         metadata = self.cleaned_data.get("metadata", "{}")
-        
+    
         if not metadata:
             return {}
 
@@ -52,8 +52,8 @@ class AgentForm(forms.ModelForm):
     def save(self, commit=True):
         agent = super().save(commit=False)
         agent.user = self.user
-        
+    
         if commit:
             agent.save()
-        
+    
         return agent

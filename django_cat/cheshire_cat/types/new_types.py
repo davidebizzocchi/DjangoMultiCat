@@ -25,7 +25,7 @@ class ChatHistoryMessage(BaseModel):
         if isinstance(v, (int, float)):
             return datetime.fromtimestamp(v)
         return v
-    
+
     @field_validator('why', mode='before') 
     @classmethod
     def validate_why(cls, v):
@@ -94,7 +94,7 @@ class CatMessage(ConversationMessage, ChatIDMixin):
         **kwargs,
     ):
         if "content" in kwargs:
-            print("The `content` parameter is deprecated. Use `text` instead.")    
+            print("The `content` parameter is deprecated. Use `text` instead.")
             text = kwargs.pop("content")  # Map 'content' to 'text'
 
         super().__init__(user_id=user_id, text=text, image=image, audio=audio, why=why, who=who, **kwargs)
@@ -113,7 +113,7 @@ class CatMessage(ConversationMessage, ChatIDMixin):
             The text content of the message.
         """
         return self.text
-    
+
     @content.setter
     def content(self, value):
         print("The `content` attribute is deprecated. Use `text` instead.")

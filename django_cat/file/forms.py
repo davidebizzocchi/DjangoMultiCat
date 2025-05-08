@@ -26,7 +26,7 @@ class MultipleFileField(forms.FileField):
             result = [single_file_clean(d, initial) for d in data]
         else:
             result = [single_file_clean(data, initial)]
-        
+    
         return result
 
 
@@ -76,7 +76,7 @@ class FileUploadForm(forms.Form):
         help_text="Select libraries where to save the file",
         widget=forms.CheckboxSelectMultiple
     )
-    
+
     model = File
     instance = None
 
@@ -116,9 +116,9 @@ class FileUploadForm(forms.Form):
         libraries_id = self.data.getlist("libraries")
         if not libraries_id:
             return Library.objects.none()
-        
-        return Library.objects.filter(user=self.user, library_id__in=libraries_id)
     
+        return Library.objects.filter(user=self.user, library_id__in=libraries_id)
+
     def clean_file(self):
         file = self.cleaned_data.get("file")
 
@@ -127,14 +127,14 @@ class FileUploadForm(forms.Form):
 
         if not isinstance(file, list):
             raise forms.ValidationError("File upload is not a list.")
-        
+    
         if len(file) == 0:
             raise forms.ValidationError("No file uploaded.")
-        
+    
         for f in file:
             if f is None:
                 raise forms.ValidationError(f"{f} is not a valid.")
-            
+        
         return file
 
     def clean_ingestion_config(self):
@@ -151,7 +151,7 @@ class FileUploadForm(forms.Form):
             post_process_context=cleaned_data.get('post_process_context')
         )
         return cleaned_data
-        
+    
 
     def save(self, commit=True):
         saved: List[List[bool, File, List[Library], List[Library]]] = []
@@ -161,12 +161,12 @@ class FileUploadForm(forms.Form):
             return True, self.instance, uploaded, deleted
 
         files: List[InMemoryUploadedFile] = self.cleaned_data["file"]
-        
+    
         for f in files:
             file_hash = File.calculate_file_has_from_instance(f)
             possible_files = File.objects.filter(user=self.user, hash=file_hash)
             if not possible_files.exists():
-                
+            
                 file_hash_norm = file_hash + os.path.splitext(f.name)[1]
                 file_path: Path = settings.UPLOADS_ROOT / file_hash_norm
 
@@ -176,7 +176,7 @@ class FileUploadForm(forms.Form):
                     counter += 1
 
                 self.save_file(f, file_path)
-            
+        
                 instance = File.objects.create(
                     file=FileObject(path=file_path), 
                     user=self.user, 
@@ -194,7 +194,7 @@ class FileUploadForm(forms.Form):
                 saved.append([False, possible_files.first(), [], []])
 
         return saved
-    
+
     def save_file(self, file, file_path: Path):
         """
         Function to save the file in the filesystem and return its path.
@@ -202,7 +202,7 @@ class FileUploadForm(forms.Form):
         """
 
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        
+    
         with open(file_path, "wb") as f:
             for chunk in file.chunks():
                 f.write(chunk)

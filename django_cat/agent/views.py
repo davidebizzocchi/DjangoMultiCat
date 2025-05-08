@@ -16,10 +16,10 @@ from django.conf import settings
 class AgentMixin(LoginRequiredMixin):
     model = Agent
     can_view_default = False
-    
+
     context_object_name = "agent"
     success_url = reverse_lazy('agent:list')
-    
+
     slug_url_kwarg = "agent_id"
     slug_field = "agent_id"
 
@@ -38,31 +38,31 @@ class AgentMixin(LoginRequiredMixin):
         # For example:
         # context["user_llms_list"] = LLM.objects.filter(user=self.usr)
         return context
-    
+
 class LLMSchemasMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # llm_schemas = self.user.client.get_llm_schemas()
-        
+    
         # # Create forms dictionary with humanReadableName as key
         # llm_forms = {}
         # llm_class_mapping = {}
-        
+    
         # for config_title, schema in llm_schemas.items():
         #     human_readable = schema.get("humanReadableName", config_title)
         #     form = PydanticFormBuilder.create_form_from_schema(schema, config_title)
-            
+        
         #     # Save original class name in form metadata
         #     form.original_class_name = config_title
-            
+        
         #     # Store form and update mapping
         #     llm_forms[human_readable] = form
         #     llm_class_mapping[human_readable] = config_title
-        
+    
         # # Recupera gli LLM dell'utente
         # user_llms = LLM.objects.filter(user=self.usr)
         # context["user_llms"] = user_llms
-        
+    
         # context["llm_forms"] = llm_forms
         # context["llm_class_mapping"] = llm_class_mapping
 
@@ -107,7 +107,7 @@ class AgentCreateView(AgentMixin, LLMSchemasMixin, CreateView):
         return {
             "agent_id": "new",
         }
-    
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.usr

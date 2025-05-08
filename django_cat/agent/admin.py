@@ -10,7 +10,7 @@ class AgentAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     ordering = ('-updated_at',)
     readonly_fields = ('agent_id',)
-    
+
     def instructions_preview(self, obj):
         """Returns a preview of the instructions limited to 50 characters"""
         return obj.instructions[:50] + '...' if len(obj.instructions) > 50 else obj.instructions

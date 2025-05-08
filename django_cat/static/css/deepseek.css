@@ -5688,7 +5688,7 @@ body.dark .ds-elevated, body.dark [data-elevated] {
     --ds-rgb-segmented-button: var(--ds-rgb-neutral-500);
     --ds-rgb-segmented-separator: var(--ds-rgb-neutral-500);
     --ds-rgb-thumb:var(--ds-rgb-neutral-200)
-    
+
 }
 
 @media (prefers-color-scheme: dark) {

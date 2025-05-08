@@ -8,13 +8,13 @@
 
 <form method="post" class="mb-4">
     {% csrf_token %}
-    
+
     <div class="mb-3">
         <div class="d-flex justify-content-between mb-2">
             <button type="button" class="btn btn-secondary btn-sm" id="selectNone">Deselect all</button>
             <button type="button" class="btn btn-secondary btn-sm" id="selectAll">Select all</button>
         </div>
-        
+    
         <div class="list-group">
             {{ form.libraries }}
         </div>

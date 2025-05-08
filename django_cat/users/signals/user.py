@@ -12,7 +12,7 @@ def _send_html_email(subject, context, template_name, recipient_list):
     """Helper function to send HTML emails with plain text fallback"""
     text_body = render_to_string(f'emails/{template_name}.txt', context)
     html_body = render_to_string(f'emails/{template_name}.html', context)
-    
+
     email = EmailMultiAlternatives(
         subject=subject,
         body=text_body,
@@ -37,7 +37,7 @@ def create_user_profile(sender, instance: User, created: bool, **kwargs):
                 'approve_url': f"{settings.SITE_URL}{reverse('users:manage:approve', kwargs={'pk': profile.pk})}",
                 'admin_url': f"{settings.SITE_URL}/admin/users/user/{instance.pk}/change/",
             }
-            
+        
             _send_html_email(
                 subject=f"[{ENV_TYPE}] - New User: {instance.username}",
                 context=context,
@@ -56,7 +56,7 @@ def deleted_user(sender, instance: User, **kwargs):
             'email': instance.email or 'Not provided',
             'last_login': instance.last_login.strftime('%Y-%m-%d %H:%M') if instance.last_login else 'Never',
         }
-        
+    
         _send_html_email(
             subject=f"[{ENV_TYPE}] - User Deleted: {instance.username}",
             context=context,

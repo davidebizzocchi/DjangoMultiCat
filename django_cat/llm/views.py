@@ -23,11 +23,11 @@ class CreateLLMView(LoginRequiredMixin, CreateView):
         context['llm_forms'] = Forms(self.user)
         context['is_new'] = True
         return context
-        
+    
     def form_valid(self, form):
         form.instance.user = self.usr
         return super().form_valid(form)
-    
+
     def form_invalid(self, form):
         print("Form is invalid")
         print(form.errors)
@@ -38,7 +38,7 @@ class LLMListView(LoginRequiredMixin, ListView):
     model = LLM
     template_name = 'llm/list.html'
     context_object_name = 'llms'
-    
+
     def get_queryset(self):
         return LLM.objects.filter(user=self.usr)
 
@@ -47,7 +47,7 @@ class LLMDetailView(LoginRequiredMixin, DetailView):
     model = LLM
     template_name = 'llm/detail.html'
     context_object_name = 'llm'
-    
+
     def get_queryset(self):
         return LLM.objects.filter(user=self.usr)
 
@@ -57,14 +57,14 @@ class LLMUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'llm/form.html'
     form_class = LLMForm
     success_url = reverse_lazy('llm:list')
-    
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         return kwargs
-    
+
     def get_queryset(self):
         return LLM.objects.filter(user=self.usr)
-        
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['llm_forms'] = Forms(user=self.user, llm=self.get_object())
@@ -77,6 +77,6 @@ class LLMDeleteView(LoginRequiredMixin, DeleteView):
     template_name = 'llm/delete.html'
     success_url = reverse_lazy('llm:list')
     context_object_name = 'llm'
-    
+
     def get_queryset(self):
         return LLM.objects.filter(user=self.usr)
