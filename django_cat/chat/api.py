@@ -122,7 +122,7 @@ def stream(request, data: MessageIn):
     response['X-Accel-Buffering'] = 'no'
     return response
 
-@router.post("/audio-api", url_name="audio-api")
+@router.post("/transcribe", url_name="transcribe")
 def audio_upload(request, audio: UploadedFile = File(...)):
     client: Cat = get_user_client(request.user)
     
