@@ -14,34 +14,31 @@ from pathlib import Path
 from decouple import config
 import os
 from django.contrib.messages import constants as messages
-import sentry_sdk
+from django.urls import reverse_lazy
+
+from app.utils import string_to_dict
 
 
-def get_version_from_file():
-    try:
-        with open('VERSION', 'r') as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        return "v0.0.0-unknown"
-    
 ENVIRONMENT_TYPE = config("ENVIRONMENT_TYPE", default="none")
 
-# Sentry init
-sentry_sdk.init(
-    dsn=config("SENTRY_DNS"),
-    environment=ENVIRONMENT_TYPE,
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    traces_sample_rate=config("SENTRY_traces_sample_rate", cast=float, default=1.0),
-    # Set profiles_sample_rate to 1.0 to profile 100%
-    # of sampled transactions.
-    # We recommend adjusting this value in production.
-    profiles_sample_rate=config("SENTRY_profiles_sample_rate", cast=float, default=1.0),
-    send_default_pii=True,
-    release=get_version_from_file()
+LLM_PROVIDER_API_URL = config("LLM_PROVIDER_API_URL", "")
+LLM_PROVIDER_API_KEY = config("LLM_PROVIDER_API_KEY", "")
+LLM_MODEL_TEXT_ID = config("LLM_MODEL_TEXT_ID", "")
+LLM_MODEL_AUDIO_TRANSCRIPTION_ID = config("LLM_MODEL_AUDIO_TRANSCRIPTION_ID", "")
+# LLM_MODEL_AUDIO_SPEAK_ID = config("LLM_MODEL_AUDIO_ID", "gtts")  # if not given use gtts (Google Translate’s text-to-speech API)
+LLM_MODEL_AUDIO_SPEAK_ID = "gtts"
+
+CAPABILITIES_TO_PLUGINS = string_to_dict(
+    config("CAPABILITIES_PLUGINS", default=""),
+    separator=",",
+    value_len=1
 )
 
 
+{
+    "WebSearch": "miaotore",
+    "Gerry Scotti": "gerry_scatty"
+}
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -107,8 +104,20 @@ INSTALLED_APPS = [
     # CheshireCat app
     "cheshire_cat",
     # your app
+    "common",
     "users",
-    "chat"
+    "chat",
+    "library",
+    "file",
+    "agent",
+    "llm",
+
+    # AllAuth
+    "allauth",
+    "allauth.account",
+    # Google Account
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
 
 MIDDLEWARE = [
@@ -119,6 +128,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    "allauth.account.middleware.AccountMiddleware",
+
+    "users.middleware.UserApprovalMiddleware",
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -128,6 +141,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         "DIRS": [
             os.path.join(BASE_DIR, "templates"),
+            os.path.join(BASE_DIR, "templates", "allauth"),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -158,19 +172,73 @@ DATABASES = {
     }
 }
 
-# Email configuration
-# EMAIL_BACKEND= "django.core.mail.backends.console.EmailBackend"
-
 AUTHENTICATION_BACKENDS = [
-    'users.auth.UsernameAuthenticationBackend',
-    'django.contrib.auth.backends.ModelBackend',  # mantieni anche il backend predefinito se necessario
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+    # `allauth` specific authentication methods, such as login by email
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
+
+# ALLAUTH Accounts
+ACCOUNT_EMAIL_NOTIFICATIONS = config("ACCOUNT_EMAIL_NOTIFICATIONS", cast=bool)
+ACCOUNT_EMAIL_VERIFICATION = config("ACCOUNT_EMAIL_VERIFICATION", cast=str)
+ACCOUNT_REAUTHENTICATION_REQUIRED = config(
+    "ACCOUNT_REAUTHENTICATION_REQUIRED", default=False, cast=bool
+)
+ACCOUNT_REAUTHENTICATION_TIMEOUT = config(
+    "ACCOUNT_REAUTHENTICATION_TIMEOUT", default=300, cast=int
+)
+
+if DEBUG:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
+else:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+
+AUTH_USER_MODEL = "users.User"
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+ACCOUNT_LOGIN_METHODS = {"email"}
+
+DEFAULT_AVATAR_URL = "https://cheshirecat.ai/wp-content/uploads/2023/10/Logo-Cheshire-Cat.svg"
+
+
+ACCOUNT_PASSWORD_CHANGE_REDIRECT_URL = reverse_lazy("home")
+
+# Allauth Google Account
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": config("GOOGLE_CLIENT_ID"),
+            "secret": config("GOOGLE_SECRET"),
+            "key": "",
+        },
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+        # Comporta che se ci registra in locale con la stessa mail di google,
+        # al login con google, si acceda allo stesso account
+        "EMAIL_AUTHENTICATION": True,
+        "OAUTH_PKCE_ENABLED": True,
+        "FETCH_USERINFO" : True
+
+    }
+}
+
+# DEFAULT_HTTP_PROTOCOL = "https"
 
 # Login/Logout redirect URLs
 LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = 'users:login'
 LOGOUT_REDIRECT_URL = 'home'
 
+# Email configuration
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = config("EMAIL_HOST", default="localhost")
 EMAIL_PORT = config("EMAIL_PORT", default=25, cast=int)
@@ -182,6 +250,11 @@ EMAIL_USE_SSL = config("EMAIL_USE_SSL", cast=bool)
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 # Imposta il timeout di connessione per il server Django (in secondi)
 CONN_MAX_AGE = 0  # default is 0 https://docs.djangoproject.com/en/5.0/ref/databases/
+
+ADMIN_EMAILS = config("ADMIN_EMAILS", cast=str).strip().split(" ")
+
+SEND_NEW_USER_MAIL = config("SEND_NEW_USER_MAIL", cast=bool, default=False)
+SEND_DELETED_USER_MAIL = config("SEND_DELETED_USER_MAIL", cast=bool, default=False)
 
 
 # Password validation
@@ -238,3 +311,26 @@ MESSAGE_TAGS = {
 }
 
 MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
+
+UPLOADS_ROOT = MEDIA_ROOT / "uploads"
+
+# Debug Toolbar
+INTERNAL_IPS = ["127.0.0.1", "0.0.0.0", "localhost"]
+if DEBUG:
+    import socket
+
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS += [ip[:-1] + "1" for ip in ips]
+
+if config("TOOLBAR_DEBUG", cast=bool, default=DEBUG):
+    INSTALLED_APPS = [
+        *INSTALLED_APPS,
+        "debug_toolbar",
+    ]
+    MIDDLEWARE = [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+        *MIDDLEWARE,
+    ]
+
+SITE_URL = config("SITE_URL", default="http://localhost:8000")

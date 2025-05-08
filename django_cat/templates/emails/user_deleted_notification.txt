@@ -1,0 +1,10 @@
+{{ title }}
+========================================
+Environment: {{ environment }}
+
+Username: {{ username }}
+User ID: {{ user_id }}
+Email: {{ email }}
+Last Login: {{ last_login }}
+
+Django Cat

@@ -1,0 +1,33 @@
+name: Auto Assign Issues
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  auto-assign:
+    runs-on: ubuntu-latest
+
+    permissions:
+      issues: write  # Aggiungi i permessi per scrivere sulle issue
+
+    steps:
+      - name: Check if issue is unassigned
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issue = context.payload.issue;
+
+            if (!issue.assignees.length) {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                assignees: ['davidebizzocchi'] // Replace with your GitHub username
+              });
+              core.info(`Issue #${issue.number} assigned to you.`);
+            } else {
+              core.info(`Issue #${issue.number} already has assignees.`);
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTION_TOKEN }}  # Usa il GITHUB_TOKEN o un PAT

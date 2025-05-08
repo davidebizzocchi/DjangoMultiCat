@@ -1,4 +1,4 @@
-from django.db.models.signals import Signal
+from django.dispatch import Signal
 
 
 server_start = Signal()

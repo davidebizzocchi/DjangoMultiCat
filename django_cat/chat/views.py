@@ -1,65 +1,93 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import TemplateView, ListView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
+from django.views.generic import ListView, DeleteView, DetailView, RedirectView
+
+from common.mixin import LoginRequiredMixin
+
 from django.http import Http404
 from django.urls import reverse_lazy
 
 from chat.models import Message, Chat
+from chat.forms import ChatCreateForm
 
-def home(request):
-    return render(request, 'chat/home.html')
+from icecream import ic
 
-class ChatListView(LoginRequiredMixin, ListView):
+
+class ChatHome(RedirectView):
+    url = reverse_lazy('chat:list')
+    permanent = True
+
+
+class ChatMixin():
     model = Chat
+    context_object_name = "chat"
+
+    success_url = reverse_lazy('chat:list')
+
+    slug_url_kwarg = "chat_id"
+    slug_field = "chat_id"
+
+class ChatListView(ChatMixin, LoginRequiredMixin, ListView):
     template_name = 'chat/list.html'
     context_object_name = 'chats'
 
     def get_queryset(self):
-        return Chat.objects.filter(user=self.request.user)
+        return Chat.objects.filter(user=self.usr)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Aggiungi il primo messaggio per ogni chat come titolo
-        chat_titles = {}
-        for chat in context['chats']:
-            first_message = chat.messages.first()
-            chat_titles[chat.id] = first_message.text[:50] if first_message else "Nuova Chat"
-        context['chat_titles'] = chat_titles
-        return context
+class ChatStreamView(ChatMixin, LoginRequiredMixin, DetailView):
+    object: "Chat"
 
-class ChatView(LoginRequiredMixin, TemplateView):
     template_name = 'chat/streaming.html'
-    
+    context_object_name = 'thread'
+
+    def pre_dispatch(self):
+        pass
+
+    def dispatch(self, request, *args, **kwargs):
+        self.pre_dispatch()
+        return super().dispatch(request, *args, **kwargs)
+
     def get(self, request, *args, **kwargs):
-        chat = get_object_or_404(Chat, chat_id=kwargs['chat_id'])
-        if chat.user != request.user:
-            raise Http404("Chat non trovata")
+        
         return super().get(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        chat = get_object_or_404(Chat, chat_id=kwargs['chat_id'])
-        context['chat'] = chat
-        context['chat_messages'] = Message.objects.filter(chat=chat)
-        context['chat_id'] = chat.chat_id  # Add this line
+
+        if isinstance(self.object, Chat):  # otherwise it's a new chat: dict
+            context['chat_messages'] = Message.objects.filter(chat=self.object)
+            context["agent"] = self.object.agent
+
+        context["form"] = ChatCreateForm(user=self.usr)
+        context["create_thread"] = False
+        context["create_thread_immediately"] = False
+
         return context
 
-@login_required
-def create_chat(request):
-    if request.method == 'POST':
-        chat = Chat.objects.create(user=request.user)
-        return redirect('chat:chat', chat_id=chat.chat_id)
-    return redirect('chat:list')
+class ChatCreateView(ChatStreamView):
 
-class ChatDeleteView(LoginRequiredMixin, DeleteView):
-    model = Chat
+    def get_object(self, *args, **kwargs):
+        return {
+            "chat_id": "new",
+        }
+     
+    def pre_dispatch_login(self, *args, **kwargs):
+        if self.request.GET.get("force", "false") == "false":
+            if (qs := Chat.objects.filter(user=self.usr)).count() > 0:
+                return redirect(
+                    "chat:chat",
+                    chat_id=qs.first().chat_id
+                )
+        return super().pre_dispatch_login(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["create_thread"] = True
+        context["create_thread_immediately"] = False
+        context["force_create_thread"] = Chat.objects.filter(user=self.usr).count() == 0
+
+        return context
+
+class ChatDeleteView(ChatMixin, LoginRequiredMixin, DeleteView):
     template_name = 'chat/delete_confirm.html'
-    success_url = reverse_lazy('chat:list')
-    context_object_name = 'chat'
     
-    def get_object(self, queryset=None):
-        chat = get_object_or_404(Chat, chat_id=self.kwargs['chat_id'])
-        if chat.user != self.request.user:
-            raise Http404("Chat non trovata")
-        return chat

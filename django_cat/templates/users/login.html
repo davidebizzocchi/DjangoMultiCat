@@ -17,17 +17,30 @@
             {% endif %}
             <form method="post">
                 {% csrf_token %}
-                <div class="form-group">
-                    {{ form.username.label_tag }}
-                    {{ form.username }}
+                <div class="form-group mb-3">
+                    <label for="id_username">Email</label>
+                    {{ form.username|add_class:"form-control"|attr:"placeholder:Enter email"|attr:"id:id_email" }}
                     {% if form.username.errors %}
                         <div class="alert alert-danger">
                             {{ form.username.errors }}
                         </div>
                     {% endif %}
                 </div>
+                <div class="form-group mb-3">
+                    <label for="id_password">Password</label>
+                    {{ form.password|add_class:"form-control"|attr:"placeholder:Enter password"|attr:"id:id_password" }}
+                    {% if form.password.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.password.errors }}
+                        </div>
+                    {% endif %}
+                </div>
                 <button type="submit" class="btn btn-primary mt-3">Login</button>
             </form>
+            
+            <hr class="my-4">
+            {% include 'users/google_elem.html' %}
+            
         </div>
     </div>
 </div>

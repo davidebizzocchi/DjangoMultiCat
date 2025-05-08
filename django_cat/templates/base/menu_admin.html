@@ -1,7 +1,7 @@
 <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Admin</a>
+    <a class="nav-link dropdown-toggle btn btn-light bg-light rounded-3 px-4 text-dark fw-bold" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Admin</a>
     <ul class="dropdown-menu">
-      <li><a class="dropdown-item" href="{% url 'users:list' %}">Lista Utenti</a></li>
+      <li><a class="dropdown-item" href="{% url 'users:manage:list' %}">Users List</a></li>
       <li><hr class="dropdown-divider"></li>
       <li><a class="dropdown-item" href="/XYZ2024-admin/" target="_blank">Admin Backend</a></li>
       <li><a class="dropdown-item" href="http://0.0.0.0:8025/" target="_blank">mailHog</a></li>

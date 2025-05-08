@@ -1,0 +1,74 @@
+{% extends "base/base.html" %}
+{% block title %}Agents{% endblock %}
+
+{% block contenuto %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Your agents</h2>
+        <a href="{% url 'agent:create' %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> New Agent
+        </a>
+    </div>
+
+    <div class="list-group">
+        {% for agent in agents %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-robot me-2"></i>
+                    <a href="{% url 'agent:detail' agent.agent_id %}">
+                        {{ agent.name }}
+                    </a>
+                    {% if agent.is_default %}
+                        <span class="badge bg-primary ms-2">Default</span>
+                    {% endif %}
+                    {% if agent.llm %}
+                        <span class="badge bg-info ms-2">{{ agent.llm.name }}</span>
+                    {% endif %}
+                </div>
+                {% if agent.instructions %}
+                <div class="small text-muted mt-1">
+                    {{ agent.instructions|truncatechars:100 }}
+                </div>
+                {% endif %}
+                {% if agent.capabilities %}
+                <div class="mt-1">
+                    {% for capability in agent.capabilities %}
+                    <span class="badge bg-secondary me-1">{{ capability }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="mt-1">
+                    <small class="text-muted">
+                        Memory Search: 
+                        {% if agent.enable_vector_search %}
+                            <span class="badge bg-success">Enabled</span>
+                        {% else %}
+                            <span class="badge bg-danger">Disabled</span>
+                        {% endif %}
+                        {% if agent.llm_class %}
+                        | LLM Class: <span class="text-info">{{ agent.llm_class }}</span>
+                        {% endif %}
+                        {% if agent.llm %}
+                        | LLM: <span class="text-info">{{ agent.llm.name }}</span>
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+            <div class="btn-group">
+                {% if not agent.is_default %}
+                <a href="{% url 'agent:update' agent.agent_id %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'agent:delete' agent.agent_id %}" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-trash"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center text-muted">You haven't created any agents yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

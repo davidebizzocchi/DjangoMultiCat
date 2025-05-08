@@ -1,0 +1,96 @@
+{% extends 'base/base.html' %}
+{% load poll_extras %}
+
+{% block title %}Manage File Libraries{% endblock %}
+
+{% block head %}
+<style>
+    .list-group {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .list-group-item:hover {
+        background-color: var(--bs-light);
+    }
+    
+    .list-group-item input[type="checkbox"] {
+        cursor: pointer;
+    }
+    
+    .list-group-item input[type="checkbox"]:checked + span {
+        font-weight: 500;
+        color: var(--bs-primary);
+    }
+    </style>
+{% endblock %}
+
+{% block contenuto %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex align-items-center">
+                    <i class="fas fa-folder-tree me-2"></i>
+                    <h5 class="mb-0">Library Associations for <span class="text-dark">{{ object.title }}</span></h5>
+                </div>
+                
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="form-label fw-bold">Select Libraries</label>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" id="selectAll" class="btn btn-outline-primary">
+                                        <i class="fas fa-check-square me-1"></i> Select All
+                                    </button>
+                                    <button type="button" id="selectNone" class="btn btn-outline-secondary">
+                                        <i class="fas fa-square me-1"></i> Clear
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="list-group">
+                                {% for choice in form.libraries %}
+                                <label class="list-group-item list-group-item-action d-flex align-items-center">
+                                    {{ choice.tag }}
+                                    <span class="ms-2">{{ choice.choice_label }}</span>
+                                </label>
+                                {% empty %}
+                                <div class="list-group-item text-center text-muted py-4">
+                                    <i class="fas fa-folder-open fa-2x mb-2"></i>
+                                    <p class="mb-0">No libraries available yet.</p>
+                                    <small>Create some libraries to organize your files.</small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'file:list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-chevron-left me-1"></i> Back to Files
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('selectAll').addEventListener('click', function() {
+    document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = true);
+});
+
+document.getElementById('selectNone').addEventListener('click', function() {
+    document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);
+});
+</script>
+{% endblock %}
+

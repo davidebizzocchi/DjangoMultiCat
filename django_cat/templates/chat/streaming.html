@@ -1,93 +1,1693 @@
-{% extends "base/base.html" %}
+{% extends 'base/basic.html' %}
+
 {% load static %}
-
-{% block title %}Chat{% endblock %}
-
-{% block reload %}
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<link rel="stylesheet" crossorigin="" href="{% static 'css/cat_chat.css' %}">
-<link rel="stylesheet" crossorigin="" href="{% static 'css/chat.css' %}">
-{% endblock %}
-
-{% block contenuto %}
+{% load widget_tweaks %}
+{% load poll_extras %}
 
 
-{% include 'chat/_streaming/proto_objects.html' %}
+<!-- HEAD -->
+{% block head %}
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
-    <h1>Chat</h1>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-    {% include 'chat/_streaming/chat_app.html' %}
+<link rel="stylesheet" href="{% static 'css/deepseek.css' %}">
 
-    <script>
-        $(document).ready(function() {
-        // Select all elements with class 'markdown' //
-        $('.markdown').each(function() {
-            let target = $(this);
-            target.html(convertToHTML(target.text()));
-        });
-
-        // Fix error 3 white spaces //
-        $("#message-input").text('');
-        $("#message-input").focus();
-
-
-        // Last action: scrolling down
-        let container = $("#app-container");
-        container.animate({ scrollTop: container.find("#app").get(0).scrollHeight }, 200);
-    });
-
-    // Resize textarea
-    $(document).on("input", "#message-input", function(e) {
-        let textarea = $(e.currentTarget);
-        textarea.css('height', "48px");
-        textarea.css('height', textarea[0].scrollHeight + 'px');
-    });
-    
-    // Send message with enter
-    $(document).on("keydown", "#message-input", function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault(); // Impedisce il comportamento predefinito di andare a capo
-            $('#chatForm').submit(); // Invia il modulo
-        }
-    });
-
-    // Convert Markdown into HTML
-    function convertToHTML(html_content) {
-        return marked.parse(html_content);
+<style>
+    .hidden {
+        display: none!important;
     }
 
-    // Wipe chat handler
-    $(document).on("click", "#wipe-chat", async function(e) {
-        e.preventDefault();
-        
-        // if (!confirm("Sei sicuro di voler cancellare la memoria della chat? Questa azione non può essere annullata.")) {
-        //     return;
-        // }
+    .action-button-active {
+        --ds-button-color: rgba(77, 107, 254, 0.40) !important;
+        --button-text-color: #4CAEFF !important;
+        --button-border-color: rgba(0, 122, 255, 0.15) !important;
+        --ds-button-hover-color: rgba(77, 107, 254, 0.2) !important;
+    }
+    
+    div.chat-session-title {
+        text-transform: capitalize;
+    }
 
-        try {
-            const response = await fetch('{% url "chat:wipe-chat-api" chat_id=chat_id %}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
-                }
-            });
+    div.profile-name {
+        text-transform: capitalize;
+    }
 
-            if (response.ok) {
-                // Clear messages from UI
-                $("#responses").empty();
-            } else {
-                alert("Errore durante la pulizia della chat");
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert("Errore durante la pulizia della chat");
+    div.avatar-wrapper {
+        background-color: rgb(var(--ds-rgb-fuchsia-200));;
+    }
+
+    div.ds-notification-container {
+        position: absolute;
+        top: 2vh;
+        left: 0px;
+    }
+
+    div.ds-notification-container > div {
+        margin-bottom: 10px;
+    }
+
+    body {
+        --app-height: 812px;
+    }
+
+    div.sp_logo_svg {
+        cursor: pointer;
+    }
+
+    .spin {
+        animation: rotate 1s linear infinite;
+        -webkit-animation: rotate 1s linear infinite;
+    }
+
+    @-webkit-keyframes rotate {
+        from {
+            -webkit-transform: rotate(0deg);
         }
+        to {
+            -webkit-transform: rotate(360deg);
+        }
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    svg.loader {
+        width: 30px;
+    }
+
+    div.copy-icon-svg {
+        padding: 2px;
+    }
+
+    .logo-svg path {
+        fill: #d5e2fa
+    }
+
+    .brand-logo-svg svg {
+        width: 80px;
+        height: 50px;
+    }
+
+    /* Asst message think */
+
+    /* Asst message think animations */
+    @-webkit-keyframes fadeInUpScale {
+        0% {
+            -webkit-transform: scaleY(0);
+            transform: scaleY(0);
+            -webkit-transform-origin: top;
+            transform-origin: top;
+        }
+        100% {
+            -webkit-transform: scaleY(1);
+            transform: scaleY(1);
+            -webkit-transform-origin: top;
+            transform-origin: top;
+        }
+    }
+    
+    @keyframes fadeInUpScale {
+        0% {
+            transform: scaleY(0);
+            transform-origin: top;
+        }
+        100% {
+            transform: scaleY(1);
+            transform-origin: top;
+        }
+    }
+
+    @-webkit-keyframes fadeInUpTranslate {
+        0% {
+            opacity: 0;
+            -webkit-transform: translateY(10px);
+            transform: translateY(10px);
+        }
+        70% {
+            opacity: 1;
+            -webkit-transform: translateY(5px);  /* TOOD: decide if it's better -5px (bouncing effect) */
+            transform: translateY(5px);
+        }
+        100% {
+            opacity: 1;
+            -webkit-transform: translateY(0);
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        70% {
+            opacity: 1;
+            transform: translateY(5px);  /* TOOD: decide if it's better -5px (bouncing effect) */
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @-webkit-keyframes IncreseOpacity {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes IncreseOpacity {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    div.think-wrapper {
+        padding: 0 0 0 13px;
+        line-height: 26px;
+        position: relative;
+        color: #a6a6a6;
+
+        --arrow-transition-time: 0.3s;
+        --transition-time: 0.7s;
+    }
+
+    div.think-wrapper div.think-line {
+        border-left: 2px solid #e5e5e5;
+        border-color: #4e4e56;
+        border-radius: 10px;
+        height: calc(100% - 10px);
+        margin-top: 5px;
+        position: absolute;
+        top: 0px;
+        left: 0;
+    }
+
+    button.collapse-think .arrow {
+        transition: transform var(--arrow-transition-time) ease-in-out;
+        -webkit-transition: transform var(--arrow-transition-time) ease-in-out;
+    }
+
+    button.collapse-think[aria-expanded="true"] .arrow {
+        transform: rotate(180deg);
+    }
+
+    button.collapse-think[aria-expanded="false"] .arrow {
+        transform: rotate(0deg);
+    }
+
+    div.think-wrapper div.think-container {
+        transition: IncreseOpacity var(--transition-time) ease-out;
+        -webkit-transition: IncreseOpacity var(--transition-time) ease-out;
+    }
+
+    div.think-wrapper div.think-content {
+        transition: fadeInUp var(--transition-time) ease-out;
+        -webkit-transition: fadeInUp var(--transition-time) ease-out;
+    }
+
+    div.think-wrapper div.collapse.show div.think-content {
+        opacity: 1;
+        transform: translateY(0);
+        animation: fadeInUpTranslate var(--transition-time) ease-out forwards;
+        -webkit-animation: fadeInUpTranslate var(--transition-time) ease-out forwards;;
+    }
+
+    /* Asst message think line animated */
+    div.think-wrapper div.collapse.show div.think-line {
+        /* animation: fadeInUpScale var(--transition-time) cubic-bezier(0.95, 0.06, 0, 0.14) forwards; */
+        animation: fadeInUpScale calc(var(--transition-time)*0.8) ease-out forwards;
+        -webkit-animation: fadeInUpScale calc(var(--transition-time)*0.8) ease-out forwards;
+    }
+
+    /* New chat sidebar (opened) button */
+    div.new-chat-section > div.new-chat-button-wrapper {
+        width: 65%;
+        justify-content: center;
+    }
+
+
+    /* Modal dialog */
+    div.ds-modal-content {
+        min-width: 80vw !important;
+        min-height: 80vh !important;
+        max-width: calc(100vw - 20px) !important;
+    }
+
+    /* common classes */
+    .transition {
+        transition: all 0.3s ease-out;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    /* Annotations */
+    div.annotations-container {
+        max-height: 30vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        --bs-btn-hover-bg: rgba(var(--bs-secondary-rgb), 0.3);
+    }
+
+    @media (max-width: 780px){
+        #headerNames {
+            display: none !important;
+        }
+    }
+
+    div.header-content-wrapper {
+        height: auto;
+    }
+
+    div.header-content-wrapper {
+        --bs-box-shadow: 0 0.5rem 1rem rgba(137, 137, 137, 0.075);
+    }
+</style>
+{% endblock%}
+
+<!-- TITLE -->
+{% block title %}
+Chat
+{% endblock %}
+
+<!-- NO FOOTER -->
+{% block footer %}
+{% endblock footer %}
+
+<!-- BODY TAG ATTR -->
+
+{% block body_attr %}
+class="apple en_US dark" data-ds-dark-theme="dark"
+{% endblock %}
+
+<!-- BODY -->
+
+{% block body %}
+<div id="root">
+    <div class="main-container">
+        <div class="header-logo-background"></div>
+        <div class="sidebar-navigation">
+
+            <!-- SIDEBAR -->
+            {% include "chat/components/sidebar/base.html" %}
+
+
+            <!-- CHAT -->
+
+            {% include "chat/components/chat/base.html" %}
+
+
+        </div>
+    </div>
+</div>
+
+<div class="ds-notification-container ds-theme"></div>
+
+<div class="ds-floating-position-wrapper ds-theme" data-transform-origin="bottom"
+    style="z-index: 0; left: 8px; top: 191px;"></div>
+<div class="ds-floating-position-wrapper ds-theme" data-transform-origin="bottom"
+    style="z-index: 0; left: 8px; top: 229px;"></div>
+
+<div id="popup-chat-actions" class="ds-floating-position-wrapper ds-theme" data-transform-origin="top left"
+    style="display: none; z-index: 1024; padding: 6px; left: 215.999985px; top: 230.999996px;">
+    <div class="ds-dropdown-menu ds-elevated" role="menu"
+        style="--ds-dropdown-menu-font-size: var(--ds-font-size-m); --ds-dropdown-menu-color: #3A3A46; --ds-dropdown-menu-option-color-hover: #555562; --ds-dropdown-menu-option-error-color-hover: rgba(255, 99, 99, 0.25); --ds-dropdown-menu-padding: 4px; --ds-dropdown-menu-option-padding: 8px 16px 8px 8px; --ds-dropdown-menu-option-line-height: var(--ds-line-height-m); --ds-dropdown-menu-border-radius: 12px; --ds-dropdown-menu-option-border-radius: 12px; --ds-dropdown-menu-option-icon-size: 20px; --ds-dropdown-menu-option-icon-margin: 0 10px 0 0;">
+        <div data-action="rename" class="ds-dropdown-menu-option ds-dropdown-menu-option--none">
+            <div class="ds-dropdown-menu-option__icon">
+                <div class="ds-icon" style="font-size: 24px; width: 24px; height: 24px; color: rgb(205, 212, 223);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M20.2286 18.25H3.77142C3.34538 18.25 3 18.5954 3 19.0214C3 19.4475 3.34538 19.7928 3.77142 19.7928H20.2286C20.6546 19.7928 21 19.4475 21 19.0214C21 18.5954 20.6546 18.25 20.2286 18.25Z"
+                            fill="currentColor"></path>
+                        <mask id="mask0_1954_727" maskUnits="userSpaceOnUse" x="3" y="2" width="15" height="15">
+                            <path d="M17.1429 2H3V16.1428H17.1429V2Z" fill="white"></path>
+                        </mask>
+                        <g mask="url(#mask0_1954_727)">
+                            <path
+                                d="M4.48999 16.14C4.36999 16.14 4.26002 16.12 4.15002 16.1C4.04002 16.07 3.94003 16.03 3.84003 15.98C3.73003 15.93 3.63999 15.88 3.54999 15.8C3.45999 15.73 3.39001 15.65 3.32001 15.56C3.25001 15.48 3.19001 15.38 3.14001 15.28C3.09001 15.18 3.05003 15.07 3.03003 14.96C3.01003 14.85 3 14.74 3 14.62C3 14.51 3.00998 14.4 3.03998 14.29L3.75 11.33C3.9 10.71 4.20001 10.18 4.64001 9.73L11.4 2.98C11.55 2.82 11.72 2.68 11.91 2.56C12.09 2.44 12.28 2.34 12.49 2.25C12.69 2.17 12.9 2.1 13.12 2.06C13.33 2.02 13.55 2 13.77 2C14 2 14.21 2.02 14.43 2.06C14.65 2.1 14.86 2.17 15.06 2.25C15.27 2.34 15.46 2.44 15.64 2.56C15.83 2.68 16 2.82 16.15 2.98C16.31 3.14 16.45 3.31001 16.57 3.49001C16.69 3.67001 16.79 3.87001 16.88 4.07001C16.96 4.27001 17.03 4.49 17.07 4.7C17.11 4.92 17.13 5.14 17.13 5.36C17.13 5.58 17.11 5.79999 17.07 6.00999C17.03 6.22999 16.96 6.44 16.88 6.64C16.79 6.85 16.69 7.04 16.57 7.22C16.45 7.41 16.31 7.58 16.15 7.73L9.40002 14.49C8.95002 14.94 8.42 15.23 7.81 15.38L4.84003 16.09C4.73003 16.12 4.60999 16.14 4.48999 16.14ZM13.67 3.63C13.22 3.66 12.84 3.84 12.52 4.16L5.78998 10.89C5.55998 11.12 5.41002 11.39 5.33002 11.71L4.66998 14.46L7.42999 13.8C7.73999 13.72 8.02 13.57 8.25 13.34L15 6.58C15.08 6.5 15.15 6.42001 15.22 6.32001C15.28 6.23001 15.33 6.13 15.38 6.02C15.42 5.92 15.45 5.81 15.47 5.7C15.5 5.58 15.51 5.47 15.51 5.36C15.51 5.24 15.5 5.13 15.47 5.02C15.45 4.91 15.42 4.8 15.38 4.69C15.33 4.59 15.28 4.49 15.22 4.39C15.15 4.3 15.08 4.21 15 4.13C14.82 3.96 14.62 3.82001 14.39 3.74001C14.16 3.65001 13.91 3.61 13.67 3.63Z"
+                                fill="currentColor"></path>
+                        </g>
+                    </svg></div>
+            </div>
+            <div class="ds-dropdown-menu-option__label">Rename</div>
+        </div>
+        <div data-action="delete" class="ds-dropdown-menu-option ds-dropdown-menu-option--error">
+            <div class="ds-dropdown-menu-option__icon">
+                <div class="ds-icon" style="font-size: 24px; width: 24px; height: 24px;"><svg width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M5.3948 8.24785C5.89262 8.21027 6.32593 8.58498 6.36058 9.083L6.91194 17.0084V17.0423C6.91194 18.562 8.1119 19.8099 9.60009 19.8099H14.4119C15.905 19.8099 17.1001 18.563 17.1001 17.0423V17.009L17.6407 9.08428C17.6747 8.58626 18.1074 8.21098 18.6053 8.24783C19.099 8.28438 19.4706 8.71284 19.4369 9.20682L18.9 17.0774C18.8817 19.6322 16.8736 21.6849 14.4119 21.6849H9.60009C7.14544 21.6849 5.13073 19.6335 5.11207 17.0781L4.56455 9.20795C4.53019 8.71406 4.90112 8.28511 5.3948 8.24785Z"
+                            fill="currentColor"></path>
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M21 5.75C21 6.26777 20.5803 6.6875 20.0625 6.6875H3.9375C3.41973 6.6875 3 6.26777 3 5.75C3 5.23223 3.41973 4.8125 3.9375 4.8125H20.0625C20.5803 4.8125 21 5.23223 21 5.75Z"
+                            fill="currentColor"></path>
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M10.2 10.75C10.6971 10.75 11.1 11.1529 11.1 11.65L11.1 16.1C11.1 16.5971 10.6971 17 10.2 17C9.70299 17 9.30005 16.5971 9.30005 16.1L9.30005 11.65C9.30005 11.1529 9.70299 10.75 10.2 10.75Z"
+                            fill="currentColor"></path>
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M13.7999 10.75C14.297 10.75 14.6999 11.1529 14.6999 11.65L14.6999 16.1C14.6999 16.5971 14.297 17 13.7999 17C13.3028 17 12.8999 16.5971 12.8999 16.1L12.8999 11.65C12.8999 11.1529 13.3028 10.75 13.7999 10.75Z"
+                            fill="currentColor"></path>
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M9.37093 2.87988C9.53733 2.5331 9.88788 2.3125 10.2725 2.3125H13.7269C14.1114 2.3125 14.462 2.53305 14.6284 2.87977L15.8048 5.33074L14.1949 6.16926L13.2436 4.1875H10.7558L9.80489 6.16916L8.19482 5.33084L9.37093 2.87988Z"
+                            fill="currentColor"></path>
+                    </svg></div>
+            </div>
+            <div class="ds-dropdown-menu-option__label">Delete</div>
+        </div>
+    </div>
+</div>
+
+<!-- CREATE FORM -->
+{% include 'chat/components/general/create_chat_form.html' %}
+
+<!-- ALL THE PROTO OBJECTS -->
+
+{% include 'chat/components/chat/messages/user.html' %}
+{% include 'chat/components/chat/messages/asst.html' %}
+{% include 'chat/components/chat/messages/annot.html' %}
+
+{% include 'chat/components/sidebar/history/date_group.html' %}
+{% include 'chat/components/sidebar/history/chat_item.html' %}
+
+{% include 'chat/components/general/loader.html' %}
+{% include 'chat/components/general/change_name.html' %}
+{% include 'chat/components/general/error_banner.html' %}
+{% include 'chat/components/general/create.html' %}
+
+
+<script type="module">    
+    
+    // Carica la libreria SSE come modulo
+    import { SSE } from 'https://cdn.jsdelivr.net/npm/sse.js@2.4.1/lib/sse.min.js';
+
+
+    /* RULES
+
+        Se un elemento non ha classe, allora gli viene assegnata una classe _descrizone_action_, per poterlo identificare
+        Solitamente viene data all'elemento con classe "ds-icon", però non è che sia fondamentale
+
+        Brutto, ma funziona alla perfezione.
+    */
+
+
+    const THREAD_ID = "{{ thread.chat_id }}"
+    const MESSAGE_LIFETIME = Number("{% messages_lifetime %}")  // in milliseconds
+
+    console.log("lifetime", MESSAGE_LIFETIME, "{% messages_lifetime %}");
+
+
+    /* HTML */
+    const HTML_USER_MESSAGE = $("#proto-user-msg");
+    const HTML_ASST_MESSAGE = $("#proto-asst-msg");
+    const HTML_ANNOT_ELEMENT = $("#proto-annot");
+
+    const HTML_DATE_GROUP = $("#proto-history-group");
+    const HTML_CHAT_ITEM = $("#proto-cat-item");
+    const HTML_CHANGE_NAME = $("#proto-change-name");  // for thread change name
+    const HTML_LOADER = $("#proto-loader");
+    const HTML_ERROR_BANNER = $("#proto-error-banner");
+    const HTML_PAGE_POPUP = $("#proto-page-popup");
+    const HTML_SEGMENTED_CONTAINER = $("#proto-segmented-container");
+    const HTML_DROPDOWN_MENU = $("#proto-dropdown-menu");
+
+    /* DOM */
+    const sidebar_dom = $("#sidebar");
+    const chat_list_dom = sidebar_dom.find("div.chat-history-list");
+
+    const buttons_dom = $('div.ds-icon, div.ds-icon-button');
+    const sidebar_button_dom = buttons_dom.has('#collapse-sidebar-0730');
+    const new_chat_dom = $("._new-chat-action_");
+    const scroll_down_icon_dom = $("#scrool-down-icon");
+    const popup_chat_actions_dom = $("#popup-chat-actions");
+
+    const chat_header_name_text = $("#thread-name-header");
+
+    const chat_container_dom = $("div.message-container");
+    const chat_messages_dom = $("div.message-text");  // here messages
+    const chat_bubble_dom = $("div.message-bubble");  // this scroll!!
+
+    const input_group_dom = $("div.input-group-wrapper");
+    const input_textarea_dom = input_group_dom.find("#chat-input");
+    const input_action_buttons_container_dom = input_group_dom.find("div.action-buttons-container");
+    const input_action_buttons_dom = input_action_buttons_container_dom.find("div[role=button]");
+
+    const send_message_dom = input_action_buttons_dom.filter("div.file-input-button");
+
+    const notification_container_dom = $("div.ds-notification-container");
+
+    const sp_logo_svg = $("div.brand-logo-svg");
+
+    const new_chat_form_dom = $("#create-thread-form");
+    const popup_new_chat_dom = $("#popup-create-thread");
+
+    const prompts_wrapper_dom = $("#prompts-wrapper");
+    const prompt_containers_dom = $("div.examples-container");
+    const prompt_examples_dom = prompt_containers_dom.find("div.example-item");
+
+    /* CLASS NAMES */
+    const class_action_button_active = "action-button-active";
+    const class_chat_box_active = "active-chat-item";
+    const class_chat_history_date_group = "history-date-group";
+    const class_chat_message_action_button = "_chat-message-action_";
+    const class_assistant_chat_message = "code-block-wrapper";
+
+    const class_button_toggle_annotations = "_toggle_annotations_container_"
+    
+    /* VARIABILES */
+    let popup_chat_action_active = false;
+    let actual_chat_group_date_value = null;
+    let actual_chat_item_count = 0;
+
+    let last_user_text = "";
+
+    console.log("buttons", buttons_dom, sidebar_button_dom);
+
+    /* OVVERIDE */
+
+    // Button to send messages
+    send_message_dom.toggle_active = function () {
+        send_message_dom.toggleClass("file-input-hidden");
+        send_message_dom.attr("aria-disabled", send_message_dom.hasClass("file-input-hidden"));
+    }
+
+    send_message_dom.activate = function () {
+        send_message_dom.removeClass("file-input-hidden");
+        send_message_dom.attr("aria-disabled", "false");
+    }
+
+    send_message_dom.disable = function () {
+        send_message_dom.addClass("file-input-hidden");
+        send_message_dom.attr("aria-disabled", "true");
+    }
+
+    send_message_dom.is_active = function () {
+        return !send_message_dom.hasClass("file-input-hidden");
+    }
+
+    // Textarea to write content
+    input_textarea_dom.toggle_active = function () {
+        input_textarea_dom.prop("disabled", !input_textarea_dom.prop("disabled"));
+    }
+
+    input_textarea_dom.activate = function () {
+        console.log("ACTIVE TEXTAREA");
+        input_textarea_dom.prop("disabled", false);
+    }
+
+    input_textarea_dom.disable = function () {
+        console.log("DISABLE TEXTAREA");
+        input_textarea_dom.prop("disabled", true);
+    }
+
+    input_textarea_dom.is_active = function () {
+        return input_textarea_dom.prop("disabled");
+    }
+
+
+    $(document).ready(function () {
+
+        console.log("WE ARE READY TO GO!");
+
+        /* INIT */
+
+        send_data(
+            "{% url 'chat:api:thread-url' %}",
+            "POST",
+            {
+                "thread_id": THREAD_ID
+            },
+            function (response) {
+                if (response !== null)
+                    input_textarea_dom.activate();
+                    input_textarea_dom.focus();
+            }
+        )
+
+        scroll_chat_to_bottom();
+        popup_chat_actions_dom.hide();
+        input_textarea_dom.focus();
+
+        // load with API
+        fetch_old_messages();
+        fetch_thread_list();
+
+        /* HANDLERS */
+        
+        // This control all the outside elements click
+        $("body").on("click", function (event) {
+            let target = $(event.target);
+
+            if (popup_chat_action_active && !target.closest("#popup-chat-actions").length) {
+                event.stopImmediatePropagation();
+                console.log("CLICKED OUTSIDE!");
+
+                hide_chat_control_popup();
+            }
+        });
+
+        sidebar_button_dom.on('click', function (event) {
+            // Assign the event target to the variable 'target'
+            let target = event.currentTarget;
+
+            // Log the target element to the console
+            console.log("HAI PREMUTO IL MENU!", target);
+
+            sidebar_dom.toggleClass("collapse");
+        });
+
+        new_chat_dom.on('click', function (event) {
+            // Assign the event target to the variable 'target'
+            let target = event.currentTarget;
+
+            // Log the target element to the console
+            console.log("HAI PREMUTO IL NUOVA CHAT!", target);
+
+            // window.location.href = "{% url 'chat:api:thread-create' %}"
+            {% if create_thread_immediately %}
+            send_data(
+                "{% url 'chat:api:thread-create' %}",
+                "POST",
+                {},
+                reload_thread_page
+            )
+            {% else %}
+            popup_new_chat_dom.show();
+            {% endif %}
+        });
+
+        // This control the chat control menu
+        $("body").on("click", "div.chat-item-menu", function (event) {
+            // Assign the event target to the variable 'target'
+            let target = $(event.currentTarget);
+            event.stopImmediatePropagation();
+
+            let thread_item = target.closest("div.chat-history-item");
+            console.log("show popup", thread_item);
+            show_chat_control_popup(
+                target.get(0).getBoundingClientRect().left,
+                thread_item.get(0).getBoundingClientRect().bottom,
+                {
+                    "thread_id": get_thread_id(thread_item)
+                }  // pass the thread_id
+            );
+
+            // Log the target element to the console
+            console.log("HAI PREMUTO IL MENU DELLA CHAT!", target);
+        });
+
+        // This control if a chat control item is clicked
+        $("body").on("click", "div.ds-dropdown-menu-option", function(event) {
+            let target = $(event.currentTarget);
+            event.stopImmediatePropagation();
+            console.log("HAI PREMUTO UNA VOCE DEL MENU!", target, target.data("action"));
+
+            // TODO: Execute the action
+            let popup = target.closest("div#popup-chat-actions")
+            console.log("popup data, ", popup, get_data(popup, "thread_id"));
+            let thread_id = get_data(popup, "thread_id")
+            let action = target.data("action");
+            if (action == "rename") {
+                active_thread_rename(get_data(popup, "thread_id"));
+            } else if (action == "delete") {
+                send_delete_thread(thread_id);
+            }
+
+            hide_chat_control_popup();
+        });
+
+        // This scroll to the end of the chat, when the icon is clicked
+        scroll_down_icon_dom.on("click", function (event) {
+            console.log("SCROLL DOWN of ", chat_messages_dom.prop("scrollHeight"), "easeInOutSine");
+
+            // chat_bubble_dom.scrollTop(chat_messages_dom.prop("scrollHeight"));
+            scroll_chat_to_bottom();
+        });
+
+        chat_bubble_dom.on("scroll", function (event) {
+            let target = $(event.currentTarget);
+
+            // console.log(target.scrollTop(), (chat_heigth() - target.innerHeight()));
+            
+            // difference between the scroll and the chat height: 200px
+            if (target.scrollTop() >= (chat_heigth() - target.innerHeight()) * 0.9) {
+                scroll_down_icon_dom.hide();
+            } else {
+                scroll_down_icon_dom.show();
+            }
+        });
+
+        // Chat message action buttons
+        $("body").on("click", "div." + class_chat_message_action_button, function (event) {
+            let target = $(event.currentTarget);
+            let action = target.data("action");
+            let text = target.closest("div.code-content").text()
+
+            // If requested copy of an assistant message
+            if (text === "")
+                text = target.closest("div.message-actions").find("div.ds-markdown").text();
+
+            console.log("HAI PREMUTO TASTO AZIONE MESSAGGI", action, text);
+
+            if (action == "copy") {
+                create_error_banner("Text copied successfully.");
+                navigator.clipboard.writeText(text).then(function () {
+                    console.log('Async: Copying to clipboard was successful!');
+                }, function (err) {
+                    console.error('Async: Could not copy text: ', err);
+                });
+            }
+            // TODO: add others
+            else {
+                create_feature_not_allowed_banner(action, true);
+            }
+        });
+
+        input_action_buttons_dom.on("click", function (event) {
+            let target = $(event.currentTarget);
+            let action = target.data("action");
+
+            console.log("HAI PREMUTO UN PULSANTE DELL'INPUT!", action);
+
+
+            // TOODO: Execute the action
+
+            if (action == "send-msg" && send_message_dom.is_active()) {
+                send_message();
+            }
+            // TODO: add others
+            else {
+                create_feature_not_allowed_banner(action);
+                return;
+            }
+
+            target.toggleClass(class_action_button_active);
+        });
+
+        input_textarea_dom.on("input", function (event) {
+            let text = input_textarea_dom.val();
+            // console.log("INPUT TEXTAREA!", text);
+            
+            if (text.length > 0) {
+                send_message_dom.activate();
+            } else {
+                send_message_dom.disable();
+            }
+
+        });
+
+        // Redirect: Change chat when press chat button
+        chat_list_dom.on("click", "div.chat-history-item", function (event) {
+            let target = $(event.currentTarget);
+            
+            if ($(event.target).closest('.chat-item-menu').length)  // Press menu item
+                return;
+
+            let thread_id = get_data(target, "thread_id");
+
+            if (thread_id == null) return;
+
+            if (thread_id != THREAD_ID)
+                change_thread(thread_id);
+        });
+
+        // Send message on enter
+        input_textarea_dom.on("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+
+                send_message();
+            }
+        });
+    
+        // Close the notification: X pressed
+        notification_container_dom.on("click", "div.ds-toast__close", function (event) {
+            let target = $(event.currentTarget).closest("div.ds-toast-animation");
+            
+            let timer = target.data("timer");
+            console.log("timer", timer);
+
+            if (timer) clearTimeout(timer);
+
+            target.remove();
+        });
+
+        // Logo superlarn sidebar in alto
+        sp_logo_svg.on("click", function (event) {
+            window.location.href = "{% url 'chat:home' %}";
+        })
+
+        new_chat_form_dom.on("submit", function (event) {
+            event.preventDefault();
+            let data = serializeFormToJson(new_chat_form_dom);
+
+            console.log("new chat form data", data);
+            send_data(
+                "{% url 'chat:api:thread-create' %}",
+                "POST",
+                data,
+                reload_thread_page
+            )
+        });
+        
+        // Pulsante creazione chat
+        popup_new_chat_dom.on("click", "div.ds-icon-button", function (event) {
+            console.log("hide chat form")
+
+            {% if not force_create_thread %}
+            new_chat_form_dom.trigger("reset");
+            popup_new_chat_dom.hide();
+            {% endif %}
+        });
+        
+        // Insert prompts
+        prompt_examples_dom.on("click", function (event) {
+            let target = $(event.target);
+
+            input_textarea_dom.val(target.text().trim());
+            send_message();
+        });
+    
+        // Show/hide think content of asst messages
+        chat_bubble_dom.on("click", "div.think-wrapper button.collapse-think", function (event) {
+            let target = $(event.currentTarget);
+            target.closest("div.think-wrapper").find("div.think-container").toggleClass("show");
+            target.attr("aria-expanded") == "true" ? target.attr("aria-expanded", "false") : target.attr("aria-expanded", "true");
+        });
+    
+        chat_bubble_dom.on("click", "button." + class_button_toggle_annotations, function (event) {
+            let target = $(event.currentTarget);
+            let annot_container = target.closest("div.container").find("div.annotations-container");
+            let timeout = 500;  // ms
+
+            // Change the arrow
+            target.find("i").toggleClass("fa-chevron-right").toggleClass("fa-chevron-down");
+
+            if (annot_container.hasClass("hidden")) {
+                annot_container.removeClass("hidden");
+                annot_container.fadeIn(timeout);
+            } else {
+                setTimeout(() => {
+                    annot_container.addClass("hidden");
+                }, timeout);
+
+                annot_container.fadeOut(timeout);
+            }
+        });
     });
+
+    /* FUNCTIONS */
+
+    function serializeFormToJson(form) {
+        const formDataArray = form.serializeArray(); // Serialize form into an array of objects
+        const formObject = {};
+
+        // Convert the array to a JSON object
+        $.each(formDataArray, function (_, field) {
+            // Check if the field should be treated as an integer (e.g., number input or numeric values)
+            if (!isNaN(field.value) && field.value.trim() !== '') {
+                formObject[field.name] = parseInt(field.value, 10); // Convert to integer
+            } else if (field.value.trim() === '') {
+                formObject[field.name] = null;
+            }
+             else {
+                formObject[field.name] = field.value; // Keep the value as string
+            }
+
+            // Handle multiple inputs with the same name (e.g., checkboxes)
+            if (formObject[field.name] && Array.isArray(formObject[field.name])) {
+                formObject[field.name].push(field.value);
+            }
+        });
+
+        return formObject;
+    }
+
+    function get_data(item, key) {
+        return item.attr("data-" + key)
+    }
+
+    function add_data(item, data = {}) {
+        for (const [key, value] of Object.entries(data)) {
+            console.log("set", key, value)
+            item.attr("data-" + key, value);
+        }
+
+        // console.log("add data:", data, item.data(), item.attr("data-thread_id"), get_data(item, "thread_id"));
+    }
+
+    function remove_all_data(item) {
+        // TODO, idk don't work
+        console.log("remove all data from", item);
+        Object.keys(item.data()).forEach(function(key) {
+            // Remove the data-* attribute using the removeAttr method
+            item.removeAttr("data-" + key);
+            console.log("key", key);
+        });
+    }
+
+    function show_old_messages(response) {
+        let messages = response.messages;
+
+        messages.forEach(msg => {
+            if (msg.sender == "user") {
+                create_user_msg().populate(msg.text).set({"timestamp": msg.timestamp});
+            } else {
+                create_asst_msg().populate(msg.text).set({"timestamp": msg.timestamp}).add_multiple_annotations(msg.annotations);
+            }
+
+            scroll_chat_to_bottom();
+        });
+    }
+
+    function fetch_old_messages() {
+        send_data(
+            "{% url 'chat:api:message-list' thread_id=thread.chat_id %}",
+            "POST", {"limit": 0}, show_old_messages
+        );
+    }
+
+    function show_chat_control_popup(left, top, args = {}) {
+        console.log("SHOW POPUP!", left, top);
+
+        popup_chat_actions_dom.css({
+            left: left + "px",
+            top: top + "px"
+        });
+
+        popup_chat_actions_dom.show();
+        popup_chat_action_active = true;
+        
+        console.log("popup args", args)
+        add_data(popup_chat_actions_dom, args);
+
+        return popup_chat_actions_dom;
+    }
+
+    function hide_chat_control_popup() {
+        console.log("HIDE POPUP!");
+
+        popup_chat_actions_dom.hide();
+        popup_chat_action_active = false;
+
+        remove_all_data(popup_chat_actions_dom);
+    }
+
+    function scroll_chat_to_bottom() {
+        // console.log("SCROLL DOWN of ", chat_heigth(), "easeInOutSine");
+
+        chat_bubble_dom.stop().animate({
+                scrollTop: chat_heigth()
+            }, {
+                duration: 500,  // Animation duration in milliseconds
+                easing: 'easeInOutSine' // Smooth easing function: TODO select one 
+
+                /*
+
+                LIST OF EASING
+
+                ### **1. Built-in jQuery Easing**
+                | Easing Type | Description                                                                |
+                |-------------|----------------------------------------------------------------------------|
+                | `linear`    | Constant speed (no acceleration/deceleration).                             |
+                | `swing`     | Default easing: starts slow, speeds up, then slows down.                   |
+
+                ---
+
+                ### **2. jQuery UI Easing** *(requires jQuery UI)*  
+                | Easing Type          | Description                                                                |
+                |----------------------|----------------------------------------------------------------------------|
+                | `easeInQuad`         | Starts slow, accelerates quadratically.                                    |
+                | `easeOutQuad`        | Starts fast, decelerates quadratically.                                    |
+                | `easeInOutQuad`      | Slow start/end, fast middle (quadratic curve).                             |
+                | `easeInCubic`        | Stronger acceleration (cubic curve).                                       |
+                | `easeOutCubic`       | Stronger deceleration.                                                     |
+                | `easeInOutCubic`     | Smooth acceleration/deceleration (cubic curve).                            |
+                | `easeInQuart`        | Sharper acceleration (quartic curve).                                      |
+                | `easeOutQuart`       | Sharper deceleration.                                                      |
+                | `easeInOutQuart`     | Symmetric sharp acceleration/deceleration.                                 |
+                | `easeInQuint`        | Very sharp acceleration (quintic curve).                                   |
+                | `easeOutQuint`       | Very sharp deceleration.                                                   |
+                | `easeInOutQuint`     | Balanced sharp acceleration/deceleration.                                  |
+                | `easeInExpo`         | Extreme acceleration (exponential curve).                                  |
+                | `easeOutExpo`        | Extreme deceleration.                                                      |
+                | `easeInOutExpo`      | Extreme start/end, very fast middle.                                       |
+                | `easeInSine`         | Smooth acceleration (sinusoidal curve).                                    |
+                | `easeOutSine`        | Smooth deceleration.                                                       |
+                | `easeInOutSine`      | Smooth symmetrical curve.                                                  |
+                | `easeInCirc`         | Circular motion-based acceleration.                                        |
+                | `easeOutCirc`        | Circular motion-based deceleration.                                        |
+                | `easeInOutCirc`      | Circular motion acceleration/deceleration.                                 |
+                | `easeInElastic`      | Overshoots with an elastic "snap" effect at the start.                     |
+                | `easeOutElastic`     | Overshoots with an elastic "snap" effect at the end.                       |
+                | `easeInOutElastic`   | Elastic effect at both start and end.                                      |
+                | `easeInBack`         | Slight overshoot at the start.                                             |
+                | `easeOutBack`        | Slight overshoot at the end.                                               |
+                | `easeInOutBack`      | Overshoots at both start and end.                                          |
+                | `easeInBounce`       | Bounce effect at the start.                                                |
+                | `easeOutBounce`      | Bounce effect at the end.                                                  |
+                | `easeInOutBounce`    | Bounce effect at both start and end.                                       |
+
+                */
+            });
+        
+    }
+
+    function chat_heigth() {
+        return chat_messages_dom.prop("scrollHeight");
+    }
+
+    function send_data(url, method="POST", data = {}, callback = null, csrf_token = true) {
+        // Set up headers
+        let headers = {};
+        if (csrf_token) {
+            headers["X-CSRFToken"] = CSRF_TOKEN; // Add CSRF token to headers if required
+        }
+
+        // Send the AJAX request
+        $.ajax({
+            url: url,
+            type: method,
+            data: JSON.stringify(data),
+            headers: headers,
+            contentType: "application/json",
+            dataType: "json",
+            success: function (response) {
+                
+                console.log(response);
+                if (callback && typeof callback === "function") {
+                    callback(response);
+                }
+            },
+            error: function (xhr, status, error) {
+                // Log the error
+                console.error("ERROR: ", error);
+                console.error("Status: ", status);
+                console.error("Response: ", xhr.responseText);
+            }
+        });
+    }
+
+    function create_msg(user=false) {
+        let message = user ? HTML_USER_MESSAGE.clone(true) : HTML_ASST_MESSAGE.clone(true);
+        message.removeAttr("id");
+        message.testo = "";
+        message.show();
+        message.appendTo(chat_messages_dom);
+
+        message.populate = function (text) {
+            user ? populate_user_message(message, text) : populate_asst_message(message, text);
+
+            return message;
+        }
+
+        message.set = function (data) {
+            add_data(message, data);
+            return message;
+        }
+
+        return message;
+    }
+
+    function create_user_msg() {
+        return create_msg(true);
+    }
+
+    function create_asst_msg() {
+        let msg = create_msg(false);
+
+        // [text, Object{number, name, link}]
+        msg.annotations = {};
+        msg.last_annotations_number = 0;
+
+        msg.add_multiple_annotations = function (annots) {
+            console.log("add multiple annotations", annots);
+            annots.forEach(annot => {
+                if (typeof annot == "object" && annot !== null)
+                    this.add_annotation(annot.file_id, annot.filename, annot.link, annot.preview, annot.score);
+                if (Array.isArray(annot))
+                    this.add_annotation(annot[0], annot[1], annot[2], annot[3], annot[4]);
+            });
+        }
+
+        msg.add_annotation = function (file_id, name, link, preview, score) {
+            // Show the annotations wrapper of the message
+            this.find("div.annotations-wrapper").show();
+
+            let annot_number = this.last_annotations_number;
+
+            if (this.annotations[file_id] !== undefined) {
+                annot_number = this.annotations[file_id].number;
+            }
+
+            if (this.annotations[file_id] === undefined) {
+                if (link) {
+                    this.last_annotations_number++;
+
+                    let new_annot = {};
+                    new_annot.link = link;
+                    new_annot.number = this.last_annotations_number;
+                    new_annot.name = name;
+                    new_annot.preview = preview;
+                    new_annot.score = score;
+
+                    this.annotations[file_id] = new_annot;
+                }
+            }
+
+            if (annot_number !== this.last_annotations_number && link)
+                this.update_annot_html(file_id);
+
+            return this;
+        }
+
+        msg.update_annot_html = function(new_annot) {
+            let annot = this.annotations[new_annot];
+
+            if (annot === undefined) return;
+
+            let annot_html = HTML_ANNOT_ELEMENT.clone(true);
+            annot_html.removeAttr("id");
+
+            annot_html.find("span.annotation-number").text(annot.number);
+            annot_html.find("div.annotation-file > a").text(annot.name).attr("href", annot.link);
+
+            if (annot.link === "") annot_html.find("div.annotation-file > a").removeClass("text-primary").addClass("text-muted disabled");
+            else annot_html.find("span.annotation-number").removeClass("bg-secondary").addClass("bg-primary");
+
+            annot_html.find("span.annotation-score").text(annot.score);
+
+            annot_html.find("a.annotation-link").attr("href", annot.preview);
+
+            annot_html.show();
+            this.find("div.annotations-container").append(annot_html);
+
+            return this;
+        }
+
+        return msg;
+    }
+
+    function populate_user_message(msg, text) {
+        msg.find("div.code-content").text(text);
+        // message.find("div.message-time").text(data.time);
+        return msg;
+    }
+
+    function convertToHTML(text) {
+        return marked.parse(text);
+    }
+
+    function parse_asst_text(text) {
+        if (text.startsWith("<think>")) {
+            text = text.substring(7);
+            let final_think_index = text.indexOf("</think>");
+
+            if (final_think_index == -1) {
+                return [text, ""];
+            }
+            else {
+                return [text, text.substring(final_think_index + 8)];
+            }
+        }
+        
+        return ["", text];
+    }
+
+    function populate_asst_message(msg, text) {
+        msg.testo += text;
+        
+        let parsed_text = parse_asst_text(msg.testo);
+
+        if (parsed_text[0].length != 0) {
+            msg.find("div.think-wrapper").show();
+        }
+
+        msg.find("div.think-content").text(parsed_text[0]);
+        msg.find("div.ds-markdown").html(convertToHTML(parsed_text[1]));
+    }
+    
+    function add_thread_libraries(thread, libraries) {
+
+        let chat_libs = thread.find("div.chat-libraries");
+        
+        chat_libs.show();
+
+        let chat_libs_text = chat_libs.children().first();
+        if (libraries.length === 0) {
+            chat_libs_text.removeClass("text-primary").addClass("text-secondary");
+            chat_libs_text.text("No library used");
+            return;
+        };
+
+        libraries.forEach(function (lib) {
+            let badge = chat_libs.find("#proto-chat-libraries").clone(true);
+
+            badge.removeAttr("id");
+            badge.show();
+
+            badge.text(lib);
+            chat_libs.append(badge);
+        });
+    }
+
+    function add_thread_info(thread_id) {
+        let chat_item = find_thread_item(thread_id);
+
+        if (chat_item.length == 0) return;
+        chat_item = chat_item.first();
+
+        send_data(
+            "{% url 'chat:api:thread-info' thread_id=0 %}".replace("0", thread_id),
+            "GET",
+            {},
+            function (response) {
+                add_thread_libraries(chat_item, response.libraries);
+            }
+        )
+    }
+
+    function create_chat_item() {
+        let item = HTML_CHAT_ITEM.clone(true);
+        item.removeAttr("id");
+
+        item.populate = function (name, thread_id) {
+            item.find("div.chat-title-text").text(name);
+            item.attr("data-thread_id", thread_id);
+
+            if (thread_id == THREAD_ID) {
+                item.addClass(class_chat_box_active);
+            }
+
+            add_thread_info(thread_id);
+
+            item.show();
+        }
+
+        // Seleziono l'utenti history date group e glielo appendo
+        let last_chat_group = chat_list_dom.find("div." + class_chat_history_date_group + ":last");
+        let last_spacer = last_chat_group.find("div.date-group-spacer");
+        
+        last_spacer.before(item);
+        
+        // console.log("all:", last_chat_group, last_spacer);
+        return item;
+    }
+
+    function create_chat_group() {
+        let group = HTML_DATE_GROUP.clone(true);
+        group.removeAttr("id");
+
+        group.populate = function (date) {
+            group.find("div.date-header").text(date);
+            group.show();
+        }
+
+        group.appendTo(
+            chat_list_dom
+        )
+
+        return group
+    }
+
+    function show_new_chat_items(response) {
+        console.log("show new chat items", response);
+        response.forEach(function(thread) {
+
+            // Non esiste nessun group date, oppure il thread ne ha uno diverso
+            if (actual_chat_group_date_value === null || actual_chat_group_date_value != thread.date)
+            {
+                create_chat_group().populate(thread.date);
+                actual_chat_group_date_value = thread.date;
+            }
+                
+            
+            create_chat_item().populate(thread.title, thread.thread_id);
+        });
+    }
+
+    function fetch_thread_list() {
+        send_data(
+            "{% url 'chat:api:thread-list' %}",
+            "POST",
+            {
+                "start": actual_chat_item_count,
+                "limit": 20
+            },
+            show_new_chat_items
+        )
+
+        actual_chat_item_count += 20
+    }
+
+    function find_thread_item(thread_id) {
+        console.log("find", thread_id, chat_list_dom, chat_list_dom.find('div.chat-history-item'))
+        return chat_list_dom.find(`div.chat-history-item[data-thread_id=${thread_id}]`);
+    }
+
+    function get_thread_name(thread_item) {
+        return thread_item.find("div.chat-title-text").text();
+    }
+
+    function get_thread_id(thread_item) {
+        console.log("get thread id", thread_item);
+        return get_data(thread_item, "thread_id");
+    }
+
+    function reload_thread_page(response = null) {
+        console.log("realod", response);
+
+        
+        console.log("{% url 'chat:create' %}");
+        if (response === null)
+            window.location.href = "{% url 'chat:create' %}"
+
+        if (response.url !== null)
+            window.location.href = response.url
+        else
+            window.location.href = "{% url 'chat:create' %}"
+            
+    }
+
+    function change_thread(thread_id) {
+
+        send_data(
+            "{% url 'chat:api:thread-url' %}",
+            "POST",
+            {
+                "thread_id": thread_id  // new thread idf
+            },
+            reload_thread_page
+
+        )
+    }
+
+    // Controllo thread
+
+    function thread_delete_reload(thread_id) {
+        if (THREAD_ID === thread_id) {
+            reload_thread_page()
+        }
+        else  // Delete the chat element
+        {
+            let chat_item = find_thread_item(thread_id);
+            let group_date = chat_item.closest("div.history-date-group");
+
+            if (group_date.children().length == 3) {
+                group_date.remove();
+            }
+            else
+                chat_item.remove();
+        }
+    }
+
+    function send_delete_thread(thread_id) {
+        send_data(
+            "{% url 'chat:api:thread-delete' thread_id=0 %}".replace("0", thread_id),
+            "DELETE",
+            {
+            },
+            function (response) {
+                thread_delete_reload(thread_id)
+            }
+        )
+    }
+
+    function change_thread_name(thread_id, new_name) {
+        let chat_item = find_thread_item(thread_id);
+        chat_item.find("div.chat-title-text").text(new_name);
+        chat_item.data("thread_id", new_name);
+    }
+
+    function send_rename_thread(thread_id, new_name) {
+        send_data(
+            "{% url 'chat:api:thread-rename' thread_id=0 %}".replace("0", thread_id),
+            "POST",
+            {
+                "name": new_name
+            }, function (response) {
+                change_thread_name(thread_id, new_name);  // Viene richiamata solo se resituisce un 200
+            }
+        )
+    }
+
+    function active_thread_rename(thread_id) {
+        let thread_item = find_thread_item(thread_id);
+        let thread_name = get_thread_name(thread_item);
+
+        console.log("thread", thread_item);
+
+        let rename_item = HTML_CHANGE_NAME.clone(true);
+        rename_item.removeAttr("id");
+
+        rename_item.find("input").val(thread_name);
+        rename_item.attr("data-thread_id", thread_id);
+
+        thread_item.before(rename_item);
+        thread_item.hide();
+        rename_item.show();
+
+        rename_item.find("input").focus();
+
+        console.log("rename", rename_item);
+        rename_item.find("input").on("blur", function (event) {
+            console.log("blur")
+            let new_name = rename_item.find("input").val();
+
+            if (new_name != thread_name && new_name.length > 0) {
+                send_rename_thread(thread_id, new_name);
+            }
+
+            rename_item.remove();
+            thread_item.show();
+        })
+    }
+
+    // Error banner
+    function erase_notifications() {
+        notification_container_dom.empty();
+    }
+
+    function create_error_banner(text, html=false) {
+        let banner = HTML_ERROR_BANNER.clone(true);
+        banner.removeAttr("id");
+
+        if (html) banner.find("div.ds-toast__content").html(text);
+        else banner.find("div.ds-toast__content").text(text);
+
+        banner.appendTo(notification_container_dom);
+        banner.show();
+
+        timer_for_banner(banner);
+    }
+
+    function timer_for_banner(item) {
+        item.data(
+            "timer",
+            setTimeout(() => { item.remove(); }, MESSAGE_LIFETIME)
+        );
+    }
+
+    function create_feature_not_allowed_banner(action) {
+        if (action === null) return;
+        create_error_banner(`The feature <b>${action}</b> is not allowed yet. The next version will address this!`, true);
+    }
+
+    // Create a new chat Popup
+
+    function create_page_popup() {
+        let popup = HTML_PAGE_POPUP.clone(true);
+        popup.removeAttr("id");
+
+        popup.appendTo("body");
+        popup.show();
+
+        popup.populate = function (name) {
+            popup.find("div.ds-modal-content__title").text(name);
+        }
+
+        return popup;
+    }
+
+    function create_segmented_menu(popup, active_index=0, ...args) {
+        let container = HTML_SEGMENTED_CONTAINER.clone(true);
+        container.removeAttr("id");
+
+        container.appendTo(popup.find("div.elements"));
+        
+        let proto_button = container.find("div.ds-segmented-button");
+
+        args.forEach((item, index) => {
+            let button = proto_button.clone(true)
+            button.removeAttr("id");
+
+            button.text(item);
+            button.appendTo(container);
+
+            if (index === active_index) {
+                button.addClass("ds-segmented-button--selected");
+            }
+
+            // Event listener for change active when pressed
+            button.on("click", function (event) {
+                container.find("div.ds-segmented-button").removeClass("ds-segmented-button--selected");
+                button.addClass("ds-segmented-button--selected");
+            });
+        });
+
+        return container;
+    }
+
+    function create_dropdown_menu(popup, ...args) {
+        let container = HTML_DROPDOWN_MENU.clone(true);
+        container.removeAttr("id");
+
+        container.appendTo(popup.find("div.elements"));
+
+        let proto_option = container.find("div.ds-native-select");
+
+        args.forEach((item) => {
+            // let option = proto_option.clone(true);
+            // option.removeAttr("id");
+
+            // option.find("div.ds-dropdown-menu-option__label").text(item);
+            // option.appendTo(container);
+
+            // TODO: This is not very easy to do, so not in this issue!
+        });
+
+        return container;
+    }
+
+    // Loader
+    function create_message_loader(message=null) {
+        console.log("LOADER");
+        let loader = HTML_LOADER.clone(true);
+        loader.removeAttr("id");
+        loader.show();
+
+        // loader.appendTo(chat_messages_dom);
+        if (message === null)
+            message = chat_messages_dom.find("div." + class_assistant_chat_message + ":last");
+
+        message.prepend(loader);
+
+        loader.addClass("spin");
+
+        return loader;
+    }
+
+
+    /* STREAM */
+
+    function send_message(input=null, from_user_message=null, save_user_message=true, save_assistant_message=true) {
+        /*
+            PARAMS
+
+            input: string || null, default: null
+             if null use the textarea (default) value
+             if not null, specify the message to send
+
+            from_user_message: user_message_dom || null, default: null
+             if not null, specify a spefic (user) message to user as input
+
+            save_user_message: boolean, default: true
+             if true, specify the server to save the user message
+
+            save_assistant_message: boolean, default: true
+             if true, specify the server to sve the assistant message
+        */
+
+        console.log("Form submission started");
+
+        let user_text = (input === null) ? input_textarea_dom.val(): input;
+
+        let user_msg = undefined;
+
+        if (from_user_message !== null)
+        {
+            user_text = from_user_message.text();
+            user_msg = from_user_message;   
+        } else {
+            user_msg = create_user_msg();
+            user_msg.populate(user_text);
+        }
+
+        user_text = user_text.trim();
+
+        if (chat_messages_dom.length === 1) {
+            chat_header_name_text.text(user_text);
+            find_thread_item(THREAD_ID).find("div.chat-title-text").text(user_text);
+        }
+            
+
+        last_user_text = user_text;
+
+        let asst_msg = create_asst_msg();
+        asst_msg.find("div.think-container").addClass("collapse show");
+
+        let loader = create_message_loader(asst_msg);
+        let exist_loader = true;
+
+        let wait_response = setTimeout(() => {
+            source.close();
+            endLoadingState();
+
+            create_error_banner("Server error, please try again...");
+            
+            if (exist_loader) loader.remove();
+            asst_msg.remove();
+            user_msg.remove();
+            
+        }, 10 * 1000);
+
+        startLoadingState();
+
+        console.log("Sending message streaming request for:", user_text);
+        const source = new SSE("{% url 'chat:api:thread-stream' thread.chat_id %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': CSRF_TOKEN,
+            },
+            // payload: {
+            //     "message": user_text
+            // },
+            payload: JSON.stringify({
+                "message": user_text,
+                // "save_user_message": save_user_message,
+                // "save_assistant_message": save_assistant_message
+            })
+        });
+
+        source.addEventListener('message', function (e) {
+            const payload = JSON.parse(e.data);
+
+            if (payload.data !== undefined)
+                handle_chat_message(payload.data);
+
+            if (payload.attributes !== undefined)
+                handle_message_attr(payload.attributes);
+
+            if (payload.annotations !== undefined)
+                handle_message_annotations(payload.annotations);
+        });
+
+        source.addEventListener('RunCreated', function (e) {
+            for (const errors of document.querySelectorAll('.errorlist')) {
+                errors.remove();
+            }
+
+            const payload = JSON.parse(e.data);
+            // document.getElementById('id_thread_id').value = payload.data.thread_id;
+        });
+
+        source.addEventListener('RunCompleted', function (e) {
+            for (const errors of document.querySelectorAll('.errorlist')) {
+                errors.remove();
+            }
+        });
+
+        source.addEventListener('FormInvalid', function (e) {
+            userMessage.remove();
+            assistantMessage.remove();
+            const payload = JSON.parse(e.data);
+            document.getElementById('form-container').innerHTML = payload.form;
+            endLoadingState();
+        });
+
+        source.addEventListener('Attributes', function (e) {
+            e.source.close();
+            endLoadingState();
+        });
+
+
+        source.addEventListener('Done', function (e) {
+            e.source.close();
+            endLoadingState();
+        });
+
+        source.addEventListener('error', function(e) {
+            e.preventDefault();  // doesn't work
+
+            const xhr = e.source.xhr;
+            if (xhr && xhr.status === 500) {
+                console.error('Errore 500: problema interno del server.');
+
+                endLoadingState();
+                create_error_banner("Server error, please try again...");
+            }
+
+        });
+
+        source.stream();
+
+        // Message handlers
+        function handle_chat_message(text) {
+                // Tolgo il loader
+                if (exist_loader) {
+                    loader.remove();
+                    exist_loader = false;
+                    clearTimeout(wait_response);
+                }
+
+                asst_msg.populate(text);
+
+                scroll_chat_to_bottom();
+        }
+
+        function handle_message_attr(payload) {
+            let attrs = JSON.parse(payload);
+            asst_msg.set(attrs);
+        }
+
+        function handle_message_annotations(payload) {
+            console.log("ANNOTATIONS", payload);
+            asst_msg.add_annotation(
+                payload.file_id, payload.filename, payload.link, payload.preview, payload.score
+            );
+        }
+    }
+
+    function startLoadingState() {
+        send_message_dom.disable();
+        input_textarea_dom.val("");
+        input_textarea_dom.disable();
+    }
+
+    function endLoadingState() {   
+        input_textarea_dom.activate();     
+        input_textarea_dom.val("");
+        input_textarea_dom.focus();
+        // $("#chat-form-help-text").text("");
+
+        erase_notifications();
+
+        // let chats_left = Number($("#chats-left").text());
+        // if (chats_left > 0) $("#chats-left").text(chats_left -1);
+
+        scroll_chat_to_bottom();
+        send_message_dom.disable();
+    }
 </script>
 
-    {% include 'chat/_streaming/js_sse.js' %}
-
-    {% include 'chat/_streaming/js_audio.js' %}
-
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 {% endblock %}

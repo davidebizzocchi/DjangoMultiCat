@@ -1,0 +1,34 @@
+{% extends "base/base.html" %}
+{% block title %}Delete {{ agent.name }}{% endblock %}
+
+{% block contenuto %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Confirm deletion
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">Are you sure you want to delete the agent "{{ agent.name }}"?</p>
+                    <p class="text-muted small">This action cannot be undone.</p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'agent:list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

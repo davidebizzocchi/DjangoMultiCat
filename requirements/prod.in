@@ -1,0 +1,5 @@
+# requirements/prod.in
+
+-r base.in
+
+gunicorn[gevent]

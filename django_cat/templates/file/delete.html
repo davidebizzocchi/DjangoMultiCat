@@ -1,0 +1,102 @@
+<!-- file_confirm_delete.html -->
+
+{% extends 'base/base.html' %}
+
+{% block title %}Delete File{% endblock %}
+
+{% block head %}
+<style>
+.delete-card {
+    max-width: 500px;
+    margin: 2rem auto;
+    transition: transform 0.3s ease;
+}
+
+.delete-card:hover {
+    transform: translateY(-5px);
+}
+
+.warning-icon {
+    font-size: 3rem;
+    color: var(--bs-danger);
+    margin-bottom: 1.5rem;
+}
+
+.file-name {
+    font-weight: 500;
+    color: var(--bs-danger);
+}
+
+.warning-text {
+    color: var(--bs-gray-600);
+    font-size: 0.9rem;
+    margin: 1rem 0;
+}
+
+.delete-notice {
+    background-color: rgba(var(--bs-danger-rgb), 0.1);
+    border-left: 4px solid var(--bs-danger);
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0.25rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+.btn-cancel {
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background-color: var(--bs-gray-200);
+}
+
+.btn-delete {
+    background-color: var(--bs-danger);
+    border-color: var(--bs-danger);
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    background-color: var(--bs-dark);
+    transform: translateY(-1px);
+    color: var(--bs-danger) !important;
+}
+</style>
+{% endblock %}
+
+{% block contenuto %}
+<div class="container">
+    <div class="card delete-card shadow-sm">
+        <div class="card-body text-center">
+            <i class="fas fa-exclamation-triangle warning-icon"></i>
+            <h2 class="card-title h4 mb-4">Delete File</h2>
+            
+            <p class="mb-2">Are you sure you want to delete:</p>
+            <p class="file-name mb-4">"{{ file.title }}"</p>
+            
+            <div class="delete-notice">
+                <i class="fas fa-info-circle me-2"></i>
+                <span>Libraries containing this file will not be deleted</span>
+            </div>
+
+            <div class="action-buttons">
+                <a href="{% url 'file:list' %}" class="btn btn-cancel">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-delete text-white">
+                        <i class="fas fa-trash-alt me-2"></i>Delete File
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

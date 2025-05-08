@@ -1,0 +1,25 @@
+{% extends "base/base.html" %}
+{% block title %}My Libraries{% endblock %}
+
+{% block contenuto %}
+<h2>Your libraries</h2>
+    
+<form method="get" action="{% url 'library:new' %}" class="mb-4">
+    <button type="submit" class="btn btn-success">New Library</button>
+</form>
+
+<div class="list-group">
+    {% for library in libraries %}
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+        <a href="{% url 'library:library' library.library_id %}" class="flex-grow-1">
+            {{ library.name }}
+        </a>
+        <a href="{% url 'library:delete' library.library_id %}" class="btn btn-danger btn-sm">
+            Delete
+        </a>
+    </div>
+    {% empty %}
+    <p>You haven't created any libraries yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; }
+        .header { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .content { margin: 20px 0; }
+        .detail { margin: 10px 0; }
+        .label { font-weight: bold; color: #7f8c8d; width: 120px; display: inline-block; }
+        .button { 
+            display: inline-block; padding: 10px 15px; 
+            background-color: #3498db; color: white; 
+            text-decoration: none; border-radius: 4px; margin-top: 10px;
+        }
+        .footer { font-size: 0.8em; color: #95a5a6; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>{{ title }}</h2>
+            <p>Environment: {{ environment }}</p>
+        </div>
+        
+        <div class="content">
+            <div class="detail"><span class="label">Username:</span> {{ username }}</div>
+            <div class="detail"><span class="label">User ID:</span> {{ user_id }}</div>
+            <div class="detail"><span class="label">Email:</span> {{ email }}</div>
+            
+            <h3 style="color: #e74c3c; margin-top: 25px;">Action Required</h3>
+            <a href="{{ approve_url }}" class="button">Approve User</a>
+            <br>
+            <a href="{{ admin_url }}" style="margin-top: 5px; display: inline-block;">View in Admin Panel</a>
+        </div>
+        
+        <div class="footer">
+            Django Cat
+        </div>
+    </div>
+</body>
+</html>

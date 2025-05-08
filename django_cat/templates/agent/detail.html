@@ -1,0 +1,109 @@
+{% extends "base/base.html" %}
+{% block title %}{{ agent.name }}{% endblock %}
+
+{% block contenuto %}
+<div class="container">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-robot"></i> {{ agent.name }}
+                {% if agent.is_default %}
+                    <span class="badge bg-primary">Default</span>
+                {% endif %}
+            </h3>
+            <div class="btn-group">
+                {% if not agent.is_default %}
+                <a href="{% url 'agent:update' agent.agent_id %}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{% url 'agent:delete' agent.agent_id %}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Instructions</h5>
+            <p class="card-text">{{ agent.instructions|linebreaks }}</p>
+
+            <h5 class="card-title mt-4">Capabilities</h5>
+            <div>
+                {% if agent.capabilities %}
+                    {% for capability in agent.capabilities %}
+                    <span class="badge bg-secondary me-2">{{ capability }}</span>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No capabilities configured</p>
+                {% endif %}
+            </div>
+
+            <!-- LLM Information Section -->
+            <h5 class="card-title mt-4">Language Model (LLM)</h5>
+            {% if agent.llm %}
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Name:</strong> {{ agent.llm.name }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Class:</strong> {{ agent.llm.llm_class }}</p>
+                            </div>
+                        </div>
+                        <hr>
+                        <h6>Configuration:</h6>
+                        <pre class="mb-0"><code>{{ agent.llm.config|pprint }}</code></pre>
+                    </div>
+                </div>
+            {% elif agent.llm_name %} {# Fallback for legacy llm_name, llm_class, llm_config #}
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <p class="text-warning"><i class="fas fa-exclamation-triangle"></i> This agent is using a legacy LLM configuration.</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Name:</strong> 
+                                    {{ agent.llm_name }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Class:</strong> 
+                                    {{ agent.llm_class }}
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                        <h6>Configuration:</h6>
+                        <pre class="mb-0"><code>{{ agent.llm_config|pprint }}</code></pre>
+                    </div>
+                </div>
+            {% else %}
+                <p class="text-muted">No LLM associated with this agent.</p>
+            {% endif %}
+
+            <h5 class="card-title mt-4">Memory Search</h5>
+            <p class="card-text">
+                {% if agent.enable_vector_search %}
+                    <span class="badge bg-success">Enabled</span>
+                {% else %}
+                    <span class="badge bg-danger">Disabled</span>
+                {% endif %}
+            </p>
+
+            <h5 class="card-title mt-4">Metadata</h5>
+            <pre class="bg-light p-3 rounded"><code>{{ agent.metadata|pprint }}</code></pre>
+
+            <div class="text-muted mt-3">
+                <small>
+                    <i class="fas fa-clock"></i> Created on: {{ agent.created_at|date:"d/m/Y H:i" }}<br>
+                    <i class="fas fa-history"></i> Last update: {{ agent.updated_at|date:"d/m/Y H:i" }}
+                </small>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'agent:list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to list
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -12,3 +12,14 @@ gTTS
 markdown2
 beautifulsoup4
 sentry-sdk[django]
+pytesseract
+pdf2image
+Pillow
+tiktoken
+openai
+#docling
+
+django-allauth
+django-allauth[socialaccount]
+
+django-debug-toolbar

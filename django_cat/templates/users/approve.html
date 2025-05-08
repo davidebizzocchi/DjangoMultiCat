@@ -1,0 +1,72 @@
+{% extends 'base/base.html' %}
+
+{% block title %}
+    {% if user.is_approved %}
+        Revoke User Approval
+    {% else %}
+        Approve User
+    {% endif %}
+{% endblock %}
+
+{% block contenuto %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    {% if user.is_approved %}
+                        <h3>Revoke Access for {{ user.user.email }}</h3>
+                    {% else %}
+                        <h3>Approve User: {{ user.user.email }}</h3>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if user.avatar_url %}
+                        <div class="col-md-3 text-center mb-3">
+                            <img src="{{ user.avatar_url }}" alt="Profile Picture" class="img-fluid rounded-circle" style="max-width: 100px;">
+                        </div>
+                        <div class="col-md-9">
+                        {% else %}
+                        <div class="col-md-12">
+                        {% endif %}
+                            <p><strong>Email:</strong> {{ user.email }}</p>
+                            <p><strong>Cheshire Cat ID:</strong> {{ user.cheshire_id }}</p>
+                            {% if user.name %}<p><strong>Name:</strong> {{ user.name }}</p>{% endif %}
+                            <p><strong>Registration Date:</strong> {{ user.user.date_joined|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Last Login:</strong> {{ user.user.last_login|date:"d/m/Y H:i"|default:"Never" }}</p>
+                            <p><strong>Current Status:</strong> 
+                                {% if user.is_approved %}
+                                    <span class="badge bg-success">Approved</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <form method="post">
+                            {% csrf_token %}
+                            {% if user.is_approved %}
+                                <p class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> Warning: Revoking approval will restrict this user's access to the platform. Are you sure you want to continue?
+                                </p>
+                                <input type="hidden" name="action" value="revoke">
+                                <button type="submit" class="btn btn-warning">Revoke Approval</button>
+                            {% else %}
+                                <p class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> By approving this user, you will grant them full access to the platform.
+                                </p>
+                                <input type="hidden" name="action" value="approve">
+                                <button type="submit" class="btn btn-success">Approve User</button>
+                            {% endif %}
+                            <a href="{% url 'users:manage:list' %}" class="btn btn-secondary">Cancel</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

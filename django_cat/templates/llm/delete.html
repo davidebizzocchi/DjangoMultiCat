@@ -1,0 +1,52 @@
+{% extends "base/base.html" %}
+
+{% block title %}Delete Language Model{% endblock %}
+
+{% block contenuto %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-trash-alt"></i> Delete Language Model
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="alert alert-warning">
+                        Are you sure you want to delete the language model "<strong>{{ llm.name }}</strong>"?
+                        This action cannot be undone.
+                    </p>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Language Model Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-3">Name:</dt>
+                                <dd class="col-sm-9">{{ llm.name }}</dd>
+                                
+                                <dt class="col-sm-3">LLM Class:</dt>
+                                <dd class="col-sm-9">{{ llm.llm_class }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'llm:list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt"></i> Delete Permanently
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

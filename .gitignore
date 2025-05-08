@@ -1,8 +1,22 @@
 # Personal
+
+docker/prod/
+
+plugins/
+
+!plugins/multicat/
+!plugins/multicat/**
+
 .venv
 core
+docs
+config.json
+__DjangoMultiCat.code-workspace
 
 !requirements/*.txt
+
+!docs/releases.md
+!docs/release_template.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -128,7 +142,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/

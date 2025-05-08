@@ -1,0 +1,268 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Files Library{% endblock %}
+
+{% block head %}
+<style>
+.file-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-left: 4px solid transparent;
+}
+
+.file-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+}
+
+.file-card.configuring {
+    border-left-color: var(--bs-warning);
+}
+
+.file-card.processing {
+    border-left-color: var(--bs-info);
+}
+
+.file-card.uploading {
+    border-left-color: var(--bs-primary);
+}
+
+.file-card.ready {
+    border-left-color: var(--bs-success);
+}
+
+.progress {
+    background-color: rgba(0,0,0,.05);
+    height: 8px;
+    border-radius: 999px;
+}
+
+.progress-bar {
+    border-radius: 999px;
+}
+
+.file-size {
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+}
+
+.file-actions {
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.file-card:hover .file-actions {
+    opacity: 1;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.empty-state > i {
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: var(--bs-gray-600);
+    margin-bottom: 1.5rem;
+
+}
+</style>
+{% endblock %}
+
+{% block contenuto %}
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <h4 class="mb-0">
+                <i class="fas fa-file-alt me-2 text-primary"></i>File Library
+            </h4>
+            <a href="{% url 'file:upload' %}" class="btn btn-primary">
+                <i class="fas fa-cloud-upload-alt me-2"></i>Upload New File
+            </a>
+        </div>
+        
+        <div class="card-body p-0">
+            {% if files %}
+                <div class="list-group list-group-flush">
+                    {% for file in files %}
+                    <div class="list-group-item file-card p-3 {% if file.is_configuring %}configuring
+                         {% elif file.is_processing %}processing
+                         {% elif file.is_uploading %}uploading
+                         {% elif file.is_ready %}ready{% endif %}"
+                         id="file-{{ file.file_id }}" 
+                         data-file-id="{{ file.file_id }}" 
+                         data-status="{{ file.status }}">
+                        
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="mb-0">{{ file.title }}</h5>
+                                    
+                                    {% if file.is_configuring %}
+                                        <span class="badge bg-warning ms-2 status-badge">Configuring</span>
+                                    {% elif file.is_processing %}
+                                        <span class="badge bg-info ms-2 status-badge">Processing</span>
+                                    {% elif file.is_uploading %}
+                                        <span class="badge bg-primary ms-2 status-badge">Uploading</span>
+                                    {% elif file.is_ready %}
+                                        <span class="badge bg-success ms-2 status-badge">Ready</span>
+                                    {% endif %}
+
+                                    <span class="badge bg-success ms-2 ingested-badge {% if not file.ingested %}d-none{% else %}d-inline{% endif %}">
+                                        <i class="fas fa-check-circle me-1"></i>Ingested
+                                    </span>
+                                </div>
+
+                                {% if file.config_progress < 100 %}
+                                <div class="progress mb-2">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" 
+                                         style="width: {{ file.config_progress }}%"
+                                         aria-valuenow="{{ file.config_progress }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <div class="file-size mb-3">
+                                    <i class="fas fa-hdd me-1"></i>{{ file.file.size|filesizeformat }}
+                                </div>
+
+                                <div class="file-actions">
+                                    <a href="{% url 'file:assoc' file.file_id %}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-folder-tree me-1"></i>Manage Libraries
+                                    </a>
+                                    <a href="{{ file.link }}" target="_blank" class="btn btn-outline-info btn-sm">
+                                        <i class="fas fa-external-link-alt me-1"></i>Preview
+                                    </a>
+                                    <a href="{% url 'file:delete' file.file_id %}" class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-trash-alt me-1"></i>Delete
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fs-2 text-primary fas fa-file-upload"></i>
+                    <p class="h5">No files uploaded yet</p>
+                    <p class="text-muted">Start by uploading your first file</p>
+                    <a href="{% url 'file:upload' %}" class="fs-2 btn btn-primary">
+                        <i class="fas fa-cloud-upload-alt me-2"></i>Upload File
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    console.group('File List Initialization');
+    const URLS = {
+        {% for file in files %}
+            '{{ file.file_id}}' : '{% url "file:api:config_status" file_id=file.file_id %}',
+        {% endfor %}
+    }
+    console.log('Available URLs:', URLS);
+
+const updateFileStatus = (fileId) => {
+    console.group(`Updating file status: ${fileId}`);
+    console.time(`Status update for ${fileId}`);
+
+    $.ajax({
+        url: URLS[fileId],
+        method: 'GET',
+        success: function(data) {
+            console.log('Status data received:', data);
+            const $fileElement = $(`#file-${fileId}`);
+            
+            if ($fileElement.length === 0) {
+                console.warn('File element not found in DOM');
+                return;
+            }
+            
+            // Update status badge
+            const $statusBadge = $fileElement.find('.status-badge');
+            if ($statusBadge.length) {
+                console.log('Updating status badge:', data.status);
+                $statusBadge.removeClass().addClass('badge ms-2 status-badge');
+                switch (data.status) {
+                    case 'pending_config':
+                        $statusBadge.addClass('bg-warning').text('Configuring');
+                        break;
+                    case 'pending_process':
+                        $statusBadge.addClass('bg-info').text('Post Processing');
+                        break;
+                    case 'pending_upload':
+                        $statusBadge.addClass('bg-primary').text('Uploading');
+                        break;
+                    case 'ready':
+                        $statusBadge.addClass('bg-success').text('Ready');
+                        break;
+                }
+            }
+
+            // Update progress bar
+            const $progressBar = $fileElement.find('.progress');
+            if ($progressBar.length) {
+                console.log('Updating progress:', data.progress);
+                if (data.status !== 'ready') {
+                    $progressBar.show();
+                    const $bar = $progressBar.find('.progress-bar');
+                    $bar.css('width', `${data.progress}%`)
+                        .attr('aria-valuenow', data.progress)
+                        .text(`${data.progress}%`);
+                } else {
+                    $progressBar.hide();
+                }
+            }
+
+            // Update ingested badge
+            const $ingestedBadge = $fileElement.find('.ingested-badge');
+            console.log('Ingestion status:', data.is_ingested);
+            if (data.is_ingested) {
+                $ingestedBadge.removeClass('d-none').addClass('d-inline');
+            } else {
+                $ingestedBadge.removeClass('d-inline').addClass('d-none');
+            }
+
+            if (data.status !== 'ready' || !data.is_ingested) {
+                console.log('Scheduling next update in 2s');
+                setTimeout(() => updateFileStatus(fileId), 2000);
+            } else {
+                console.log('File processing complete');
+                $("#progress-bar").hide();
+            }
+            
+            console.timeEnd(`Status update for ${fileId}`);
+        },
+        error: function(error) {
+            console.error('Ajax error:', error);
+            console.log('Retrying in 5s');
+            setTimeout(() => updateFileStatus(fileId), 5000);
+        },
+        complete: function() {
+            console.groupEnd();
+        }
+    });
+};
+
+$(document).ready(function() {
+    const fileElements = $('[data-file-id]');
+    console.log(`Found ${fileElements.length} files to monitor`);
+    
+    fileElements.each(function() {
+        const fileId = $(this).data('fileId');
+        console.log(`Initiating monitoring for file: ${fileId}`);
+        updateFileStatus(fileId);
+    });
+    
+    console.groupEnd();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends 'base/base.html' %}
+{% load poll_extras %}
+
+{% block title %}Upload Files{% endblock %}
+
+{% block head %}
+<style>
+.form-section {
+    background-color: rgba(0,0,0,0.03);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-section-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--bs-primary);
+}
+
+.custom-file-upload {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 2rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.custom-file-upload:hover {
+    border-color: var(--bs-primary);
+    background-color: rgba(var(--bs-primary-rgb), 0.03);
+}
+
+.custom-file-upload i {
+    font-size: 2rem;
+    color: var(--bs-primary);
+    margin-bottom: 1rem;
+}
+
+.help-text {
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+    margin-top: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block contenuto %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex align-items-center">
+                    <i class="fas fa-cloud-upload-alt me-2"></i>
+                    <h5 class="mb-0">Upload Files</h5>
+                </div>
+                
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- File Upload Section -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="fas fa-file me-2"></i>Select Files
+                            </div>
+                            <label class="custom-file-upload d-block">
+                                {{ form.file }}
+                                <i class="fas fa-upload"></i>
+                                <div>Drag and drop files here or click to select</div>
+                                <small class="help-text d-block mt-2">Supported formats: PDF, Images, Text files</small>
+                            </label>
+                        </div>
+
+                        <!-- Processing Options Section -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="fas fa-cogs me-2"></i>Processing Options
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ form.ingestion_type.label }}</label>
+                                    {{ form.ingestion_type|add_class:"form-select" }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ form.page_mode.label }}</label>
+                                    {{ form.page_mode|add_class:"form-select" }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Post Processing Section -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="fas fa-magic me-2"></i>Post Processing
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.post_process.label }}</label>
+                                {{ form.post_process|add_class:"form-select" }}
+                                <small class="help-text">{{ form.post_process.help_text }}</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.post_process_context.label }}</label>
+                                {{ form.post_process_context|add_class:"form-control" }}
+                                <small class="help-text">{{ form.post_process_context.help_text }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Libraries Section -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="fas fa-folder-tree me-2"></i>Select Libraries
+                            </div>
+                            
+                            <div class="d-flex justify-content-end gap-2 mb-3">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="selectNone">
+                                    <i class="fas fa-times-circle me-1"></i>Deselect All
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="selectAll">
+                                    <i class="fas fa-check-circle me-1"></i>Select All
+                                </button>
+                            </div>
+
+                            <div class="list-group">
+                                {{ form.libraries }}
+                            </div>
+                            {% if form.libraries.help_text %}
+                                <small class="help-text mt-2">{{ form.libraries.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'file:list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-chevron-left me-1"></i>Back to Files
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-cloud-upload-alt me-1"></i>Upload Files
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('selectAll').addEventListener('click', function() {
+    document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = true);
+});
+
+document.getElementById('selectNone').addEventListener('click', function() {
+    document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);
+});
+
+// Show selected file names
+document.querySelector('input[type=file]').addEventListener('change', function(e) {
+    const fileCount = e.target.files.length;
+    const label = document.querySelector('.custom-file-upload div');
+    if (fileCount > 0) {
+        label.textContent = fileCount === 1 
+            ? e.target.files[0].name 
+            : `${fileCount} files selected`;
+    } else {
+        label.textContent = 'Drag and drop files here or click to select';
+    }
+});
+</script>
+{% endblock %}

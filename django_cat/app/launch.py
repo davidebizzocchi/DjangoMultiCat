@@ -14,25 +14,23 @@ def call_main_in_thread(module_name):
     Import the `main` function from the given module name and run it in a separate thread.
     """
     try:
-        # Importa dinamicamente il modulo specificato
+        # Dynamically import the specified module
         file_path = settings.BASE_DIR / module_name / "launch.py"
 
         if not file_path.exists():
-            raise FileNotFoundError(f"Il file {file_path} non esiste.")
+            raise FileNotFoundError(f"File {file_path} does not exist.")
 
-        # Crea uno spec dal file
+        # Create spec from file
         spec = importlib.util.spec_from_file_location("launch", str(file_path))
         module = importlib.util.module_from_spec(spec)
         sys.modules["launch"] = module
         spec.loader.exec_module(module)
 
-        # module = importlib.import_module(f"code.{module_name}.launch")
-
-        # Verifica se il modulo ha una funzione `main`
+        # Check if module has a `main` function
         if hasattr(module, "main"):
             main_function = getattr(module, "main")
 
-            # Avvia la funzione `main` in un thread separato
+            # Start the `main` function in a separate thread
             thread = Thread(target=main_function)
             thread.start()
 
@@ -48,10 +46,12 @@ from app.signals import server_start
 
 def main():
     """
-    Itera attraverso le app specificate in `settings.YOUR_APP` e lancia la funzione `main`.
+    Iterate through apps specified in `settings.YOUR_APP` and launch their `main` function.
     """
     # for app_label in getattr(settings, "YOUR_APP", []):
         # call_main_in_thread(app_label)
 
+    import app.config
+    
     ic(server_start)
     server_start.send(sender=None)

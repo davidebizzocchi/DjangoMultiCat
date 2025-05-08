@@ -1,17 +1,20 @@
-from typing import Iterable, Dict, List
+import mimetypes
+from typing import Iterable, Dict, List, Union
 from icecream import ic
 # from users.models import UserProfile
 import requests
 import time
-from functools import wraps
 from cheshire_cat.decorators import wait_cat, HOST, PORT, wait_for_cat
 import json
 from queue import Queue
 from decouple import config
 import io
+import uuid
 
-from cheshire_cat.types import ChatContent, ChatHistoryMessage, ChatToken, ChatHistory
-from groq import Groq
+from cheshire_cat.types.cat_types import UserMessage
+from cheshire_cat.types import AgentRequest, CatMessage, ChatHistoryMessage, ChatToken, ChatHistory, GenericMessage, Notification, DocReadingProgress, LLMRequest
+from cheshire_cat.types import Agent as AgentComplete
+from openai import OpenAI
 
 import cheshire_cat_api as ccat
 
@@ -20,9 +23,15 @@ from bs4 import BeautifulSoup
 import markdown2
 
 from cheshire_cat.custom_objects import CatClient
+import tiktoken
+
+from django.conf import settings
+
+from users.utils import generate_unhashable_password
 
 
 CatConfig = ccat.Config
+END_STREAM = object()
 
 class Cat(CatClient):
     _instances = {}
@@ -37,23 +46,31 @@ class Cat(CatClient):
         if user_id not in cls._instances:
             wait_for_cat()
             instance = super().__new__(cls)
-            instance._initialized = False  # Flag per evitare reinizializzazione
+            instance._initialized = False
             cls._instances[user_id] = instance
+            # cls._ref_counts[user_id] = 0  # Initialize counter
+        
+        # cls._ref_counts[user_id] += 1  # Increment counter
         return cls._instances[user_id]
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self, '_initialized') or not self._initialized:
             # str is chat_id
             self._chat_queues: Dict[str, Queue] = {}
-            self._message_contents: Dict[str, ChatContent] = {}
+            self._message_contents: Dict[str, CatMessage] = {}
             self._stream_active: Dict[str, bool] = {}
+            self._is_startup = False
             self.AUDIO_MAX_SIZE = 25 * 1024 * 1024  # 25MB in bytes
             
             super().__init__(on_message=self.on_message, *args, **kwargs)
 
-            self._groq = Groq(api_key=config("GROQ_API_KEY"))
+            self._llm = OpenAI(
+                base_url=settings.LLM_PROVIDER_API_URL if settings.LLM_PROVIDER_API_URL != "" else None,
+                api_key=settings.LLM_PROVIDER_API_KEY
+            )
             self.startup()
             
+            self._notification_handlers: Dict[str, callable] = {}
             self._initialized = True
 
     def _check_ws_connection(self):
@@ -66,30 +83,73 @@ class Cat(CatClient):
 
     def startup(self):
         ic(self.is_ws_connected)
-        if self.is_ws_connected:
+        if self.is_ws_connected or self._is_startup:
             return self
         
         self.connect_ws()
+        self._is_startup = True
 
         counter = 0
         while not self.is_ws_connected:
             time.sleep(0.2)
             counter += 1
 
+            if self._is_startup:
+                break
+
             if counter == 100:
                 raise TimeoutError("Cannot connect to the websocket")
 
         return self
+    
+    def count_token(self, message: str):
+        encoding = tiktoken.get_encoding("cl100k_base")
+        return len(encoding.encode(message))
+    
+    def chat_completition(self, message: str):
+        """Send a message to the completion chat"""
+        self.send(message=message, chat_id="completition")
 
-    def send(self, message, chat_id="default", *args, **kwargs):
+        return "completition"
+    
+    def _check_history(self, chat_id):
+        from chat.models import Chat
+        cat_history_len = self.get_chat_history_length(chat_id)
+
+        # Insert only the last 10 messages
+        if cat_history_len > 10:
+            return
+        
+        chat = Chat.objects.get(chat_id=chat_id)
+
+        # Exclude last user message
+        server_history_len = chat.messages.count()
+        if server_history_len <= cat_history_len:
+            return
+
+        last_index = 11
+        if server_history_len < 11:
+            last_index = server_history_len
+
+        for message in chat.messages.order_by("-timestamp").all()[cat_history_len+1:last_index]:
+            self.insert_message_in_history(chat_id, message.cat_model(), index=0)
+
+    def send(self, message, chat_id="default", agent_id=None, *args, **kwargs):
+        from chat.models import Chat
         """Send prompt to ws with specific chat_id"""
+
         self._reset_new_message(chat_id)
         self._check_ws_connection()
-        return super().send(message, chat_id=chat_id, *args, **kwargs)
+        self._check_history(chat_id)
+
+        # Retrieve the agent_id if not passed
+        if agent_id is None:
+            agent_id = Chat.objects.select_related("agent").only("agent__agent_id").get(chat_id=chat_id).agent.agent_id
+
+        return super().send(message, chat_id=chat_id, agent_id=agent_id, *args, **kwargs)
 
     def on_message(self, message):
         """Callback for message received"""
-        # ic(message)
 
         msg_json = json.loads(message)
         self._on_message(msg_json)
@@ -106,34 +166,60 @@ class Cat(CatClient):
         """Handle messages for specific chats"""
         msg_type = message.get("type", None)
         chat_id = message.get("chat_id", "default")
-
-        if msg_type == "chat_token":
-            chat_message = ChatToken(**message)
-            
-            if chat_id in self._stream_active:
-                self._chat_queues[chat_id].put(chat_message)
         
-        if msg_type == "chat":
-            self._message_contents[chat_id] = ChatContent(**message)
+        if msg_type == "chat_token":
+            message = message.get("content", {})
+            content = message.get("content", "")
+            chat_id = message.get("chat_id", "default")
+
+            stream_message = ChatToken(text=content, chat_id=chat_id)
+
+            if self._stream_active.get(chat_id, False):
+                self._chat_queues[chat_id].put(stream_message)
+        
+        elif msg_type == "chat":
+            self._message_contents[chat_id] = CatMessage(**message)
             self.end_stream(chat_id)
+        
+        elif msg_type == "json-notification":
+            content = message.get("content", {})
+            if content.get("type") == "doc-reading-progress":
+                progress = DocReadingProgress(**content)
+
+                # Notify the registered handlers with their arguments
+                handlers = list(self._notification_handlers.values())
+                for handler in handlers:
+                    handler(progress)
+        
+        else:
+            # Handle generic messages
+            generic_message = GenericMessage(**message)
+            # You can add specific handling for other message types here
+            ic(f"Received generic message: {generic_message}")
+
+            # Stop all streams
+            if generic_message.type == "error":
+                self.end_stream(chat_id)
 
     def end_stream(self, chat_id: str = "default"):
         """End stream for specific chat"""
         if chat_id in self._stream_active:
             self._stream_active[chat_id] = False
-            self._chat_queues[chat_id].put(None)
+            self._chat_queues[chat_id].put(END_STREAM)
 
     def _stream(self, chat_id):
         """Stream messages for specific chat"""
-
-        while self._stream_active.get(chat_id):
+        
+        while self._stream_active.get(chat_id, False):
+            chat_queque = self._chat_queues[chat_id]
             try:
-                token = self._chat_queues[chat_id].get(block=True)
-                if token is None:  # segnale di terminazione
+                token = chat_queque.get(block=True)
+
+                if token is END_STREAM:  # termination signal
                     break
                 yield token
-            except Queue.Empty:
-                continue  # Continuiamo ad ascoltare se la coda è vuota
+
+                continue  # Continue listening if the queue is empty
             except Exception as e:
                 ic(f"Stream error for chat {chat_id}: {e}")
                 break
@@ -145,24 +231,27 @@ class Cat(CatClient):
             yield f"Error: {chat_id} this chat is not active"
             return
         
-        # Modifica qui: yield from invece di una semplice chiamata
+        # Change here: yield from instead of a simple call
         yield from self._stream(chat_id)
 
-    def get_message_content(self, chat_id: str = "default") -> ChatContent:
+    def get_message_content(self, chat_id: str = "default") -> CatMessage:
         return self._message_contents.get(chat_id)
     
-    def wait_message_content(self, chat_id: str = "default") -> ChatContent:
+    def wait_message_content(self, chat_id: str = "default") -> CatMessage:
         while self._message_contents.get(chat_id) is None:
             time.sleep(0.1)
+
+            if not self._stream_active.get(chat_id):
+                return None
         return self._message_contents[chat_id]
     
-    def _transcribe(self, audio_bytes):
+    def _transcribe(self, audio_bytes, language="it"):
         start = time.time()
-        transcription = self._groq.audio.transcriptions.create(
+        transcription = self._llm.audio.transcriptions.create(
             file=("temp.wav", audio_bytes),
-            model="whisper-large-v3",
-            language="it",
-            prompt="Trascrivi il messaggio dell'utente",
+            model=settings.LLM_MODEL_AUDIO_TRANSCRIPTION_ID,
+            language=language,
+            prompt="Transcribe the user's message",
             response_format="json"
         )
         ic("time", time.time() - start, transcription)
@@ -197,18 +286,17 @@ class Cat(CatClient):
     def parse_markdown(self, text):
         return BeautifulSoup(markdown2.markdown(text), "html.parser").get_text()
     
-    def _speak(self, text):
-        tts = gTTS(
+    def _speak_gtts(self, text):
+        return gTTS(
             text=self.parse_markdown(text),
-            lang="it",
-        )
+            lang=settings.LANGUAGE_CODE.split("-")[0].lower(),
+        ).write_to_fp(io.BytesIO())
 
-        stream = io.BytesIO()
-        tts.write_to_fp(stream)
+    def _speak(self, text):
+        if settings.LLM_MODEL_AUDIO_ID == "gtts":
+            return self._speak_gtts(text)
 
-        stream.seek(0)
-
-        return stream
+        return None
     
     def speak(self, text):
         return self._speak(text)
@@ -217,17 +305,22 @@ class Cat(CatClient):
         for collection in self.memory.get_collections()["collections"]:
             yield collection["name"]
 
-    def delete_chat(self, chat_id):
-        self.memory.wipe_memory_points_by_metadata(
+    def wipe_chat_episodic(self, chat_id: str):
+        # it is correct that the key is "chat"!
+        return self.memory.wipe_memory_points_by_metadata(
             collection_id="episodic",
-            body={"chat_id": chat_id}
+            body={"chat": chat_id}
         )
+
+    def delete_chat(self, chat_id: str):
+        self.wipe_chat_episodic(chat_id)
         return self.memory.delete_working_memory(chat_id)
     
-    def wipe_chat(self, chat_id):
+    def wipe_chat(self, chat_id: str):
+        self.wipe_chat_episodic(chat_id)
         return self.memory.wipe_conversation_history_by_chat(chat_id)
     
-    def get_chat_history(self, chat_id):
+    def get_chat_history(self, chat_id: str):
         response = self.memory.get_working_memory(chat_id)
         if "history" in response:
             return ChatHistory(messages=[
@@ -235,8 +328,352 @@ class Cat(CatClient):
             ])
         return ChatHistory()
 
+    def get_chat_history_length(self, chat_id: str):
+        response = self.memory.get_conversation_history_length(chat_id)
+        return response.get("length", 0)
+
     def get_chat_list(self):
         return self.memory.get_working_memories_list()
+
+    def insert_message_in_history(self, chat_id: str, message: Union[CatMessage, UserMessage], index: int = 0):
+        response = self.memory.insert_message_in_conversation_history(
+            chat_id=chat_id,
+            message=message,
+            index=index)
+        
+        if response.get("success", False):
+            return True
+        
+        return False
+
+    def register_notification_handler(self, handler, *handler_args, **handler_kwargs) -> str:
+        """
+        Register a handler for notifications and return its ID
+        
+        Args:
+            handler: Function that receives a notification
+            *handler_args: Positional arguments to pass to the handler
+            **handler_kwargs: Keyword arguments to pass to the handler
+            
+        Returns:
+            str: Unique ID of the registered handler
+        """
+        handler_id = str(uuid.uuid4())
+        self._notification_handlers[handler_id] = handler
+        return handler_id
+
+    def unregister_notification_handler(self, handler_id: str):
+        """
+        Remove a handler given its ID
+        
+        Args:
+            handler_id: ID of the handler to remove
+        """
+        if handler_id in self._notification_handlers:
+            del self._notification_handlers[handler_id]
+
+    def unregister_all_notification_handlers(self):
+        """Removes all registered handlers"""
+        self._notification_handlers.clear()
+
+    def _cleanup_old_notifications(self):
+        """Removes notifications older than TTL seconds"""
+        current_time = time.time()
+        while self._notifications and (current_time - self._notifications[0].received_at) > self._notification_ttl:
+            self._notifications.popleft()
+
+    def _add_notification(self, notification: Notification):
+        """Adds a new notification and cleans up old ones"""
+        self._cleanup_old_notifications()
+        self._notifications.append(notification)
+
+    def get_recent_notifications(self):
+        """Returns recent notifications after cleaning up old ones"""
+        self._cleanup_old_notifications()
+        return list(self._notifications)
+    
+    def upload_file(self, file, metadata: Dict, chunk_size=None, chunk_overlap=None):
+        url =  f"http://{HOST}:{PORT}/rabbithole/"
+        
+        with open(file.file.path.absolute(), "rb") as f:
+            files = {"file": (
+                str(file.file.path.name),  # Use the file_id with the extension
+                f,
+                mimetypes.guess_type(file.file.path.absolute())[0]
+            )}
+
+            payload = {
+                "metadata": json.dumps(metadata),
+                "chunk_overlap": chunk_overlap,
+                "chunk_size": chunk_size,
+            }
+
+            return requests.post(
+                url=url,
+                files=files,
+                data=payload,
+                headers={
+                    "user_id": file.userprofile.cheshire_id  # Add the user_id in the header
+                },
+            ).json()
+    
+    def delete_file(self, file):
+        return self.memory.wipe_memory_points_by_metadata(
+            collection_id="declarative",
+            body={
+                "file_id": str(file.file_id),
+            }
+        )
+
+    def get_file_chats(self, file) -> List[str]:
+        """Get all chats using a specific file through its libraries
+        
+        Args:
+            file: File instance to check
+            
+        Returns:
+            List[str]: List of chat IDs using this file
+        """
+        from chat.models import Chat
+
+        return list(
+            Chat.objects.filter(
+                libraries__associations__file=file  # Navigate through the relationships
+            ).values_list(
+                'chat_id', flat=True
+            ).distinct()
+        )
+
+    def update_file_chats(self, file) -> dict:
+        """Update the chats associated with a file in the memory
+        
+        Args:
+            file: File instance to update
+            
+        Returns:
+            dict: Response from the API with update status
+        """
+        chat_ids = self.get_file_chats(file)
+                
+        metadata = {
+            "search": {"file_id": str(file.file_id)},
+            "update": {"chats_id": chat_ids}
+        }
+        
+        return self.memory.update_points_metadata(
+            collection_id="declarative",
+            search=metadata["search"], 
+            update=metadata["update"]
+        )
+
+    def get_file_metadata(self, file) -> dict:
+        """Get all memory points for a specific file
+        
+        Args:
+            file_id: ID of the file to search for
+            
+        Returns:
+            dict: Memory points containing the file metadata
+        """
+        return self.memory.get_points_by_metadata(
+            collection_id="declarative",
+            metadata={"file_id": str(file.file_id)}
+        )
+
+    def edit_file_chats(self, file, chat_ids: List[str], mode: str = "add", collection_id: str = "declarative"):
+        """
+        Update chat_ids in file memories metadata
+        :param file: File instance to update
+        :param chat_ids: List of chat IDs to add/remove
+        :param mode: 'add' to add chat_ids, 'remove' to remove them
+        """
+
+        if isinstance(file, str):
+            file_id = file
+        else:
+            file_id = str(file.file_id)
+
+        if isinstance(chat_ids, str):
+            chat_ids = [chat_ids]
+
+        search_metadata = {"file_id": file_id}
+        return self.memory.edit_chat_to_points(
+            collection_id=collection_id,
+            search_metadata=search_metadata,
+            chat_ids=chat_ids,
+            mode=mode
+        )
+    
+    def add_file_to_chats(self, file, chat_ids: List[str]):
+        """Add a file to a chat in the memory
+        
+        Args:
+            file: File instance to add
+            chat_id: Chat ID to add the file to
+            
+        Returns:
+            dict: Response from the API with update status
+        """
+
+        if isinstance(file, str):
+            file_id = file
+        else:
+            file_id = str(file.file_id)
+
+        if isinstance(chat_ids, str):
+            chat_ids = [chat_ids]
+
+        return self.edit_file_chats(
+            file_id, chat_ids, "add", "declarative"
+        )
+    
+    def remove_file_to_chats(self, file, chat_ids: List[str]):
+        """Remove a file to a chat in the memory
+        
+        Args:
+            file: File instance to remove
+            chat_id: Chat ID to remove the file to
+            
+        Returns:
+            dict: Response from the API with update status
+        """
+
+        if isinstance(file, str):
+            file_id = file
+        else:
+            file_id = str(file.file_id)
+
+        if isinstance(chat_ids, str):
+            chat_ids = [chat_ids]
+
+        return self.edit_file_chats(
+            file_id, chat_ids, "remove", "declarative"
+        )
+
+    def create_agent(self, agent: Union[AgentRequest, AgentComplete]):
+        from agent.models import Agent
+
+        if isinstance(agent, Agent) or isinstance(agent, AgentRequest) or  isinstance(agent, AgentComplete):
+            response = self.agents.create_agent(
+                data=agent.model_dump()
+            )
+        elif isinstance(agent, dict):
+            response = self.agents.create_agent(
+                data=agent
+            )
+        else:
+            return False
+
+        if response.get("success", False):
+            return AgentComplete.model_validate(response["agent"])
+        
+        return None
+    
+    def retrieve_agent(self, agent_id: str):
+        response = self.agents.retrieve_agent(agent_id=agent_id)
+
+        if response.get("success", False):
+            return AgentComplete.model_validate(response["agent"])
+        
+        return None
+    
+    def list_agents(self):
+        response = self.agents.list_agents()
+        return list(AgentComplete.model_validate(agent) for agent in response["agents"])
+        
+    def delete_agent(self, agent_id: str):
+        response = self.agents.delete_agent(agent_id=agent_id)
+
+        if response.get("success", False):
+            return True
+        
+        return False
+    
+    def update_agent(self, agent: Union[AgentComplete]):
+        from agent.models import Agent
+
+        if isinstance(agent, Agent):
+            response = self.agents.update_agent(agent_id=agent.agent_id, data=agent.model_dump())
+        if isinstance(agent, AgentComplete):
+            response = self.agents.update_agent(agent_id=agent.id, data=agent.model_dump(exclude={"id"}))
+        else:
+            return False
+
+        if response.get("success", False):
+            return AgentComplete.model_validate(response["agent"])
+        
+        return None
+    
+    def sync_agents(self):
+        from agent.models import Agent
+        """One-way: django -> cat, this because cat don't know what user has created an agent"""
+        
+        agents = self.list_agents()
+        ids = {agent.id for agent in agents}
+        ids.add("default")
+
+        queryset = Agent.objects.exclude(agent_id__in=ids)
+
+        for agent in queryset.all():
+            self.create_agent(agent)
+
+        return queryset.count()
+    
+    def create_llm(self, llm: LLMRequest):
+        """Create a new LLM"""
+        response = self.llm.create_llm(
+            data=llm.model_dump()
+        )
+
+        if response.get("success", False):
+            return True
+        
+        return False
+    
+    def update_llm(self, llm: LLMRequest):
+        """Update an existing LLM"""
+        response = self.llm.update_llm(
+            data=llm.model_dump()
+        )
+
+        if response.get("success", False):
+            return True
+        
+        return False
+
+    def delete_llm(self, llm_name: str):
+        """Delete an existing LLM"""
+        response = self.llm.delete_llm(
+            llm_name=llm_name
+        )
+
+        if response.get("success", False):
+            return True
+
+        return False
+
+    def list_llms(self):
+        """List all LLMs"""
+        response = self.llm.list_llms()
+
+        if response.get("success", False):
+            return [LLMRequest.model_validate(llm) for llm in response["llms"]]
+        
+        return []
+
+    def get_llm(self, llm_id: str):
+        """Get an LLM by its ID"""
+        response = self.llm.get_llm(llm_id=llm_id)
+
+        if response.get("success", False):
+            return LLMRequest.model_validate(response["llm"])
+        
+        return None
+
+    def get_llm_schemas(self):
+        """List all schemas"""
+        return self.llm.get_llm_schemas()["schemas"]
+
 
 @wait_cat
 def get_user_id(username: str):
@@ -252,7 +689,7 @@ def get_user_id(username: str):
 def connect_as_admin() -> Cat:
     
     admin_id = get_user_id("admin")
-    if admin_id is None:
+    if (admin_id is None):
         raise ValueError("Admin user not found")
     
     config = CatConfig(user_id=admin_id, base_url=HOST, port=PORT)
@@ -264,8 +701,11 @@ def connect_user(user_id) -> Cat:
 
 @wait_cat
 def create_user(user):
-    ic(get_user_id(user.username))
-    if get_user_id(user.username) is not None:
+    user_id = get_user_id(user.username)
+    ic("creating user with:", user_id)
+
+    if user_id is not None:
+        user.set_manual_id(user_id)
         return True
     
     url = f"http://{HOST}:{PORT}/users/"
@@ -274,11 +714,11 @@ def create_user(user):
         "username": user.username,
         "permissions": {
             "CONVERSATION": ["WRITE", "EDIT", "LIST", "READ", "DELETE"],
-            "MEMORY": ["READ", "LIST"],
+            "MEMORY": ["READ", "LIST", "DELETE", "WRITE"],
             "STATIC": ["READ"],
             "STATUS": ["READ"]
         },
-        "password": user.password
+        "password": generate_unhashable_password()
     }
     headers = {"Content-Type": "application/json"}
 
@@ -293,7 +733,7 @@ def create_user(user):
 
 @wait_cat
 def delete_user(user):
-    url = f"http://{HOST}:{PORT}/users/{user.cheschire_id}/"
+    url = f"http://{HOST}:{PORT}/users/{user.cheshire_id}/"
 
     response = requests.delete(url)
     if response.status_code == 200:
