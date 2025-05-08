@@ -70,7 +70,7 @@
                                 {{ form.file }}
                                 <i class="fas fa-upload"></i>
                                 <div>Drag and drop files here or click to select</div>
-                                <small class="help-text d-block mt-2">Supported formats: PDF, Images, Text files</small>
+                                <small class="help-text d-block mt-2">Supported formats: PDF, Images, Text files, Audio files</small>
                             </label>
                         </div>
 
@@ -84,8 +84,10 @@
                                 <div class="col-md-6">
                                     <label class="form-label">{{ form.ingestion_type.label }}</label>
                                     {{ form.ingestion_type|add_class:"form-select" }}
+                                    <!-- Aggiungi campo hidden per preservare il valore -->
+                                    <input type="hidden" name="{{ form.ingestion_type.name }}" id="ingestion_type_hidden">
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-6" id="page_mode_container">
                                     <label class="form-label">{{ form.page_mode.label }}</label>
                                     {{ form.page_mode|add_class:"form-select" }}
                                 </div>
@@ -93,7 +95,7 @@
                         </div>
 
                         <!-- Post Processing Section -->
-                        <div class="form-section">
+                        <div class="form-section" id="post_processing_container">
                             <div class="form-section-title">
                                 <i class="fas fa-magic me-2"></i>Post Processing
                             </div>
@@ -151,25 +153,112 @@
 </div>
 
 <script>
-document.getElementById('selectAll').addEventListener('click', function() {
-    document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = true);
-});
+$(document).ready(function() {
+    // Prendi i valori INGESTION_TYPES dalle opzioni del select
+    const ingestion_type_select_dom = $('#{{ form.ingestion_type.id_for_label }}');
+    const page_mode_container_dom = $('#page_mode_container');
+    const file_input_dom = $('#{{ form.file.id_for_label }}');
+    const ingestion_type_hidden_dom = $('#ingestion_type_hidden');
 
-document.getElementById('selectNone').addEventListener('click', function() {
-    document.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);
-});
+    // Estrai i valori dalle opzioni del select
+    const INGESTION_TYPES = {
+        AUDIO: ingestion_type_select_dom.find('option:contains("Audio")').val(),
+        NORMAL: ingestion_type_select_dom.find('option:contains("Normal")').val(),
+        OCR: ingestion_type_select_dom.find('option:contains("OCR")').val()
+    };
 
-// Show selected file names
-document.querySelector('input[type=file]').addEventListener('change', function(e) {
-    const fileCount = e.target.files.length;
-    const label = document.querySelector('.custom-file-upload div');
-    if (fileCount > 0) {
-        label.textContent = fileCount === 1 
-            ? e.target.files[0].name 
-            : `${fileCount} files selected`;
-    } else {
-        label.textContent = 'Drag and drop files here or click to select';
+    // Sincronizza il campo hidden con il select
+    function syncHiddenInput() {
+        ingestion_type_hidden_dom.val(ingestion_type_select_dom.val());
     }
+
+    function updateIngestionTypeOptionsVisibility(is_audio_file_present) {
+        const audio_option_dom = ingestion_type_select_dom.find('option[value="' + INGESTION_TYPES.AUDIO + '"]');
+        const normal_option_dom = ingestion_type_select_dom.find('option[value="' + INGESTION_TYPES.NORMAL + '"]');
+        const ocr_option_dom = ingestion_type_select_dom.find('option[value="' + INGESTION_TYPES.OCR + '"]');
+
+        if (is_audio_file_present) {
+            audio_option_dom.show();
+            normal_option_dom.hide();
+            ocr_option_dom.hide();
+            ingestion_type_select_dom.val(INGESTION_TYPES.AUDIO);
+            ingestion_type_select_dom.prop('disabled', true);
+            syncHiddenInput(); // Sincronizza quando cambia
+        } else {
+            audio_option_dom.hide();
+            normal_option_dom.show();
+            ocr_option_dom.show();
+            
+            if (ingestion_type_select_dom.val() === INGESTION_TYPES.AUDIO) {
+                ingestion_type_select_dom.val(INGESTION_TYPES.NORMAL);
+                syncHiddenInput(); // Sincronizza quando cambia
+            }
+            ingestion_type_select_dom.prop('disabled', false);
+        }
+    }
+
+    function updatePageModeVisibility() {
+        const selected_ingestion_type = ingestion_type_select_dom.val();
+        if (selected_ingestion_type === INGESTION_TYPES.OCR) {
+            page_mode_container_dom.show();
+        } else {
+            page_mode_container_dom.hide();
+        }
+    }
+
+    file_input_dom.on('change', function(e) {
+        const file_count = e.target.files.length;
+        const label_div_dom = $('.custom-file-upload div');
+        let is_audio_file_present = false;
+
+        if (file_count > 0) {
+            label_div_dom.text(file_count === 1 
+                ? e.target.files[0].name 
+                : `${file_count} files selected`);
+            
+            const first_file = e.target.files[0];
+            const audio_mime_types = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/opus', 'audio/webm', 'audio/mp4', 'audio/x-m4a', 'audio/flac'];
+            const audio_extensions = ['.mp3', '.wav', '.ogg', '.aac', '.opus', '.m4a', '.flac'];
+            
+            is_audio_file_present = audio_mime_types.includes(first_file.type.toLowerCase()) || 
+                                 audio_extensions.some(ext => first_file.name.toLowerCase().endsWith(ext));
+        } else {
+            label_div_dom.text('Drag and drop files here or click to select');
+        }
+
+        updateIngestionTypeOptionsVisibility(is_audio_file_present);
+        updatePageModeVisibility(); 
+    });
+
+    ingestion_type_select_dom.on('change', function() {
+        syncHiddenInput();
+        updatePageModeVisibility(); 
+    });
+
+    function initializeFormDisplay() {
+        const files = file_input_dom[0].files;
+        let is_audio = false;
+        if (files && files.length > 0) {
+            const first_file = files[0];
+            const audio_mime_types = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/opus', 'audio/webm', 'audio/mp4', 'audio/x-m4a', 'audio/flac'];
+            const audio_extensions = ['.mp3', '.wav', '.ogg', '.aac', '.opus', '.m4a', '.flac'];
+            is_audio = audio_mime_types.includes(first_file.type.toLowerCase()) || 
+                      audio_extensions.some(ext => first_file.name.toLowerCase().endsWith(ext));
+        }
+        updateIngestionTypeOptionsVisibility(is_audio);
+        updatePageModeVisibility();
+        syncHiddenInput();
+    }
+
+    initializeFormDisplay();
+
+    $('#selectAll').on('click', function() {
+        $('input[name="{{ form.libraries.name }}"][type=checkbox]').prop('checked', true);
+    });
+
+    $('#selectNone').on('click', function() {
+        $('input[name="{{ form.libraries.name }}"][type=checkbox]').prop('checked', false);
+    });
 });
 </script>
 {% endblock %}
