@@ -2,6 +2,33 @@
 
 
 
+type: issue_audio_transcription
+## Release v1.2.1-69f8596
+
+### Information
+- **Source branch**: dev
+- **Target branch**: dev
+- **Issue**: [#dev](https://github.com/davidebizzocchi/DjangoCat/issues/dev)
+- **Type**: dev
+- **Previous version**: v1.2.1-69f8596
+- **New version**: v1.2.1-69f8596
+- **Code change statistics**:  16 files changed, 901 insertions(+), 933 deletions(-)
+
+### Commits
+- 69f8596 - fix utils (davidebizzocchi)
+- 66eec6d - audio post processing (davidebizzocchi)
+- a3970c2 - template upload check difference from file and audio (davidebizzocchi)
+- 6a6ffc1 - fix chat_completition in client (davidebizzocchi)
+- ad386f6 - upload file and transcribe (davidebizzocchi)
+- 07a725a - translate comments in english (davidebizzocchi)
+- fb1daf9 - _transcribe removed time stats (davidebizzocchi)
+- c3f4294 - chat endpoint "audio-api" has been renamed to "transcribe" (davidebizzocchi)
+- a08be9f - audio transcription in chat template (davidebizzocchi)
+- 3b5883b - delete old _streaming files (davidebizzocchi)
+
+---
+
+
 type: feature_multi_llms
 ## Release v1.2.0-8d1fd80
 
