@@ -11,6 +11,6 @@ class UserApprovalMiddleware:
             if not request.path.startswith('/users/'):
                 messages.warning(request, "Your account is not approved yet.")
                 return redirect('users:profile')
-        
+    
         response = self.get_response(request)
         return response

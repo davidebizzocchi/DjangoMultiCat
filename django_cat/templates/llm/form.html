@@ -20,7 +20,7 @@
                 <div class="card-body">
                     <form method="post" id="llm-form">
                         {% csrf_token %}
-                        
+                    
                         <div class="mb-3">
                             <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
                             {{ form.name|add_class:"form-control" }}
@@ -29,7 +29,7 @@
                             {% endif %}
                             <div class="form-text">A descriptive name for this Language Model</div>
                         </div>
-                        
+                    
                         <div class="mb-3">
                             <label for="llm-selector" class="form-label">LLM Type</label>
                             <select id="llm-selector" class="form-select">
@@ -51,7 +51,7 @@
                         </div>
 
                         <div id="llm-description" class="alert alert-info mb-3 d-none"></div>
-                        
+                    
                         <!-- Hidden field to store the actual class value -->
                         <input type="hidden" name="{{ form.llm_class.name }}" id="{{ form.llm_class.id_for_label }}" value="{{ form.llm_class.value|default:'' }}">
                         <input type="hidden" name="{{ form.config.name }}" id="{{ form.config.id_for_label }}" value="{{ form.config.value|default:'{}' }}">
@@ -59,7 +59,7 @@
                         <!-- Dynamic LLM Forms -->
                         <div id="dynamic-llm-forms" class="mb-4">
                             {% for llm_name, form_data in llm_forms.forms.items %}
-                            <div id="form-{{ llm_name|slugify }}" class="llm-form-container" style="display: none;">                                
+                            <div id="form-{{ llm_name|slugify }}" class="llm-form-container" style="display: none;">                            
                                 {% for field in form_data.form %}
                                 <div class="mb-3">
                                     <label for="{{ field.id_for_label }}" class="form-label">
@@ -68,7 +68,7 @@
                                         <span class="text-danger">*</span>
                                         {% endif %}
                                     </label>
-                                    
+                                
                                     {% if field|field_type == "BooleanField" %}
                                     <div class="form-check">
                                         {{ field|add_class:"form-check-input" }}
@@ -77,11 +77,11 @@
                                     {% else %}
                                         {{ field|add_class:"form-control" }}
                                     {% endif %}
-                                    
+                                
                                     {% if field.help_text %}
                                     <div class="form-text">{{ field.help_text }}</div>
                                     {% endif %}
-                                    
+                                
                                     {% if field.errors %}
                                     <div class="invalid-feedback d-block">{{ field.errors }}</div>
                                     {% endif %}
@@ -113,7 +113,7 @@
     const llmClassInput = document.getElementById('{{ form.llm_class.id_for_label }}');
     const llmConfigInput = document.getElementById('{{ form.config.id_for_label }}');
     const llmForms = document.querySelectorAll('.llm-form-container');
-    
+
     // Current config if exists
     let currentConfig = {};
     try {
@@ -124,14 +124,14 @@
         console.error("Error parsing config:", e);
         currentConfig = {};
     }
-    
+
     // Get llm class from the form
     let LLMClassValue = '{{ form.llm_class.value|escapejs }}';
     if (!LLMClassValue || LLMClassValue === 'None') {
         LLMClassValue = llmSelector.options[llmSelector.selectedIndex].value;
     }
     console.log("Original LLM class:", LLMClassValue);
-    
+
     // Map for LLM metadata and class-to-name mapping
     const llmMeta = {};
     {% for llm_name, llm_form in llm_forms.items %}
@@ -141,31 +141,31 @@
         link: "{{ llm_form.meta.link|default:""|escapejs }}"
     };
     {% endfor %}
-    
+
     // Function to show the selected form
     function showLLMForm(llmName) {
         // Hide all forms first
         llmForms.forEach(form => {
             form.style.display = 'none';
-            
+        
             // Disable all inputs in hidden forms to prevent validation errors
             form.querySelectorAll('input, select, textarea').forEach(input => {
                 input.disabled = true;
             });
         });
-        
+    
         // Show the selected form if exists
         const formId = `form-${llmName.toLowerCase().replace(/\s+/g, '-')}`;
         const selectedForm = document.getElementById(formId);
-        
+    
         if (selectedForm) {
             selectedForm.style.display = 'block';
-            
+        
             // Enable all inputs in the visible form
             selectedForm.querySelectorAll('input, select, textarea').forEach(input => {
                 input.disabled = false;
             });
-            
+        
             // Set class input for submission
             llmClassInput.value = LLMClassValue;
 
@@ -176,7 +176,7 @@
             }
         }
     }
-    
+
     // Function to fill form fields with config values
     function fillFormWithConfig(formContainer, config) {
         console.log("Filling form with config:", config);
@@ -195,19 +195,19 @@
             }
         });
     }
-    
+
     // Function to collect form data into config object
     function collectFormData(formContainer) {
         const config = {};
         const inputs = formContainer.querySelectorAll('input:not([disabled]), select:not([disabled]), textarea:not([disabled])');
-        
+    
         inputs.forEach(input => {
             // Extract the field name from the input name (remove form prefix if present)
             let fieldName = input.name;
             if (fieldName.includes('-')) {
                 fieldName = fieldName.split('-').pop();
             }
-            
+        
             // Set value based on input type
             if (input.type === 'checkbox') {
                 config[fieldName] = input.checked;
@@ -218,16 +218,16 @@
                 config[fieldName] = input.value;
             }
         });
-        
+    
         return config;
     }
-    
+
     // Listen for change on LLM selector
     llmSelector.addEventListener('change', function() {
         const selectedLLM = this.value;
         showLLMForm(selectedLLM);
     });
-    
+
     // Initialize with selected value if exists, or disable all form inputs initially
     document.addEventListener('DOMContentLoaded', function() {
         // First, disable all form inputs
@@ -236,35 +236,35 @@
                 input.disabled = true;
             });
         });
-        
+    
         // If we have an existing class, find the corresponding name and show that form
-        if (LLMClassValue) {            
+        if (LLMClassValue) {        
             showLLMForm(LLMClassValue);
         }
     });
-    
+
     // Handle form submission
     document.getElementById('llm-form').addEventListener('submit', function(e) {
         const selectedLLM = llmSelector.value;
         console.log("Selected LLM:", selectedLLM);
-        
+    
         // Validate form selection
         if (!selectedLLM) {
             e.preventDefault();
             alert('Please select a Language Model before submitting.');
             return false;
         }
-        
+    
         // Get form ID from the selected LLM
         const formId = `form-${selectedLLM.toLowerCase().replace(/\s+/g, '-')}`;
         const selectedForm = document.getElementById(formId);
-        
+    
         if (selectedForm) {
             // Get original class name from the form
-            
+        
             // Collect form data into config
             const config = collectFormData(selectedForm);
-            
+        
             // Check required fields
             let missingFields = [];
             selectedForm.querySelectorAll('input[required]:not([disabled]), select[required]:not([disabled]), textarea[required]:not([disabled])').forEach(field => {
@@ -275,18 +275,18 @@
                     field.classList.remove('is-invalid');
                 }
             });
-            
+        
             // If missing fields, show error and don't submit
             if (missingFields.length > 0) {
                 e.preventDefault();
                 alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
                 return false;
             }
-            
+        
             // Update values for submission
             llmConfigInput.value = JSON.stringify(config);
             llmClassInput.value = selectedLLM;
-            
+        
             console.log(`Submitting: LLM Class=${selectedLLM}`, config);
         } else {
             e.preventDefault();

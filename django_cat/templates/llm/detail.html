@@ -16,16 +16,16 @@
                     <dl class="row">
                         <dt class="col-sm-3">Name:</dt>
                         <dd class="col-sm-9">{{ llm.name }}</dd>
-                        
+                    
                         <dt class="col-sm-3">LLM Class:</dt>
                         <dd class="col-sm-9">{{ llm.llm_class }}</dd>
-                        
+                    
                         <dt class="col-sm-3">Configuration:</dt>
                         <dd class="col-sm-9">
                             <pre class="bg-light p-3 rounded"><code>{{ llm.config|pprint }}</code></pre>
                         </dd>
                     </dl>
-                    
+                
                     <div class="d-flex justify-content-between mt-4">
                         <a href="{% url 'llm:list' %}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Back

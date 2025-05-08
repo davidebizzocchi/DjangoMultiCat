@@ -38,7 +38,7 @@
             </div>
         </div>
             {% endif %}
-            
+        
             <div class="card">
                 <div class="card-header">
                     <h2>Welcome, {{ user.name|capfirst|default:user.email }}</h2>
@@ -57,7 +57,7 @@
                             {% if name %}<p><strong>Name:</strong> {{ name }}</p>{% endif %}
                             <p><strong>Account Status:</strong> {% if is_approved %}<span class="text-success fw-bold">Approved</span>{% else %}<span class="text-warning">Pending Approval</span>{% endif %}</p>
                             <p><strong>Configuration Status:</strong> {% if configured %}<span class="text-success fw-bold">Configured</span>{% else %}<span class="text-warning">Not Configured</span>{% endif %}</p>
-                            
+                        
                             {% if user.is_staff or user.is_superuser %}
                             <div class="alert alert-info mt-3">
                                 <strong>Admin Privileges:</strong> 
@@ -73,7 +73,7 @@
                         {% endif %}
                         <button class="btn btn-danger" onclick="confirmDelete()">Delete Account</button>
                     </div>
-                    
+                
                     {% if configured %}
                     <div id="editProfileForm" class="mt-4" style="display: none;">
                         <h4>Edit Profile</h4>
@@ -113,11 +113,11 @@
             }
         });
     }
-    
+
     function showEditProfileForm() {
         document.getElementById('editProfileForm').style.display = 'block';
     }
-    
+
     function hideEditProfileForm() {
         document.getElementById('editProfileForm').style.display = 'none';
     }

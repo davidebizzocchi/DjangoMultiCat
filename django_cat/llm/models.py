@@ -31,7 +31,7 @@ class LLM(BaseUserModel):
         """
 
         return self.llm.model_dump()
-    
+
     def save_llm(self):
         return self.client.update_llm(self.llm)
 
@@ -48,7 +48,7 @@ class LLM(BaseUserModel):
         Returns the LLM schemas.
         """
         return user.client.get_llm_schemas()
-    
+
     def delete(self, *args, **kwargs):
         """
         Override delete method to ensure the LLM instance is deleted correctly.

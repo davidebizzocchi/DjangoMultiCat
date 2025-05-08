@@ -82,7 +82,7 @@
                 <i class="fas fa-cloud-upload-alt me-2"></i>Upload New File
             </a>
         </div>
-        
+    
         <div class="card-body p-0">
             {% if files %}
                 <div class="list-group list-group-flush">
@@ -94,12 +94,12 @@
                          id="file-{{ file.file_id }}" 
                          data-file-id="{{ file.file_id }}" 
                          data-status="{{ file.status }}">
-                        
+                    
                         <div class="d-flex align-items-start justify-content-between">
                             <div class="flex-grow-1">
                                 <div class="d-flex align-items-center mb-2">
                                     <h5 class="mb-0">{{ file.title }}</h5>
-                                    
+                                
                                     {% if file.is_configuring %}
                                         <span class="badge bg-warning ms-2 status-badge">Configuring</span>
                                     {% elif file.is_processing %}
@@ -180,12 +180,12 @@ const updateFileStatus = (fileId) => {
         success: function(data) {
             console.log('Status data received:', data);
             const $fileElement = $(`#file-${fileId}`);
-            
+        
             if ($fileElement.length === 0) {
                 console.warn('File element not found in DOM');
                 return;
             }
-            
+        
             // Update status badge
             const $statusBadge = $fileElement.find('.status-badge');
             if ($statusBadge.length) {
@@ -245,7 +245,7 @@ const updateFileStatus = (fileId) => {
                 console.log('Updating file link to:', data.link);
                 $fileLink.attr('href', data.link);
             }
-            
+        
             console.timeEnd(`Status update for ${fileId}`);
         },
         error: function(error) {
@@ -262,13 +262,13 @@ const updateFileStatus = (fileId) => {
 $(document).ready(function() {
     const fileElements = $('[data-file-id]');
     console.log(`Found ${fileElements.length} files to monitor`);
-    
+
     fileElements.each(function() {
         const fileId = $(this).data('fileId');
         console.log(`Initiating monitoring for file: ${fileId}`);
         updateFileStatus(fileId);
     });
-    
+
     console.groupEnd();
 });
 </script>

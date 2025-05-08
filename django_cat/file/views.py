@@ -19,13 +19,13 @@ class FileUploadView(LoginRequiredMixin, CreateView):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
-    
+
     def get_success_url(self):
         return self.success_url
 
     def form_valid(self, form):
         saved_files = form.save()
-        
+    
         for created, file, uploaded, deleted in saved_files:
             if created:
                 messages.success(
@@ -42,7 +42,7 @@ class FileUploadView(LoginRequiredMixin, CreateView):
                     self.request,
                     f'File "{file.title}" already exists in the system.'
                 )
-        
+    
         return super().form_valid(form)
 
 
@@ -102,5 +102,5 @@ class FileAssociationView(LoginRequiredMixin, UpdateView):
                 self.request,
                 f'File "{file}" removed from libraries: {", ".join(lib.name for lib in deleted)}'
             )
-        
+    
         return super().form_valid(form)

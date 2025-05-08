@@ -47,9 +47,9 @@ class ChatStreamView(ChatMixin, LoginRequiredMixin, DetailView):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        
-        return super().get(request, *args, **kwargs)
     
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -69,7 +69,7 @@ class ChatCreateView(ChatStreamView):
         return {
             "chat_id": "new",
         }
-     
+ 
     def pre_dispatch_login(self, *args, **kwargs):
         if self.request.GET.get("force", "false") == "false":
             if (qs := Chat.objects.filter(user=self.usr)).count() > 0:
@@ -90,4 +90,4 @@ class ChatCreateView(ChatStreamView):
 
 class ChatDeleteView(ChatMixin, LoginRequiredMixin, DeleteView):
     template_name = 'chat/delete_confirm.html'
-    
+

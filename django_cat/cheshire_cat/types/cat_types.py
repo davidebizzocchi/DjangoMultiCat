@@ -229,7 +229,7 @@ class MessageWhy(BaseModelDict):
             def __eq__(self, other):
                 # Compare only the first element for equality
                 return self.tuple_data[0] == other.tuple_data[0]
-            
+        
             @property
             def original(self):
                 return self.tuple_data
@@ -255,13 +255,13 @@ class MessageWhy(BaseModelDict):
                     )
 
         return file_ids
-        
+    
 
 class Message(BaseModelDict):
     """
     Base class for working memory history entries.
     Is subclassed by `ConversationMessage`, which in turns is subclassed by `CatMessage` and `UserMessage`.
-    
+
     Attributes
     ----------
     user_id : str
@@ -323,7 +323,7 @@ class ConversationMessage(Message):
         """
         print("The `message` attribute is deprecated. Use `text` instead.")
         return self.text
-    
+
     @message.setter
     def message(self, value):
         print("The `message` attribute is deprecated. Use `text` instead.")

@@ -109,33 +109,33 @@ class UserProfile(models.Model):
     @property
     def username(self):
         return self.user.username
-    
+
     @property
     def email(self):
         return self.user.email
-    
+
     @property
     def password(self):
         return self.user.password
-    
+
     @property
     def is_staff(self):
         return self.user.is_staff
-    
+
     @property
     def is_superuser(self):
         return self.user.is_superuser
-    
+
     @staticmethod
     def get_admin() -> "UserProfile":
         return UserProfile.objects.get(pk=1)
-    
+
     def delete(self):
         self.user.delete()
 
     def __str__(self):
         return self.user.email
-    
+
     def update_instance(self):
         """Inizializza i valori del modello, quelli che richiedono una query solitamente."""
         self._update_allauth()

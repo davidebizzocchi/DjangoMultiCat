@@ -27,27 +27,27 @@ class FileObject(BaseModel):
             self.size = self.path.stat().st_size
 
         return self
-    
+
     def __str__(self):
         return self._serialize_path(self.path)
-    
+
 class FileObjectEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, FileObject):
             return obj.model_dump()
         return super().default(obj)
-    
+
 class FileObjectDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-    
+
     def object_hook(self, obj):
         if isinstance(obj, dict) and 'path' in obj:
             return FileObject(**obj)
-        
+    
         if isinstance(obj, str):
             return FileObject(path=obj)
-        
+    
         return obj
 
 
@@ -212,7 +212,7 @@ class IngestionConfig(BaseModel):
     @property
     def is_ocr(self) -> bool:
         return self.type == IngestionType.OCR
-    
+
     @property
     def is_audio(self) -> bool:
         return self.type == IngestionType.AUDIO
@@ -220,7 +220,7 @@ class IngestionConfig(BaseModel):
     @property
     def is_double_page(self) -> bool:
         return self.mode == PageMode.DOUBLE
-    
+
     @property
     def needs_post_process(self) -> bool:
         return self.post_process != PostProcessType.NONE
@@ -235,7 +235,7 @@ class IngestionConfigEncoder(json.JSONEncoder):
 class IngestionConfigDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-    
+
     def object_hook(self, obj):
         if isinstance(obj, dict) and "type" in obj and "mode" in obj:
             return IngestionConfig(**obj)

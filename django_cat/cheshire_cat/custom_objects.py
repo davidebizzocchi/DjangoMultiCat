@@ -70,7 +70,7 @@ class CatRabbitHoleApi(RabbitHoleApi):
             '200': "object",
             '422': "HTTPValidationError"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -154,7 +154,7 @@ class CatMemoryApi(MemoryApi):
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Get Working Memories List
-        
+    
         Get list of available working memories
 
         :param _request_timeout: timeout setting for this request
@@ -180,7 +180,7 @@ class CatMemoryApi(MemoryApi):
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -248,7 +248,7 @@ class CatMemoryApi(MemoryApi):
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Get Working Memory
-        
+    
         Get a specific working memory
 
         :param chat_id: Working memory ID (required)
@@ -278,7 +278,7 @@ class CatMemoryApi(MemoryApi):
             '200': "object",
             '404': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -347,7 +347,7 @@ class CatMemoryApi(MemoryApi):
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Delete Working Memory
-        
+    
         Delete a specific working memory
 
         :param chat_id: Working memory ID (required)
@@ -377,7 +377,7 @@ class CatMemoryApi(MemoryApi):
             '200': "object",
             '404': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -446,7 +446,7 @@ class CatMemoryApi(MemoryApi):
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Wipe Conversation History
-        
+    
         Wipe vector memory points for a specific chat_id
 
         :param chat_id: Chat ID (required)
@@ -476,7 +476,7 @@ class CatMemoryApi(MemoryApi):
             '200': "object",
             '404': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -547,7 +547,7 @@ class CatMemoryApi(MemoryApi):
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Update points metadata in a collection by metadata filter
-        
+    
         :param collection_id: Collection ID (required)
         :type collection_id: str
         :param search: Metadata filter to search points
@@ -581,7 +581,7 @@ class CatMemoryApi(MemoryApi):
             '200': "object",
             '400': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -659,7 +659,7 @@ class CatMemoryApi(MemoryApi):
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Get points filtered by metadata criteria
-        
+    
         :param collection_id: Collection ID (required)
         :type collection_id: str
         :param metadata: Metadata filter criteria
@@ -682,7 +682,7 @@ class CatMemoryApi(MemoryApi):
             '200': "object",
             '400': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -774,7 +774,7 @@ class CatMemoryApi(MemoryApi):
             '200': "object",
             '400': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -850,7 +850,7 @@ class CatMemoryApi(MemoryApi):
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Wipe Conversation History
-        
+    
         Wipe vector memory points for a specific chat_id
 
         :param chat_id: Chat ID (required)
@@ -880,7 +880,7 @@ class CatMemoryApi(MemoryApi):
             '200': "object",
             '404': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -964,7 +964,7 @@ class CatMemoryApi(MemoryApi):
             '200': "object",
             '400': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -1107,7 +1107,7 @@ class AgentsApi:
             _host=_host,
             _request_auth=_request_auth
         )
-    
+
     def _update_agent_serialize(
         self,
         agent_id: StrictStr,
@@ -1233,7 +1233,7 @@ class AgentsApi:
             _host=_host,
             _request_auth=_request_auth
         )
-    
+
     @validate_call
     def list_agents(
         self,
@@ -1261,7 +1261,7 @@ class AgentsApi:
             '200': "object",
             '400': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -1301,7 +1301,7 @@ class AgentsApi:
             '200': "object",
             '400': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -1343,7 +1343,7 @@ class AgentsApi:
             '200': "object",
             '400': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -1383,7 +1383,7 @@ class AgentsApi:
             '200': "object",
             '400': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -1423,7 +1423,7 @@ class AgentsApi:
             '200': "object",
             '400': "object"
         }
-        
+    
         response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
@@ -1668,7 +1668,7 @@ class LLMsApi:
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Get LLM Schemas
-        
+    
         Get available LLM schemas
 
         :param _request_timeout: timeout setting for this request

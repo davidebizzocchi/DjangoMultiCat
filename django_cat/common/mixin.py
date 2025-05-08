@@ -21,21 +21,21 @@ class LoginRequiredMixin(LoginRequiredMixin):
                 result := self.check_user()
             ) is not None:
                 return result
-            
+        
             if (
                 result := self.pre_dispatch_login(request, *args, **kwargs)
             ) is not None:
                 return result
 
         return super().dispatch(request, *args, **kwargs)
-    
+
     def check_user(self):
         if self.is_superuser_required and not self.usr.is_superuser:
             return self.handle_no_permission()
-    
+
         if self.is_staff_required and not self.usr.is_staff:
             raise self.handle_no_permission()
-        
+    
         return None
 
     def pre_dispatch_login(self, request, *args, **kwargs):

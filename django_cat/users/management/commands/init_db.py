@@ -47,6 +47,6 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("Admin profile already exists."))
 
         # SETUP
-        
+    
         # Sync agents with CAT
         sync_agent_with_cat()

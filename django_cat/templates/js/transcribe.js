@@ -19,11 +19,11 @@ function setupBandpassFilter() {
 function checkSilence() {
     const data = new Uint8Array(audio_analyser.frequencyBinCount);
     audio_analyser.getByteFrequencyData(data);
-    
+
     // Calculate RMS only for voice frequencies (80Hz-1kHz)
     const vocalRange = Array.from(data).slice(10, 100);
     const rms = Math.sqrt(vocalRange.reduce((sum, v) => sum + v * v, 0) / vocalRange.length);
-    
+
     if (rms < SILENCE_THRESHOLD_RMS) {
         if (!audio_silenceTimeout) {
             audio_silenceTimeout = setTimeout(() => {
@@ -55,26 +55,26 @@ async function startRecording(call_when_ready = () => {}) {
     try {
         // Initialize audio context and nodes
         setupBandpassFilter();
-        
+    
         // Get user media
         audio_stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        
+    
         // Setup audio processing chain for visualization
         audio_microphone = audio_context.createMediaStreamSource(audio_stream);
         audio_microphone.connect(audio_analyser);
-        
+    
         // Setup bandpass filter for streaming
         audio_source = audio_context.createMediaStreamSource(audio_stream);
         audio_source.connect(audio_bandpass);
         audio_bandpass.connect(audio_analyser);
-        
+    
         // Set up data array for visualization
         audio_waveformData = new Uint8Array(audio_analyser.frequencyBinCount);
-        
+    
         // Start drawing waveform
         call_when_ready();
         first_chunk = undefined;
-        
+    
         // Initialize MediaRecorder
         audio_mediaRecorder = new MediaRecorder(audio_stream, {
             mimeType: 'audio/webm;codecs=opus',
@@ -94,9 +94,9 @@ async function startRecording(call_when_ready = () => {}) {
 
             // Skip very small chunks
             if (chunkDuration < 10 || e.data.size < 1000) return;
-            
+        
             audio_chunkStartTime = Date.now();
-            
+        
             // Restart the silence interval
             audio_silenceInterval.start();
 
@@ -109,7 +109,7 @@ async function startRecording(call_when_ready = () => {}) {
             if (audio_silenceInterval) audio_silenceInterval.stop();
             audio_stream.getTracks().forEach(track => track.stop());
         };
-        
+    
         // Force split every MAX_CHUNK_DURATION
         audio_maxDurationInterval = createRestartableInterval(() => {
             if (audio_mediaRecorder?.state === 'recording') {
@@ -137,7 +137,7 @@ async function startRecording(call_when_ready = () => {}) {
         // Start timer
         audio_startTime = Date.now();
         updateTimer();
-        
+    
         return audio_stream;
     } catch (error) {
         console.error("Error starting recording:", error);
@@ -150,13 +150,13 @@ function playChunk(webmBlob) {
     const audio = new Audio();
     audio.src = URL.createObjectURL(webmBlob);
     audio.controls = true;
-    
+
     // Add to DOM (optional)
     document.body.appendChild(audio);
-    
+
     // Play automatically
     //audio.play().catch(e => console.error("Playback failed:", e));
-    
+
     // Clean up later
     audio.onended = () => URL.revokeObjectURL(audio.src);
 }
@@ -173,17 +173,17 @@ function stopRecording() {
     }
 
     audio_recorder_popup_dom.hide();
-    
+
     // Stop visualization
     if (audio_animationId) {
         cancelAnimationFrame(audio_animationId);
     }
-    
+
     // Disconnect microphone
     if (audio_microphone) {
         audio_microphone.disconnect();
     }
-    
+
     // Close audio context
     if (audio_context) {
         audio_context.close();
@@ -199,14 +199,14 @@ function forceChunkSplit() {
 // Send audio chunk for transcription
 async function sendChunk(chunk) {
     updateStatus("Processing audio...");
-    
+
     const formData = new FormData();
     formData.append('audio', chunk, `chunk_${Date.now()}.webm`);
 
     try {
         // Update progress bar
         audio_progress_bar_dom.css('width', '50%');
-        
+    
         const response = await fetch("{% url 'chat:api:transcribe' %}", {
             method: 'POST',
             body: formData,
@@ -214,10 +214,10 @@ async function sendChunk(chunk) {
                 'X-CSRFToken': CSRF_TOKEN
             }
         });
-        
+    
         // Update progress bar
         audio_progress_bar_dom.css('width', '100%');
-        
+    
         if (response.ok) {
             const result = await response.json();
             if (result.status == "success") {
@@ -225,10 +225,10 @@ async function sendChunk(chunk) {
                 const currentText = input_textarea_dom.val();
                 const newText = currentText ? currentText + " " + result.text : result.text;
                 input_textarea_dom.val(newText);
-                
+            
                 // Trigger input event to enable send button if needed
                 input_textarea_dom.trigger('input');
-                
+            
                 updateStatus("Transcription added");
             } else {
                 console.error("Error transcribing chunk:", result.error);
@@ -238,7 +238,7 @@ async function sendChunk(chunk) {
             const error = await response.json();
             updateStatus(`Error: ${error.error || response.statusText}`);
         }
-        
+    
         // Reset progress bar after a delay
         setTimeout(() => {
             audio_progress_bar_dom.css('width', '0%');

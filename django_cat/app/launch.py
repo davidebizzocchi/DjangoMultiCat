@@ -52,6 +52,6 @@ def main():
         # call_main_in_thread(app_label)
 
     import app.config
-    
+
     ic(server_start)
     server_start.send(sender=None)

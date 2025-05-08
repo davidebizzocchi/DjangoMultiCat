@@ -56,11 +56,11 @@
                     <i class="fas fa-cloud-upload-alt me-2"></i>
                     <h5 class="mb-0">Upload Files</h5>
                 </div>
-                
+            
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
-                        
+                    
                         <!-- File Upload Section -->
                         <div class="form-section">
                             <div class="form-section-title">
@@ -79,7 +79,7 @@
                             <div class="form-section-title">
                                 <i class="fas fa-cogs me-2"></i>Processing Options
                             </div>
-                            
+                        
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">{{ form.ingestion_type.label }}</label>
@@ -99,7 +99,7 @@
                             <div class="form-section-title">
                                 <i class="fas fa-magic me-2"></i>Post Processing
                             </div>
-                            
+                        
                             <div class="mb-3">
                                 <label class="form-label">{{ form.post_process.label }}</label>
                                 {{ form.post_process|add_class:"form-select" }}
@@ -118,7 +118,7 @@
                             <div class="form-section-title">
                                 <i class="fas fa-folder-tree me-2"></i>Select Libraries
                             </div>
-                            
+                        
                             <div class="d-flex justify-content-end gap-2 mb-3">
                                 <button type="button" class="btn btn-outline-secondary btn-sm" id="selectNone">
                                     <i class="fas fa-times-circle me-1"></i>Deselect All
@@ -188,7 +188,7 @@ $(document).ready(function() {
             audio_option_dom.hide();
             normal_option_dom.show();
             ocr_option_dom.show();
-            
+        
             if (ingestion_type_select_dom.val() === INGESTION_TYPES.AUDIO) {
                 ingestion_type_select_dom.val(INGESTION_TYPES.NORMAL);
                 syncHiddenInput(); // Sincronizza quando cambia
@@ -215,11 +215,11 @@ $(document).ready(function() {
             label_div_dom.text(file_count === 1 
                 ? e.target.files[0].name 
                 : `${file_count} files selected`);
-            
+        
             const first_file = e.target.files[0];
             const audio_mime_types = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/opus', 'audio/webm', 'audio/mp4', 'audio/x-m4a', 'audio/flac'];
             const audio_extensions = ['.mp3', '.wav', '.ogg', '.aac', '.opus', '.m4a', '.flac'];
-            
+        
             is_audio_file_present = audio_mime_types.includes(first_file.type.toLowerCase()) || 
                                  audio_extensions.some(ext => first_file.name.toLowerCase().endsWith(ext));
         } else {

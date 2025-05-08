@@ -14,7 +14,7 @@ class UserRegistrationForm(forms.ModelForm):
         'class': 'form-control',
         'placeholder': 'Confirm password'
     }))
-    
+
     class Meta:
         model = User
         fields = ['email', 'password']
@@ -24,15 +24,15 @@ class UserRegistrationForm(forms.ModelForm):
                 'placeholder': 'Enter email'
             }),
         }
-        
+    
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
         confirm_password = cleaned_data.get('confirm_password')
-        
+    
         if password and confirm_password and password != confirm_password:
             self.add_error('confirm_password', "Passwords don't match")
-        
+    
         return cleaned_data
 
 class LoginForm(AuthenticationForm):
@@ -44,14 +44,14 @@ class LoginForm(AuthenticationForm):
         'class': 'form-control',
         'placeholder': 'Enter password'
     }))
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+    
     # def clean(self):
     #     email = self.cleaned_data.get('username')
     #     password = self.cleaned_data.get('password')
-        
+    
     #     if email and password:
     #         self.user_cache = authenticate(
     #             self.request,

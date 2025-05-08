@@ -16,11 +16,11 @@ class BaseUserModel(models.Model):
     @property
     def userprofile(self) -> UserProfile:
         return self.user.userprofile
-    
+
     @property
     def client(self):
         return self.userprofile.client
-    
+
 
     class Meta:
         ordering = ('user',)

@@ -17,7 +17,7 @@ class AgentManager(models.Manager):
     def filter(self, *args, **kwargs):
         """Never return the default agent"""
         return super().filter(*args, **kwargs).exclude(agent_id="default")
-    
+
     def filter_include_default(self, *args, **kwargs):
         """Return all agents including the default agent"""
         query = Q(*args, **kwargs) | Q(agent_id="default")
@@ -78,23 +78,23 @@ class Agent(BaseUserModel):
 
     def model_dump(self) -> dict[str, Any]:
         return self.agent.model_dump()
-        
+    
     def full_model_dump(self) -> AgentModel:
         return AgentModel.model_validate(self.get_agent_kwargs()).model_dump()
-    
+
     @staticmethod
     def get_default():
         from users.models import UserProfile
         return Agent.objects.get_or_create(agent_id="default", user=UserProfile.get_admin().user)[0]
-    
+
     @property
     def is_default(self):
         return self.agent_id == "default"
-    
+
     def create_agent(self, save=True):
         if self.is_default:
             return self.agent
-        
+    
         agent = self.client.create_agent(self)
         self.agent_id = agent.id
 
@@ -118,6 +118,6 @@ class Agent(BaseUserModel):
         self.client.delete_agent(self.agent_id)
 
         return super().delete(*args, **kwargs)
-    
+
     def __str__(self):
         return f"{self.name} ({self.agent_id})"
