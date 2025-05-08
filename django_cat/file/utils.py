@@ -135,9 +135,12 @@ def next_file_path(file_path: Path) -> Path:
     """
 
     counter = 1
-    while file_path.exists():
+    output_path = Path(file_path)
+    while output_path.exists():
         output_path = file_path.with_name(f"{file_path.stem}_{counter}")
         counter += 1
+
+    return output_path
     
 def update_processed_text(text: str, original_path: Path) -> None:
     """
