@@ -116,6 +116,7 @@ class File(BaseUserModel):
         return Library.objects.get(library_id=library_id)
 
     def check_assoc(self, library: Union[str, Library]) -> bool:
+        """Check if a library is associated with this file"""
         if isinstance(library, str):
             library = self._get_library_from_id(library)
 
@@ -155,13 +156,23 @@ class File(BaseUserModel):
             return True
         
     def wait_ingest(self, callback_on_step=None, callback_on_complete=None):
-        file_id = str(self.file_id)
-        handler_refs = {'id': None}  # Dictionary to keep the reference
+        # Dictionary to keep the reference
+        # is used as closure for keep the associated handler ID
+        # Critical: The handler must unregister itself since the client can't determine when to do so.
+        handler_refs = {'id': None}
+        file_id = str(self.file_id)  # Because file_id is a UUID
 
         def handle_notification(notification: DocReadingProgress):
-            
+            """
+            Handle notifications from the Cheshire Cat about the file ingestion progress.
+            Check if the notification is for the current file (trhough source_id == file_id)
+            The notification status can be "progress" or "done".
+            Call callbacks if needed and set attributes accordingly.
+            At end unregister the handler (itself).
+            """
             if notification.type == "doc-reading-progress":
                 # Extracts the part before the first dot
+                # This is the file_id
                 source_id = notification.source.split('.', 1)[0] if '.' in notification.source else notification.source
                 if file_id == source_id:
                     if notification.status == "progress":
@@ -175,7 +186,6 @@ class File(BaseUserModel):
                         self.ingested = True
                         self.status = self.READY
 
-
                         self.save(update_fields=['status', "ingested"])
 
                         if callback_on_complete is not None:
@@ -183,7 +193,7 @@ class File(BaseUserModel):
 
                         self.client.unregister_notification_handler(handler_refs['id'])
 
-        # Save the ID in the reference dictionary
+        # Register the notification handler
         handler_refs['id'] = self.client.register_notification_handler(handle_notification)
         return handler_refs['id']
 
@@ -210,7 +220,8 @@ class File(BaseUserModel):
             
             if time.time() - start > timeout_seconds:
                 return
-            
+
+        # File is ready, proceed with configuration
         self.status = self.PENDING_CONFIG
         self.config_progress = 0
         self.save(update_fields=['status', 'config_progress'])
@@ -221,7 +232,8 @@ class File(BaseUserModel):
         self.config_progress = 0
         self.save(update_fields=['status', 'config_progress'])
         self.post_process()
-        
+
+        # Upload the file in the Cat
         self.status = self.PENDING_UPLOAD
         self.config_progress = 0
         self.save(update_fields=['status', 'config_progress'])
@@ -246,7 +258,7 @@ class File(BaseUserModel):
     def link(self):
         return (
             f"/media/{self.file.path.relative_to(settings.MEDIA_ROOT)}"
-        )  # Be careful if the folder name in docker is changed
+        )
 
     @classmethod
     def calculate_file_hash(self, file: Path) -> str:
@@ -275,25 +287,27 @@ class File(BaseUserModel):
     
     def apply_config_file(self, use_page_separator=False):
         """
-        Process file based on ingestion configuration and save result
+        Process file based on ingestion configuration and save result.
+        If it's an audio file, it will be transcribed and the original deleted.
+        If it's an image/PDF, OCR will be applied if configured.
         """
-        if self.ingestion_config.type == IngestionType.AUDIO:
+        if self.ingestion_config.is_audio:
             try:
                 original_audio_path = self.file.path
                 
                 if not self.hash:
-                    # Fallback, ma l'hash dovrebbe essere impostato da self.save() prima di chiamare wait_upload -> apply_config_file
+                    # Fallback - hash should be set by self.save() before calling wait_upload -> apply_config_file
                     self.hash = self.calculate_file_hash(original_audio_path)
-                    # Non salvare qui per evitare ricorsioni o problemi di thread, l'hash dovrebbe essere persistito prima.
-                    # Considera di loggare un avviso se l'hash non è presente a questo punto.
+                    # Don't save here to avoid recursion or thread issues, hash should be persisted before
+                    # Consider logging a warning if hash is not present at this point
                     ic(f"Warning: File hash was not set before apply_config_file for {original_audio_path}. Calculating now.")
-                    if not self.hash:  # Se ancora non disponibile dopo il calcolo
+                    if not self.hash:  # If still not available after calculation
                         raise ValueError("File hash is not available for naming transcribed file and could not be calculated.")
 
                 raw_audio_bytes = original_audio_path.read_bytes()
                 audio_object = io.BytesIO(raw_audio_bytes)
 
-                # Assumendo che self.client.transcribe esista e restituisca il testo trascritto
+                # Assuming self.client.transcribe exists and returns transcribed text
                 transcribed_text = self.client.transcribe(audio_object)
 
                 new_text_filename = f"{self.hash}.txt"
@@ -301,19 +315,18 @@ class File(BaseUserModel):
                 
                 new_text_path.write_text(transcribed_text, encoding='utf-8')
                 
-                # Aggiorna l'oggetto file per puntare al nuovo file di testo
-                # La dimensione verrà ricalcolata da FileObject
+                # Update file object to point to the new text file
+                # Size will be recalculated by FileObject
                 self.file = FileObject(path=new_text_path) 
-                # Salva solo il campo 'file' per aggiornare il percorso e la dimensione ricalcolata
-                # Questo save() non dovrebbe richiamare wait_upload di nuovo perché pk esiste.
+                # Save only file field to update path and recalculated size
+                # This save() should not trigger wait_upload again because pk exists
                 super().save(update_fields=['file']) 
 
-
-                # Elimina il file audio originale
+                # Delete the original audio file
                 original_audio_path.unlink()
                 
                 self.config_progress = 100
-                super().save(update_fields=['config_progress'])  # Usa super().save per evitare la logica completa di self.save()
+                super().save(update_fields=['config_progress'])  # Use super().save to avoid full save() logic
 
             except Exception as e:
                 ic(f"Error processing audio file: {str(e)}")
@@ -361,47 +374,43 @@ class File(BaseUserModel):
 
         # Calculate the minimum time required between requests
         max_tokens_per_minute = 6000
-
         minutes_per_token = 1 / max_tokens_per_minute
         wait_time = token * minutes_per_token * 60  # Convert to seconds
-
-        ic(token, minutes_per_token, wait_time)
-        # time.sleep(wait_time + 2)
+        time.sleep(wait_time + 2)
 
         chat_id = self.client.chat_completition(prompt)
-
         return self.client.wait_message_content(chat_id).text
 
     def post_process(self):
         """
-        Execute post-configuration processing before upload based on selected type
+        Execute post-configuration processing before upload based on selected type.
         """
         if not self.ingestion_config.needs_post_process:
             return
 
+        # NOTE: The output of .call_llm() must be a JSON object with a "new_text" field
         try:
-            if self.ingestion_config.type == IngestionType.OCR:
-                prompt = self.ingestion_config.get_prompt()
+            prompt = self.ingestion_config.get_prompt()
 
-                if not prompt:
-                    return
-                
-                content = getattr(self, "processed_text", None)
-                if content is None:
-                    ic(self.file.path.absolute())
-                    with open(self.file.path.absolute(), 'r') as f:
-                        content = f.read()
+            if not prompt:
+                return
+            
+            # Get thee content to process
+            content = getattr(self, "processed_text", None)
+            if content is None:
+                with open(self.file.path.absolute(), 'r') as f:
+                    content = f.read()
 
+            new_file_path = next_file_path(self.file.path).with_suffix('.txt')
 
-                new_file_path = next_file_path(self.file.path).with_suffix('.txt')
-
+            # If is OCR
+            if self.ingestion_config.is_ocr:
                 # Divide the content into pages using the delimiter
                 pages = content.split("\n")
                 total_pages = len(pages)
                 previous_text = ""
-
                 for idx, line in enumerate(pages):
-                    if line.strip().startswith('[Pagina ') and line.strip().endswith(']'):
+                    if line.strip().startswith('[Page ') and line.strip().endswith(']'):
                         if previous_text == "":
                             continue
 
@@ -420,9 +429,23 @@ class File(BaseUserModel):
                         self.save(update_fields=['config_progress'])
 
                     previous_text += line + "\n"
+            # If not OCR
+            else:
+                # Separate the context using "." as delimiter
+                pieces = content.split(".")
+                total_pieces = len(pieces)
+                for idx, piece in enumerate(pieces):
+                    request = prompt + piece
+                    result = self.call_llm(request)
+                    json_data = extract_and_validate_json(result)
 
-                self.save_processed_file(new_file_path)
-                
+                    processed_text = json_data["new_text"]
+                    update_processed_text(processed_text, new_file_path)
+
+                    self.config_progress = int(((idx + 1) / total_pieces) * 100)
+                    self.save(update_fields=['config_progress'])
+
+            self.save_processed_file(new_file_path)
 
         except Exception as e:
             raise ValueError(f"Error in post-processing: {str(e)}")
@@ -445,7 +468,7 @@ class File(BaseUserModel):
 
         super().save(*args, **kwargs)
 
-        if is_new:  # Solo se è una nuova istanza e dopo che super().save() ha assegnato un pk
+        if is_new:
             self.wait_ingest()
             threading.Thread(target=self.wait_upload).start()
 
@@ -475,6 +498,7 @@ class File(BaseUserModel):
             pass
 
         super().delete()
+
 
     def __str__(self):
         return self.title

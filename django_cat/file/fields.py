@@ -50,6 +50,7 @@ class FileObjectDecoder(json.JSONDecoder):
         
         return obj
 
+
 class IngestionType(str, Enum):
     NORMAL = "normal"
     OCR = "ocr"
@@ -71,6 +72,7 @@ class PostProcessType(str, Enum):
     NONE = "none"
     SUMMARY = "summary"
     FIX_OCR = "fix_ocr"
+    AUDIO = "audio"
     KEYWORDS = "keywords"
     BOTH = "both"
 
@@ -127,6 +129,58 @@ PROCESS_PROMPTS = {
         "}\n\n"
         "Testo da elaborare:\n"
     ),
+    PostProcessType.AUDIO: (
+        "Clean and format the following audio transcription text as Markdown, then return as JSON in this format:\n"
+        "```json\n"
+        "{\n"
+        '    "new_text": "formatted markdown text here"\n'
+        "}\n"
+        "```\n\n"
+        "**Audio transcription corrections should include:**\n"
+        "- Remove filler words (uh, um, like)\n"
+        "- Fix false starts and repetitions\n"
+        "- Add proper punctuation\n"
+        "- Capitalize properly\n"
+        "- Format numbers and dates consistently\n"
+        "- Apply Markdown formatting for:\n"
+        "  - Headers (`#`, `##`)\n"
+        "  - Lists (`-` or `1.`)\n"
+        "  - Emphasis (`*italic*`, `**bold**`)\n"
+        "  - Quotes (`> `)\n"
+        "  - Code (`` ` `` or ``` ```)\n\n"
+        "**Examples:**\n\n"
+        "1. Raw transcription with speech artifacts:\n"
+        "```\n"
+        '"uh i was thinking maybe we could um meet at 3 pm on tuesday for the *important* project"\n'
+        "```\n"
+        "Cleaned Markdown version:\n"
+        "```json\n"
+        "{\n"
+        '    "new_text": "I was thinking we could meet at 3:00 PM on Tuesday for the **important** project."\n'
+        "}\n"
+        "```\n\n"
+        "2. Meeting notes transcription:\n"
+        "```\n"
+        '"ok so first item uh infrastructure costs second security updates third q3 goals"\n'
+        "```\n"
+        "Formatted as Markdown list:\n"
+        "```json\n"
+        "{\n"
+        '    "new_text": "## Meeting Notes\\n\\n- Infrastructure costs\\n- Security updates\\n- Q3 goals"\n'
+        "}\n"
+        "```\n\n"
+        "3. Technical discussion:\n"
+        "```\n"
+        '"we need to use the json module like this import json data equals json dot loads string"\n'
+        "```\n"
+        "With code formatting:\n"
+        "```json\n"
+        "{\n"
+        '    "new_text": "We need to use the `json` module like this: `import json\\ndata = json.loads(string)`"\n'
+        "}\n"
+        "```\n\n"
+        "Text to process:\n"
+    ),
     PostProcessType.KEYWORDS: (
         "Analyze the following text and extract key words and main concepts. "
         "Organize keywords by relevance and group related ones. "
@@ -158,6 +212,10 @@ class IngestionConfig(BaseModel):
     @property
     def is_ocr(self) -> bool:
         return self.type == IngestionType.OCR
+    
+    @property
+    def is_audio(self) -> bool:
+        return self.type == IngestionType.AUDIO
 
     @property
     def is_double_page(self) -> bool:
@@ -166,6 +224,7 @@ class IngestionConfig(BaseModel):
     @property
     def needs_post_process(self) -> bool:
         return self.post_process != PostProcessType.NONE
+
 
 class IngestionConfigEncoder(json.JSONEncoder):
     def default(self, obj):

@@ -54,6 +54,7 @@ class FileUploadForm(forms.Form):
             (PostProcessType.NONE.value, 'None'),
             (PostProcessType.SUMMARY.value, 'Summary'),
             (PostProcessType.FIX_OCR.value, 'OCR Fix'),
+            (PostProcessType.AUDIO.value, 'Audio'),
             (PostProcessType.KEYWORDS.value, 'Keywords'),
             (PostProcessType.BOTH.value, 'Both'),
         ],
