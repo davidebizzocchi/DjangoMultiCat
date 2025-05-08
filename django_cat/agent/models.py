@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models import Q
 from django.conf import settings
 
-from cheshire_cat.types import AgentRequest, LLMRequest, Agent as AgentModel
+from cheshire_cat.types import AgentRequest, Agent as AgentModel
 from common.utils import BaseUserModel
 from llm.models import LLM
 
@@ -66,17 +66,8 @@ class Agent(BaseUserModel):
 
         if self.llm:
             agent_kwargs["llm_name"] = self.llm.name
-        elif hasattr(self, 'llm_name') and self.llm_name:
-            agent_kwargs["llm_name"] = self.llm_name
 
         return agent_kwargs
-    
-    def get_llm_kwargs(self):
-        return {
-            "name": self.llm.name,
-            "llm_class": self.llm.llm_class,
-            "config": self.llm.config
-        }
 
     @property
     def agent(self) -> Union[AgentModel, AgentRequest]:
@@ -90,19 +81,6 @@ class Agent(BaseUserModel):
         
     def full_model_dump(self) -> AgentModel:
         return AgentModel.model_validate(self.get_agent_kwargs()).model_dump()
-    
-    @property
-    def llm_model_instance(self) -> LLMRequest:
-        llm_kwargs = self.get_llm_kwargs()
-        if llm_kwargs is None:
-            return None
-        return LLMRequest.model_validate(llm_kwargs)
-    
-    def llm_dump(self) -> LLMRequest:
-        llm_model = self.llm_model_instance
-        if llm_model:
-            return llm_model.model_dump()
-        return None
     
     @staticmethod
     def get_default():
@@ -136,13 +114,9 @@ class Agent(BaseUserModel):
         elif self.pk and not self.is_default:
             self.client.update_agent(self)
 
-        llm_instance = self.llm_model_instance
-        if llm_instance:
-            self.client.update_llm(llm_instance)
-
     def delete(self, *args, **kwargs):
         self.client.delete_agent(self.agent_id)
-        
+
         return super().delete(*args, **kwargs)
     
     def __str__(self):
