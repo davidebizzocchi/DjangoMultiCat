@@ -108,11 +108,19 @@ class Cat(CatClient):
     
     def chat_completition(self, message: str):
         """Send a message to the completion chat"""
-        self.send(message=message, chat_id="completition")
+        self.send(message=message, chat_id="completition", agent_id="completition")
 
         return "completition"
     
     def _check_history(self, chat_id):
+        """
+        Check if the chat history is empty and insert messages if needed.
+        Let populate cat chat history, also if the chat is empty.
+        """
+        # If the chat_id is "completition", skip this check
+        if chat_id == "completition":
+            return
+
         from chat.models import Chat
         cat_history_len = self.get_chat_history_length(chat_id)
 
@@ -238,11 +246,17 @@ class Cat(CatClient):
         return self._message_contents.get(chat_id)
     
     def wait_message_content(self, chat_id: str = "default") -> CatMessage:
+        stream_ended_at = None
         while self._message_contents.get(chat_id) is None:
             time.sleep(0.1)
 
             if not self._stream_active.get(chat_id):
-                return None
+                # Also if the stream is ended, wait a second for get the message
+                if not stream_ended_at:
+                    stream_ended_at = time.time()
+                elif time.time() - stream_ended_at > 1:
+                    return None
+
         return self._message_contents[chat_id]
     
     def _transcribe(self, audio_bytes, language="it"):
