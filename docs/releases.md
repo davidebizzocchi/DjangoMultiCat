@@ -2,6 +2,25 @@
 
 
 
+type: issue
+New patch version: v1.2.2
+## Release v1.2.2-cae0766
+
+### Information
+- **Source branch**: 81-issue-file-refresh-link
+- **Target branch**: dev
+- **Issue**: [#81](https://github.com/davidebizzocchi/DjangoCat/issues/81)
+- **Type**: issue
+- **Previous version**: v1.2.1-69f8596
+- **New version**: v1.2.2-cae0766
+- **Code change statistics**:  3 files changed, 18 insertions(+), 9 deletions(-)
+
+### Commits
+- cae0766 - send file link in config_status endpoint (davidebizzocchi)
+
+---
+
+
 type: issue_audio_transcription
 ## Release v1.2.1-69f8596
 
